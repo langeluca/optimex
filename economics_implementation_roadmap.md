@@ -282,10 +282,10 @@ src/optimex/converter.py
 
 In `get_scaled_copy()` pruefen:
 
-- [ ] `intermediate_costs_cap` bleibt unveraendert.
-- [ ] `intermediate_costs_op` bleibt unveraendert.
-- [ ] `discount_rate` bleibt unveraendert.
-- [ ] `discount_reference_year` bleibt unveraendert.
+- [X] `intermediate_costs_cap` bleibt unveraendert.
+- [X] `intermediate_costs_op` bleibt unveraendert.
+- [X] `discount_rate` bleibt unveraendert.
+- [X] `discount_reference_year` bleibt unveraendert.
 
 Wichtig:
 
@@ -1059,6 +1059,155 @@ Pruefen:
   - cost objective
   - environmental objective
 - [ ] Keine ueberholten Hinweise auf nur eine Objective-Art.
+
+## Optional fuer spaeter
+
+Diese Punkte gehoeren nicht zur Minimalimplementierung, sollten aber als
+moegliche Weiterentwicklung festgehalten werden.
+
+### Optionales Cost Objective Scaling
+
+Motivation:
+
+Die Preise sollen in der ersten Implementierung nicht skaliert werden. Stattdessen
+werden die skalierten Background-Mengen im Optimizer wieder in reale Mengen
+zurueckgerechnet:
+
+```text
+real_background_purchase = fg_scale * scaled_background_purchase
+```
+
+Damit gilt:
+
+```text
+cost = real_price * real_background_purchase
+```
+
+Das ist fuer Interpretation, Tests und Dokumentation am klarsten, weil:
+
+- Kostenpreise echte Marktpreise bleiben,
+- Background-Kaeufe echte physische Mengen sind,
+- `cost_cap`, `cost_op` und `total_cost` echte Geldeinheiten haben.
+
+Falls sich spaeter zeigt, dass sehr grosse Kostenwerte numerische Probleme im
+Solver verursachen, kann ein separates Objective Scaling eingefuehrt werden.
+
+Moegliche spaetere Erweiterung:
+
+```python
+cost_scale = 1_000_000
+model.total_cost_scaled = model.total_cost / cost_scale
+```
+
+Dann koennte der Solver minimieren:
+
+```python
+model.total_cost_scaled
+```
+
+waehrend Reporting und Postprocessing weiterhin echte Kosten verwenden:
+
+```python
+model.total_cost
+```
+
+Wichtig:
+
+```text
+Nicht die Input-Preise selbst skalieren, sondern optional nur die Objective-
+Expression fuer den Solver.
+```
+
+Checkliste fuer spaeter:
+
+- [ ] Bedarf fuer Cost Objective Scaling anhand numerischer Probleme pruefen.
+- [ ] Optionales Feld `cost_scale` oder automatische Skalierung diskutieren.
+- [ ] `total_cost` weiterhin in realen Geldeinheiten halten.
+- [ ] Nur die zu minimierende Objective-Expression skalieren.
+- [ ] `solve_model()` entsprechend dokumentieren.
+
+### CO2-Preis / Carbon Pricing
+
+Motivation:
+
+Neben Marktpreisen fuer first-level Background-Produkte koennte spaeter ein
+CO2-Preis integriert werden. Damit koennen Szenarien modelliert werden, in denen
+Treibhausgasemissionen zusaetzliche Kosten verursachen.
+
+Moegliche Modellierungsvarianten:
+
+1. CO2-Preis als zusaetzlicher Kostenanteil auf charakterisierte
+   Klimawirkungen:
+
+```text
+carbon_cost[t] = carbon_price[t] * time_specific_impact["climate_change", t]
+```
+
+2. CO2-Preis direkt auf bestimmte Elementary Flows, z. B. fossiles CO2:
+
+```text
+carbon_cost[t] = sum_e carbon_price[e,t] * total_elementary_flow[e,t]
+```
+
+3. CO2-Preis als separater Reporting-Posten, ohne ihn direkt in der Objective zu
+   minimieren.
+
+Offene Designfragen:
+
+- Soll der CO2-Preis auf charakterisierte CO2-equivalent Impacts angewendet
+  werden oder direkt auf einzelne Emissionsfluesse?
+- Soll Carbon Pricing Teil von `total_cost` sein oder separat ausgewiesen werden?
+- Wie wird Doppelzaehlung vermieden, falls Background-Marktpreise bereits CO2-
+  Kosten enthalten?
+- Soll der CO2-Preis zeitabhaengig sein?
+- Soll Carbon Pricing auch bei `objective="environmental"` berichtet werden?
+
+Checkliste fuer spaeter:
+
+- [ ] Geeignete mathematische Formulierung fuer Carbon Pricing auswaehlen.
+- [ ] Datenmodell fuer `carbon_price` definieren.
+- [ ] Klaeren, ob Preis auf Impact-Kategorie oder Elementary Flow liegt.
+- [ ] Doppelzaehlung mit Marktpreisen dokumentieren.
+- [ ] Tests fuer Carbon Pricing ergaenzen.
+- [ ] ReadTheDocs-Doku mit eigenem Abschnitt ergaenzen.
+
+### Postprocessing fuer Kosten
+
+Moegliche spaetere Komfortfunktionen:
+
+```python
+extract_costs_by_year(model)
+extract_cost_breakdown(model)
+extract_capex_opex_summary(model)
+```
+
+Ziel:
+
+- Kosten je Jahr auslesen,
+- `cost_cap` und `cost_op` vergleichen,
+- diskontierte und undiskontierte Kosten ausweisen,
+- Kosten nach Background-Flow aufschluesseln.
+
+### Automatische Kostendaten aus Brightway/LCA Processor
+
+In der Minimalversion werden Kostenpreise manuell auf `model_inputs` gesetzt.
+
+Spaeter koennte `lca_processor.py` oder eine eigene Economics-Schicht Preise
+automatisch aus:
+
+- Activity- oder Edge-Attributen,
+- externen Preiszeitreihen,
+- Szenariodateien,
+- Datenbanken,
+
+ableiten.
+
+Moegliche spaetere Architektur:
+
+```text
+src/optimex/economics.py
+src/optimex/objectives.py
+```
 
 ## Definition of Done fuer ein serienreifes Feature
 
