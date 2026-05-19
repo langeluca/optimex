@@ -316,7 +316,192 @@ Checkliste:
 - [X] `load_inputs()` erweitert.
 - [X] JSON-Tests ergaenzen und durchfuehren
 
-## Schritt 5: Parser-Defaults setzen
+## Schritt 5: Kosten aus Background-Node-Attributen in die Pipeline integrieren
+
+Dateien:
+
+```text
+src/optimex/lca_processor.py
+src/optimex/converter.py
+```
+
+Ziel:
+
+Kosten sollen nicht nur manuell nachtraeglich auf `model_inputs` gesetzt werden
+koennen, sondern optional direkt aus Brightway-Background-Nodes kommen.
+
+Beispiel:
+
+```python
+electricity_mv["market_prices"] = {
+    2030: 80.0,
+    2035: 70.0,
+}
+electricity_mv.save()
+```
+
+Der Preis haengt dabei am Background-Node selbst, nicht an der Edge. Die
+CAPEX/OPEX-artige Trennung entsteht spaeter ueber die Menge:
+
+```text
+operation=False Edge -> background_purchase_cap
+operation=True Edge  -> background_purchase_op
+```
+
+Die Zuordnung zu den Kostenvektoren erfolgt anhand der konkreten Edge:
+
+```python
+if edge.operation:
+    intermediate_costs_op[(flow, year)] = market_price
+else:
+    intermediate_costs_cap[(flow, year)] = market_price
+```
+
+Wenn derselbe Background-Node in unterschiedlichen Edges sowohl operational als
+auch nicht-operational verwendet wird, landet derselbe Marktpreis dadurch in
+beiden Kostenvektoren. Das passiert dann aber nicht blind, sondern weil beide
+Verwendungen im Foreground-System tatsaechlich vorkommen.
+
+### Schritt 5.1: Node-Attribut festlegen
+
+Fuer die erste Implementierung wird nur ein Attribut unterstuetzt:
+
+```text
+market_prices
+```
+
+Format:
+
+```python
+{
+    year: price,
+}
+```
+
+Beispiel:
+
+```python
+node["market_prices"] = {
+    2030: 80.0,
+    2040: 65.0,
+}
+```
+
+Nicht Teil der ersten Version:
+
+- konstante Einzelpreise wie `market_price = 80.0`,
+- Preisinterpolation,
+- Fortschreibung fehlender Jahre,
+- waehrungsspezifische Metadaten,
+- automatische Discount-Konfiguration.
+
+Checkliste:
+
+- [ ] Attributname `market_prices` festlegen.
+- [ ] Format `{year: price}` dokumentieren.
+- [ ] Keine weiteren Preisformate in der Minimalversion unterstuetzen.
+
+### Schritt 5.2: `LCADataProcessor` um interne Kosten-Dicts erweitern
+
+Datei:
+
+```text
+src/optimex/lca_processor.py
+```
+
+In `LCADataProcessor.__init__` ergaenzen:
+
+```python
+self._intermediate_costs_cap = {}
+self._intermediate_costs_op = {}
+```
+
+Properties ergaenzen:
+
+```python
+@property
+def intermediate_costs_cap(self) -> dict:
+    return self._intermediate_costs_cap
+
+@property
+def intermediate_costs_op(self) -> dict:
+    return self._intermediate_costs_op
+```
+
+Checkliste:
+
+- [ ] Interne Dicts in `__init__` anlegen.
+- [ ] Read-only Properties ergaenzen.
+
+### Schritt 5.3: Preise beim Entdecken externer Background-Inputs auslesen
+
+Datei:
+
+```text
+src/optimex/lca_processor.py
+```
+
+Geeignete Stelle:
+
+In `_construct_foreground_tensors()` im Block fuer externe Intermediate-Flows:
+
+```python
+elif edge_type == bd.labels.consumption_edge_default:
+    if input_db == self.foreground_db.name:
+        ...
+    else:
+        # External intermediate: background consumption
+        ...
+        self._intermediate_flows.setdefault(input_code, input_name)
+```
+
+Dort zusaetzlich:
+
+```python
+market_prices = exc.input.get("market_prices")
+if market_prices is not None:
+    ...
+```
+
+Vorgeschlagene Logik:
+
+```python
+market_prices = exc.input.get("market_prices")
+if market_prices is not None:
+    if not isinstance(market_prices, dict):
+        logger.warning(
+            f"market_prices on node {exc.input} must be a dict, "
+            f"got {type(market_prices).__name__}. Skipping."
+        )
+    else:
+        for year, price in market_prices.items():
+            if year in self._system_time:
+                if exc.get("operation"):
+                    self._intermediate_costs_op[(input_code, year)] = price
+                else:
+                    self._intermediate_costs_cap[(input_code, year)] = price
+```
+
+Wichtig:
+
+- Nur externe Background-Inputs bepreisen.
+- Keine internen Foreground-Produkte bepreisen.
+- Keine Biosphere-Flows bepreisen.
+- Keine Upstream-Prozesse im Background bepreisen.
+- Den Node-Preis anhand des Edge-Attributs `operation` in den passenden
+  Kostenvektor schreiben.
+- Wenn ein Background-Node in verschiedenen Edges unterschiedlich verwendet wird,
+  kann derselbe Preis in beiden Kostenvektoren auftauchen.
+
+Checkliste:
+
+- [ ] `market_prices` nur fuer externe Intermediate-Flows auslesen.
+- [ ] Ungueltiges Format per Warnung ueberspringen.
+- [ ] Preise nur fuer Jahre in `SYSTEM_TIME` uebernehmen.
+- [ ] `operation=True` Edge schreibt in `intermediate_costs_op`.
+- [ ] Edge ohne `operation=True` schreibt in `intermediate_costs_cap`.
+
+### Schritt 5.4: Kostenfelder im Converter aus dem LCA Processor uebernehmen
 
 Datei:
 
@@ -328,16 +513,81 @@ In `ModelInputManager.parse_from_lca_processor()` beim Erzeugen der
 `OptimizationModelInputs` ergaenzen:
 
 ```python
-"intermediate_costs_cap": None,
-"intermediate_costs_op": None,
+"intermediate_costs_cap": (
+    lca_processor.intermediate_costs_cap
+    if lca_processor.intermediate_costs_cap
+    else None
+),
+"intermediate_costs_op": (
+    lca_processor.intermediate_costs_op
+    if lca_processor.intermediate_costs_op
+    else None
+),
 "discount_rate": None,
 "discount_reference_year": None,
 ```
 
+Hinweis:
+
+`discount_rate` und `discount_reference_year` bleiben erstmal manuelle
+Szenarioannahmen auf `model_inputs`. Sie werden nicht aus Brightway-Nodes
+ausgelesen.
+
 Checkliste:
 
-- [ ] Defaults ergaenzt.
-- [ ] Bestehende Parser-Tests laufen weiterhin.
+- [ ] `intermediate_costs_cap` aus `lca_processor` uebernehmen.
+- [ ] `intermediate_costs_op` aus `lca_processor` uebernehmen.
+- [ ] Leere Kosten-Dicts als `None` uebergeben.
+- [ ] `discount_rate` und `discount_reference_year` mit `None` initialisieren.
+
+### Schritt 5.5: Tests fuer Pipeline-Integration
+
+Moegliche Tests:
+
+```text
+tests/test_lca_processing.py
+```
+
+oder spaeter:
+
+```text
+tests/test_economics.py
+```
+
+Testidee:
+
+- Background-Node mit `market_prices` anlegen.
+- Foreground-Prozess konsumiert diesen Background-Node ueber eine construction
+  Edge.
+- Foreground-Prozess konsumiert einen Background-Node ueber eine operation Edge.
+- `LCADataProcessor` ausfuehren.
+- Pruefen:
+
+```python
+lca_data.intermediate_costs_cap[(construction_flow_code, year)] == price
+lca_data.intermediate_costs_op[(operation_flow_code, year)] == price
+```
+
+Dann:
+
+```python
+manager = converter.ModelInputManager()
+model_inputs = manager.parse_from_lca_processor(lca_data)
+```
+
+Pruefen:
+
+```python
+model_inputs.intermediate_costs_cap[(flow_code, year)] == price
+model_inputs.intermediate_costs_op[(flow_code, year)] == price
+```
+
+Checkliste:
+
+- [ ] Test fuer Extraktion aus Background-Node.
+- [ ] Test fuer Zuordnung anhand von `operation=True`.
+- [ ] Test fuer Uebergabe in `OptimizationModelInputs`.
+- [ ] Test fuer fehlende `market_prices`: Kostenfelder bleiben `None`.
 
 ## Schritt 6: `create_model` API erweitern
 
