@@ -312,9 +312,9 @@ Dasselbe in `ModelInputManager.load_inputs()`.
 
 Checkliste:
 
-- [ ] `save_inputs()` erweitert.
-- [ ] `load_inputs()` erweitert.
-- [ ] JSON-Roundtrip-Test ergaenzen.
+- [X] `save_inputs()` erweitert.
+- [X] `load_inputs()` erweitert.
+- [X] JSON-Tests ergaenzen und durchfuehren
 
 ## Schritt 5: Parser-Defaults setzen
 
