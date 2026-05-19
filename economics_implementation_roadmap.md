@@ -226,9 +226,9 @@ discount_reference_year: Optional[int] = Field(
 
 Checkliste:
 
-- [ ] Felder in `OptimizationModelInputs` ergaenzen.
-- [ ] Keine Skalierung der Preise einfuehren.
-- [ ] Bestehende Pflichtfelder nicht veraendern.
+- [X] Felder in `OptimizationModelInputs` ergaenzen.
+- [X] Keine Skalierung der Preise einfuehren.
+- [X] Bestehende Pflichtfelder nicht veraendern.
 
 ## Schritt 2: Validierung ergaenzen
 
@@ -268,9 +268,9 @@ Referenzjahr vor Modellstart kann sinnvoll sein. Wenn `None`, wird spaeter
 
 Checkliste:
 
-- [ ] Key-Validierung fuer `intermediate_costs_cap`.
-- [ ] Key-Validierung fuer `intermediate_costs_op`.
-- [ ] Negative `discount_rate` verhindern.
+- [X] Key-Validierung fuer `intermediate_costs_cap`.
+- [X] Key-Validierung fuer `intermediate_costs_op`.
+- [X] Negative `discount_rate` verhindern.
 
 ## Schritt 3: Scaling pruefen
 
