@@ -321,6 +321,7 @@ Checkliste:
 Dateien:
 
 ```text
+src/optimex/economics.py
 src/optimex/lca_processor.py
 src/optimex/converter.py
 ```
@@ -330,78 +331,206 @@ Ziel:
 Kosten sollen nicht nur manuell nachtraeglich auf `model_inputs` gesetzt werden
 koennen, sondern optional direkt aus Brightway-Background-Nodes kommen.
 
-Beispiel:
-
-```python
-electricity_mv["market_prices"] = {
-    2030: 80.0,
-    2035: 70.0,
-}
-electricity_mv.save()
-```
-
-Der Preis haengt dabei am Background-Node selbst, nicht an der Edge. Die
-CAPEX/OPEX-artige Trennung entsteht spaeter ueber die Menge:
+Die Kosten werden dabei analog zur bestehenden Background-Inventory-Logik
+behandelt:
 
 ```text
-operation=False Edge -> background_purchase_cap
-operation=True Edge  -> background_purchase_op
+Foreground Edge verweist auf einen Background-Node, z. B. aus der 2020 DB
+    -> optimex speichert dessen code als INTERMEDIATE_FLOW
+    -> fuer jede zeitspezifische Background-Datenbank wird der Node mit gleichem code gesucht
+    -> dort wird ein market_price gelesen
+    -> Preise werden ueber die bestehende mapping[bkg,t]-Matrix auf SYSTEM_TIME interpoliert
 ```
 
-Die Zuordnung zu den Kostenvektoren erfolgt anhand der konkreten Edge:
+Beispiel fuer User Input:
 
 ```python
-if edge.operation:
-    intermediate_costs_op[(flow, year)] = market_price
-else:
-    intermediate_costs_cap[(flow, year)] = market_price
+from optimex.economics import set_market_prices
+
+price_data = [
+    {
+        "name": "market group for electricity, medium voltage",
+        "location": "RER",
+        "year": 2020,
+        "price": 90.0,
+    },
+    {
+        "name": "market group for electricity, medium voltage",
+        "location": "RER",
+        "year": 2030,
+        "price": 70.0,
+    },
+]
+
+set_market_prices(
+    price_data=price_data,
+    background_databases={
+        2020: "ei312_REMIND-EU_SSP2_NDC_2020",
+        2030: "ei312_REMIND-EU_SSP2_NDC_2030",
+        2040: "ei312_REMIND-EU_SSP2_NDC_2040",
+        2050: "ei312_REMIND-EU_SSP2_NDC_2050",
+    },
+)
+```
+
+Der Preis haengt am Background-Node in der jeweiligen zeitspezifischen
+Background-Datenbank, nicht an der Foreground-Edge.
+
+Die CAPEX/OPEX-artige Trennung entsteht weiterhin ueber die konkrete Foreground
+Edge:
+
+```text
+operation=False Edge -> flow wird fuer intermediate_costs_cap relevant
+operation=True Edge  -> flow wird fuer intermediate_costs_op relevant
 ```
 
 Wenn derselbe Background-Node in unterschiedlichen Edges sowohl operational als
-auch nicht-operational verwendet wird, landet derselbe Marktpreis dadurch in
-beiden Kostenvektoren. Das passiert dann aber nicht blind, sondern weil beide
-Verwendungen im Foreground-System tatsaechlich vorkommen.
+auch nicht-operational verwendet wird, wird derselbe interpolierte Marktpreis in
+beiden Kostenvektoren verwendet. Das passiert dann nicht blind, sondern weil
+beide Verwendungen im Foreground-System tatsaechlich vorkommen.
 
 ### Schritt 5.1: Node-Attribut festlegen
 
-Fuer die erste Implementierung wird nur ein Attribut unterstuetzt:
+Fuer die erste Implementierung wird auf Background-Nodes nur ein Attribut
+unterstuetzt:
 
 ```text
-market_prices
+market_price
 ```
 
 Format:
 
 ```python
-{
-    year: price,
-}
+node["market_price"] = price
 ```
 
 Beispiel:
 
 ```python
-node["market_prices"] = {
-    2030: 80.0,
-    2040: 65.0,
-}
+node["market_price"] = 80.0
+node.save()
 ```
 
 Nicht Teil der ersten Version:
 
-- konstante Einzelpreise wie `market_price = 80.0`,
-- Preisinterpolation,
-- Fortschreibung fehlender Jahre,
+- `market_prices = {year: price}` auf einem einzelnen Node,
+- separate cap/op Preise auf Nodes,
+- cost improvement factors,
 - waehrungsspezifische Metadaten,
 - automatische Discount-Konfiguration.
 
+Die Zeitabhaengigkeit kommt stattdessen aus den verschiedenen premise Background-
+Datenbanken und der bestehenden `mapping`-Interpolation.
+
 Checkliste:
 
-- [ ] Attributname `market_prices` festlegen.
-- [ ] Format `{year: price}` dokumentieren.
+- [ ] Attributname `market_price` festlegen.
+- [ ] Format `node["market_price"] = float` dokumentieren.
+- [ ] Preisattribute auf zeitspezifischen Background-Nodes dokumentieren.
 - [ ] Keine weiteren Preisformate in der Minimalversion unterstuetzen.
 
-### Schritt 5.2: `LCADataProcessor` um interne Kosten-Dicts erweitern
+### Schritt 5.2: Helper fuer User Input bereitstellen
+
+Datei:
+
+```text
+src/optimex/economics.py
+```
+
+Ziel:
+
+Der User soll Preise komfortabel als Tabelle bzw. Liste von Records eingeben
+koennen:
+
+```text
+process/name, location, year, price
+```
+
+Die Helper-Funktion schreibt daraus automatisch:
+
+```python
+node["market_price"] = price
+node.save()
+```
+
+auf den passenden Background-Node in der passenden zeitspezifischen Background-
+Datenbank.
+
+Vorgeschlagene Funktion:
+
+```python
+def set_market_prices(
+    price_data,
+    background_databases: dict[int, str],
+    name_col: str = "name",
+    year_col: str = "year",
+    price_col: str = "price",
+    location_col: str | None = "location",
+    price_attribute: str = "market_price",
+    overwrite: bool = True,
+    strict: bool = True,
+) -> None:
+    ...
+```
+
+`price_data` sollte mindestens unterstuetzen:
+
+- `list[dict]`
+- `pandas.DataFrame`
+
+Beispiel mit `list[dict]`:
+
+```python
+price_data = [
+    {"name": "market for electricity, medium voltage", "location": "RER", "year": 2020, "price": 90.0},
+    {"name": "market for electricity, medium voltage", "location": "RER", "year": 2030, "price": 70.0},
+]
+```
+
+Beispiel mit DataFrame:
+
+```python
+prices = pd.DataFrame(price_data)
+set_market_prices(prices, background_databases=background_databases)
+```
+
+Interne Logik:
+
+```text
+for row in price_data:
+    year = row[year_col]
+    db_name = background_databases[year]
+    node = bd.get_node(database=db_name, name=row[name_col], location=row[location_col])
+    node[price_attribute] = row[price_col]
+    node.save()
+```
+
+Verhalten:
+
+- `strict=True`: Fehler werfen, wenn Jahr, Datenbank oder Node nicht gefunden wird.
+- `strict=False`: Warnung loggen und mit der naechsten Zeile fortfahren.
+- `overwrite=False`: vorhandene `market_price` Attribute nicht ueberschreiben.
+
+Warum dieser Helper wichtig ist:
+
+```text
+Methodisch liegen Preise sauber auf den zeitspezifischen Background-Nodes.
+Praktisch muss der User aber nur eine einfache Tabelle mit process, year, price liefern.
+```
+
+Checkliste:
+
+- [ ] Neue Datei `src/optimex/economics.py` anlegen.
+- [ ] `set_market_prices()` implementieren.
+- [ ] `list[dict]` Input unterstuetzen.
+- [ ] `pandas.DataFrame` Input unterstuetzen.
+- [ ] `background_databases={year: db_name}` verwenden.
+- [ ] `market_price` auf korrekten Background-Node schreiben.
+- [ ] `strict` und `overwrite` Verhalten definieren.
+- [ ] Tests fuer Helper schreiben.
+- [ ] In ReadTheDocs dokumentieren.
+
+### Schritt 5.3: `LCADataProcessor` um interne Kosten-Dicts erweitern
 
 Datei:
 
@@ -412,6 +541,7 @@ src/optimex/lca_processor.py
 In `LCADataProcessor.__init__` ergaenzen:
 
 ```python
+self._background_costs = {}
 self._intermediate_costs_cap = {}
 self._intermediate_costs_op = {}
 ```
@@ -419,6 +549,10 @@ self._intermediate_costs_op = {}
 Properties ergaenzen:
 
 ```python
+@property
+def background_costs(self) -> dict:
+    return self._background_costs
+
 @property
 def intermediate_costs_cap(self) -> dict:
     return self._intermediate_costs_cap
@@ -430,10 +564,13 @@ def intermediate_costs_op(self) -> dict:
 
 Checkliste:
 
-- [ ] Interne Dicts in `__init__` anlegen.
+- [ ] Interne Dicts in `__init__` anlegen:
+  - `_background_costs`
+  - `_intermediate_costs_cap`
+  - `_intermediate_costs_op`
 - [ ] Read-only Properties ergaenzen.
 
-### Schritt 5.3: Preise beim Entdecken externer Background-Inputs auslesen
+### Schritt 5.4: Merken, welche Intermediate Flows cap/op-relevant sind
 
 Datei:
 
@@ -455,53 +592,133 @@ elif edge_type == bd.labels.consumption_edge_default:
         self._intermediate_flows.setdefault(input_code, input_name)
 ```
 
-Dort zusaetzlich:
+Beim Durchlaufen der Foreground-Edges sollte gemerkt werden, ob ein
+Intermediate Flow ueber mindestens eine operation Edge oder mindestens eine
+non-operation Edge vorkommt.
 
 ```python
-market_prices = exc.input.get("market_prices")
-if market_prices is not None:
-    ...
+if exc.get("operation"):
+    self._cost_relevant_op_flows.add(input_code)
+else:
+    self._cost_relevant_cap_flows.add(input_code)
+```
+
+Diese Sets koennen intern in `__init__` angelegt werden:
+
+```python
+self._cost_relevant_cap_flows = set()
+self._cost_relevant_op_flows = set()
+```
+
+Checkliste:
+
+- [ ] Interne Sets fuer cap/op-relevante Intermediate Flows anlegen.
+- [ ] Nur externe Background-Inputs beruecksichtigen.
+- [ ] `operation=True` Edge markiert Flow als op-relevant.
+- [ ] Edge ohne `operation=True` markiert Flow als cap-relevant.
+- [ ] Interne Foreground-Produkte und Biosphere-Flows nicht bepreisen.
+
+### Schritt 5.5: `market_price` aus allen zeitspezifischen Background-Datenbanken lesen
+
+Datei:
+
+```text
+src/optimex/lca_processor.py
+```
+
+Neue Hilfslogik, nachdem `self._intermediate_flows` bekannt ist und bevor die
+finalen `intermediate_costs_*` an den Converter gehen.
+
+Prinzip:
+
+```python
+for db_name in self.background_dbs:
+    db = bd.Database(db_name)
+    for flow_code in self._intermediate_flows:
+        try:
+            activity = db.get(code=flow_code)
+        except Exception:
+            logger.warning(...)
+            continue
+
+        price = activity.get("market_price")
+        if price is not None:
+            self._background_costs[(db_name, flow_code)] = price
+```
+
+Bedeutung:
+
+```text
+background_costs[(bkg, i)] = Preis des Background-Produkts i in Background-DB bkg
+```
+
+Wichtig:
+
+- Es wird nicht nur der 2020-Node gelesen.
+- Fuer jede premise Background-Datenbank wird der Node mit gleichem code gesucht.
+- Fehlende `market_price` Attribute werden zunaechst uebersprungen.
+- Fehlende Preise bedeuten spaeter effektiv Preis 0, solange keine strengere
+  Coverage-Validierung eingefuehrt wird.
+
+Checkliste:
+
+- [ ] Neue Hilfsfunktion oder Logik fuer `_background_costs` ergaenzen.
+- [ ] Fuer jede Background-DB nach `flow_code` suchen.
+- [ ] `market_price` lesen.
+- [ ] Fehlende Nodes oder Preise mit Warnung bzw. stiller Skip-Logik behandeln.
+- [ ] Keine rekursive Background-Kostenrechnung durchfuehren.
+
+### Schritt 5.6: Background-Kosten ueber `mapping` auf Systemzeit interpolieren
+
+Datei:
+
+```text
+src/optimex/lca_processor.py
+```
+
+Nachdem `self._mapping` erstellt wurde, koennen die finalen
+`intermediate_costs_cap` und `intermediate_costs_op` berechnet werden.
+
+Formel:
+
+```text
+intermediate_price[i,t] =
+    sum_bkg background_costs[bkg,i] * mapping[bkg,t]
 ```
 
 Vorgeschlagene Logik:
 
 ```python
-market_prices = exc.input.get("market_prices")
-if market_prices is not None:
-    if not isinstance(market_prices, dict):
-        logger.warning(
-            f"market_prices on node {exc.input} must be a dict, "
-            f"got {type(market_prices).__name__}. Skipping."
+for flow_code in self._intermediate_flows:
+    for year in self._system_time:
+        interpolated_price = sum(
+            self._background_costs.get((db_name, flow_code), 0)
+            * self._mapping.get((db_name, year), 0)
+            for db_name in self.background_dbs
         )
-    else:
-        for year, price in market_prices.items():
-            if year in self._system_time:
-                if exc.get("operation"):
-                    self._intermediate_costs_op[(input_code, year)] = price
-                else:
-                    self._intermediate_costs_cap[(input_code, year)] = price
+
+        if flow_code in self._cost_relevant_cap_flows:
+            self._intermediate_costs_cap[(flow_code, year)] = interpolated_price
+
+        if flow_code in self._cost_relevant_op_flows:
+            self._intermediate_costs_op[(flow_code, year)] = interpolated_price
 ```
 
 Wichtig:
 
-- Nur externe Background-Inputs bepreisen.
-- Keine internen Foreground-Produkte bepreisen.
-- Keine Biosphere-Flows bepreisen.
-- Keine Upstream-Prozesse im Background bepreisen.
-- Den Node-Preis anhand des Edge-Attributs `operation` in den passenden
-  Kostenvektor schreiben.
-- Wenn ein Background-Node in verschiedenen Edges unterschiedlich verwendet wird,
-  kann derselbe Preis in beiden Kostenvektoren auftauchen.
+- Die cap/op-Zuordnung kommt aus der Foreground-Edge.
+- Der Preis kommt aus dem zeitspezifischen Background-Node.
+- Die Zeitinterpolation kommt aus der bestehenden `mapping`-Matrix.
 
 Checkliste:
 
-- [ ] `market_prices` nur fuer externe Intermediate-Flows auslesen.
-- [ ] Ungueltiges Format per Warnung ueberspringen.
-- [ ] Preise nur fuer Jahre in `SYSTEM_TIME` uebernehmen.
-- [ ] `operation=True` Edge schreibt in `intermediate_costs_op`.
-- [ ] Edge ohne `operation=True` schreibt in `intermediate_costs_cap`.
+- [ ] Interpolierte Preise pro `(flow_code, year)` berechnen.
+- [ ] Cap-relevante Flows in `intermediate_costs_cap` schreiben.
+- [ ] Op-relevante Flows in `intermediate_costs_op` schreiben.
+- [ ] Bestehende `mapping`-Matrix wiederverwenden.
+- [ ] Verhalten bei fehlenden Preisen dokumentieren.
 
-### Schritt 5.4: Kostenfelder im Converter aus dem LCA Processor uebernehmen
+### Schritt 5.7: Kostenfelder im Converter aus dem LCA Processor uebernehmen
 
 Datei:
 
@@ -540,7 +757,7 @@ Checkliste:
 - [ ] Leere Kosten-Dicts als `None` uebergeben.
 - [ ] `discount_rate` und `discount_reference_year` mit `None` initialisieren.
 
-### Schritt 5.5: Tests fuer Pipeline-Integration
+### Schritt 5.8: Tests fuer Pipeline-Integration
 
 Moegliche Tests:
 
@@ -556,16 +773,19 @@ tests/test_economics.py
 
 Testidee:
 
-- Background-Node mit `market_prices` anlegen.
-- Foreground-Prozess konsumiert diesen Background-Node ueber eine construction
-  Edge.
+- Background-Nodes mit gleichem code in mehreren zeitspezifischen Background-
+  Datenbanken anlegen.
+- Je Background-Node `market_price` setzen.
+- Foreground-Prozess konsumiert den 2020-Referenznode ueber eine construction Edge.
 - Foreground-Prozess konsumiert einen Background-Node ueber eine operation Edge.
 - `LCADataProcessor` ausfuehren.
 - Pruefen:
 
 ```python
-lca_data.intermediate_costs_cap[(construction_flow_code, year)] == price
-lca_data.intermediate_costs_op[(operation_flow_code, year)] == price
+lca_data.background_costs[(db_2020, flow_code)] == price_2020
+lca_data.background_costs[(db_2030, flow_code)] == price_2030
+lca_data.intermediate_costs_cap[(construction_flow_code, year)] == interpolated_price
+lca_data.intermediate_costs_op[(operation_flow_code, year)] == interpolated_price
 ```
 
 Dann:
@@ -584,10 +804,11 @@ model_inputs.intermediate_costs_op[(flow_code, year)] == price
 
 Checkliste:
 
-- [ ] Test fuer Extraktion aus Background-Node.
+- [ ] Test fuer Extraktion aus zeitspezifischen Background-Nodes.
+- [ ] Test fuer Interpolation ueber `mapping`.
 - [ ] Test fuer Zuordnung anhand von `operation=True`.
 - [ ] Test fuer Uebergabe in `OptimizationModelInputs`.
-- [ ] Test fuer fehlende `market_prices`: Kostenfelder bleiben `None`.
+- [ ] Test fuer fehlende `market_price`: Preis wird uebersprungen oder als 0 behandelt.
 
 ## Schritt 6: `create_model` API erweitern
 
