@@ -564,11 +564,11 @@ def intermediate_costs_op(self) -> dict:
 
 Checkliste:
 
-- [ ] Interne Dicts in `__init__` anlegen:
+- [x] Interne Dicts in `__init__` anlegen:
   - `_background_costs`
   - `_intermediate_costs_cap`
   - `_intermediate_costs_op`
-- [ ] Read-only Properties ergaenzen.
+- [x] Read-only Properties ergaenzen.
 
 ### Schritt 5.4: Merken, welche Intermediate Flows cap/op-relevant sind
 
