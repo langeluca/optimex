@@ -424,10 +424,10 @@ Datenbanken und der bestehenden `mapping`-Interpolation.
 
 Checkliste:
 
-- [ ] Attributname `market_price` festlegen.
-- [ ] Format `node["market_price"] = float` dokumentieren.
-- [ ] Preisattribute auf zeitspezifischen Background-Nodes dokumentieren.
-- [ ] Keine weiteren Preisformate in der Minimalversion unterstuetzen.
+- [x] Attributname `market_price` festlegen.
+- [x] Format `node["market_price"] = float` dokumentieren.
+- [x] Preisattribute auf zeitspezifischen Background-Nodes dokumentieren.
+- [x] Keine weiteren Preisformate in der Minimalversion unterstuetzen.
 
 ### Schritt 5.2: Helper fuer User Input bereitstellen
 
@@ -520,15 +520,15 @@ Praktisch muss der User aber nur eine einfache Tabelle mit process, year, price 
 
 Checkliste:
 
-- [ ] Neue Datei `src/optimex/economics.py` anlegen.
-- [ ] `set_market_prices()` implementieren.
-- [ ] `list[dict]` Input unterstuetzen.
-- [ ] `pandas.DataFrame` Input unterstuetzen.
-- [ ] `background_databases={year: db_name}` verwenden.
-- [ ] `market_price` auf korrekten Background-Node schreiben.
-- [ ] `strict` und `overwrite` Verhalten definieren.
-- [ ] Tests fuer Helper schreiben.
-- [ ] In ReadTheDocs dokumentieren.
+- [x] Neue Datei `src/optimex/economics.py` anlegen.
+- [x] `set_market_prices()` implementieren.
+- [x] `list[dict]` Input unterstuetzen.
+- [x] `pandas.DataFrame` Input unterstuetzen.
+- [x] `background_databases={year: db_name}` verwenden.
+- [x] `market_price` auf korrekten Background-Node schreiben.
+- [x] `strict` und `overwrite` Verhalten definieren.
+- [x] Tests fuer Helper schreiben.
+- [x] In ReadTheDocs dokumentieren.
 
 ### Schritt 5.3: `LCADataProcessor` um interne Kosten-Dicts erweitern
 
