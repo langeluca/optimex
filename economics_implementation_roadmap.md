@@ -612,11 +612,11 @@ self._cost_relevant_op_flows = set()
 
 Checkliste:
 
-- [ ] Interne Sets fuer cap/op-relevante Intermediate Flows anlegen.
-- [ ] Nur externe Background-Inputs beruecksichtigen.
-- [ ] `operation=True` Edge markiert Flow als op-relevant.
-- [ ] Edge ohne `operation=True` markiert Flow als cap-relevant.
-- [ ] Interne Foreground-Produkte und Biosphere-Flows nicht bepreisen.
+- [x] Interne Sets fuer cap/op-relevante Intermediate Flows anlegen.
+- [x] Nur externe Background-Inputs beruecksichtigen.
+- [x] `operation=True` Edge markiert Flow als op-relevant.
+- [x] Edge ohne `operation=True` markiert Flow als cap-relevant.
+- [x] Interne Foreground-Produkte und Biosphere-Flows nicht bepreisen.
 
 ### Schritt 5.5: `market_price` aus allen zeitspezifischen Background-Datenbanken lesen
 
