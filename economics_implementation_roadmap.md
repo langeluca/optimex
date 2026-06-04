@@ -762,10 +762,10 @@ ausgelesen.
 
 Checkliste:
 
-- [ ] `intermediate_costs_cap` aus `lca_processor` uebernehmen.
-- [ ] `intermediate_costs_op` aus `lca_processor` uebernehmen.
-- [ ] Leere Kosten-Dicts als `None` uebergeben.
-- [ ] `discount_rate` und `discount_reference_year` mit `None` initialisieren.
+- [x] `intermediate_costs_cap` aus `lca_processor` uebernehmen.
+- [x] `intermediate_costs_op` aus `lca_processor` uebernehmen.
+- [x] Leere Kosten-Dicts als `None` uebergeben.
+- [x] `discount_rate` und `discount_reference_year` mit `None` initialisieren.
 
 ### Schritt 5.8: Tests fuer Pipeline-Integration
 
