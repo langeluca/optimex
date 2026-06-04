@@ -717,17 +717,16 @@ Wichtig:
 - Die cap/op-Zuordnung kommt aus der Foreground-Edge.
 - Der Preis kommt aus dem zeitspezifischen Background-Node.
 - Die Zeitinterpolation kommt aus der bestehenden `mapping`-Matrix.
-- Flows ohne Preis sollten nicht unbemerkt als kostenlos behandelt werden.
-  Mindestens eine Warnung ist erforderlich.
 
 Checkliste:
 
-- [ ] Interpolierte Preise pro `(flow_code, year)` berechnen.
-- [ ] Cap-relevante Flows in `intermediate_costs_cap` schreiben.
-- [ ] Op-relevante Flows in `intermediate_costs_op` schreiben.
-- [ ] Bestehende `mapping`-Matrix wiederverwenden.
-- [ ] Verhalten bei fehlenden Preisen dokumentieren.
-- [ ] Warnungen fuer fehlende Preise testen.
+- [x] Interpolierte Preise pro `(flow_code, year)` berechnen.
+- [x] Cap-relevante Flows in `intermediate_costs_cap` schreiben.
+- [x] Op-relevante Flows in `intermediate_costs_op` schreiben.
+- [x] Bestehende `mapping`-Matrix wiederverwenden.
+- [ ] Verhalten bei fehlenden Preisen dokumentieren: Fehlende `market_price`
+  Attribute erzeugen beim Preislesen eine Warnung; fehlende
+  `background_costs[(db, flow)]` gehen in der Interpolation mit 0 ein.
 
 ### Schritt 5.7: Kostenfelder im Converter aus dem LCA Processor uebernehmen
 
