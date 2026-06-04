@@ -878,6 +878,14 @@ src/optimex/optimizer.py
 
 In `create_model()` bei den Parametern ergaenzen:
 
+Wichtig:
+
+```text
+intermediate_costs_cap/op sind bereits im LCADataProcessor auf SYSTEM_TIME
+interpoliert. Im Optimizer duerfen sie nicht erneut ueber BACKGROUND_ID und
+mapping gewichtet werden.
+```
+
 ```python
 model.intermediate_costs_cap = pyo.Param(
     model.INTERMEDIATE_FLOW,
