@@ -769,25 +769,35 @@ Checkliste:
 
 ### Schritt 5.8: Tests fuer Pipeline-Integration
 
-Moegliche Tests:
-
-```text
-tests/test_lca_processing.py
-```
-
-oder spaeter:
+Testdatei:
 
 ```text
 tests/test_economics.py
 ```
 
-Testidee:
+Umgesetzte Teststruktur:
+
+```text
+1. Helper-Tests fuer set_market_prices()
+2. Pipeline-Tests fuer set_market_prices -> LCADataProcessor -> ModelInputManager
+```
+
+Getestete Helper-Faelle:
+
+- `list[dict]` Input schreibt `market_price`.
+- `pandas.DataFrame` Input schreibt `market_price`.
+- Custom Column Names funktionieren.
+- `overwrite=False` schuetzt vorhandene Preise.
+- Fehlendes Jahr wirft bei `strict=True`.
+- Fehlender Node wirft bei `strict=True`.
+
+Getestete Pipeline-Faelle:
 
 - Background-Nodes mit gleichem code in mehreren zeitspezifischen Background-
   Datenbanken anlegen.
-- Je Background-Node `market_price` setzen.
+- `set_market_prices()` schreibt `market_price` auf diese Nodes.
 - Foreground-Prozess konsumiert den 2020-Referenznode ueber eine construction Edge.
-- Foreground-Prozess konsumiert einen Background-Node ueber eine operation Edge.
+- Foreground-Prozess konsumiert einen 2020-Referenznode ueber eine operation Edge.
 - `LCADataProcessor` ausfuehren.
 - Pruefen:
 
@@ -808,17 +818,17 @@ model_inputs = manager.parse_from_lca_processor(lca_data)
 Pruefen:
 
 ```python
-model_inputs.intermediate_costs_cap[(flow_code, year)] == price
-model_inputs.intermediate_costs_op[(flow_code, year)] == price
+model_inputs.intermediate_costs_cap[(flow_code, year)] == interpolated_price
+model_inputs.intermediate_costs_op[(flow_code, year)] == interpolated_price
 ```
 
 Checkliste:
 
-- [ ] Test fuer Extraktion aus zeitspezifischen Background-Nodes.
-- [ ] Test fuer Interpolation ueber `mapping`.
-- [ ] Test fuer Zuordnung anhand von `operation=True`.
-- [ ] Test fuer Uebergabe in `OptimizationModelInputs`.
-- [ ] Test fuer fehlende `market_price`: Warnung wird ausgegeben.
+- [x] Test fuer Extraktion aus zeitspezifischen Background-Nodes.
+- [x] Test fuer Interpolation ueber `mapping`.
+- [x] Test fuer Zuordnung anhand von `operation=True`.
+- [x] Test fuer Uebergabe in `OptimizationModelInputs`.
+- [x] Test fuer fehlende `market_price`: Warnung wird ausgegeben.
 
 ## Schritt 6: `create_model` API erweitern
 
