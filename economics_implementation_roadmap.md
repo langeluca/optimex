@@ -656,17 +656,25 @@ Wichtig:
 
 - Es wird nicht nur der 2020-Node gelesen.
 - Fuer jede premise Background-Datenbank wird der Node mit gleichem code gesucht.
-- Fehlende `market_price` Attribute werden zunaechst uebersprungen.
-- Fehlende Preise bedeuten spaeter effektiv Preis 0, solange keine strengere
-  Coverage-Validierung eingefuehrt wird.
+- Fehlende `market_price` Attribute fuer kostenrelevante Intermediate Flows
+  muessen mindestens eine Warnung erzeugen.
+- Fehlende Preise bedeuten spaeter effektiv Preis 0 und koennen Ergebnisse
+  verfaelschen, wenn der User sie versehentlich vergessen hat.
+- Eine spaetere strengere Coverage-Validierung kann fehlende Preise optional als
+  Fehler behandeln.
 
 Checkliste:
 
-- [ ] Neue Hilfsfunktion oder Logik fuer `_background_costs` ergaenzen.
-- [ ] Fuer jede Background-DB nach `flow_code` suchen.
-- [ ] `market_price` lesen.
-- [ ] Fehlende Nodes oder Preise mit Warnung bzw. stiller Skip-Logik behandeln.
-- [ ] Keine rekursive Background-Kostenrechnung durchfuehren.
+- [x] Neue Hilfsfunktion oder Logik fuer `_background_costs` ergaenzen.
+- [x] Fuer jede Background-DB nach `flow_code` suchen.
+- [x] `market_price` lesen.
+- [x] Fehlende Nodes oder Preise mit Warnung behandeln.
+- [x] In Warnungen klar nennen:
+  - Background-DB
+  - Flow-Code
+  - Flow-Name, falls verfuegbar
+  - ob der Flow cap- und/oder op-relevant ist
+- [x] Keine rekursive Background-Kostenrechnung durchfuehren.
 
 ### Schritt 5.6: Background-Kosten ueber `mapping` auf Systemzeit interpolieren
 
@@ -709,6 +717,8 @@ Wichtig:
 - Die cap/op-Zuordnung kommt aus der Foreground-Edge.
 - Der Preis kommt aus dem zeitspezifischen Background-Node.
 - Die Zeitinterpolation kommt aus der bestehenden `mapping`-Matrix.
+- Flows ohne Preis sollten nicht unbemerkt als kostenlos behandelt werden.
+  Mindestens eine Warnung ist erforderlich.
 
 Checkliste:
 
@@ -717,6 +727,7 @@ Checkliste:
 - [ ] Op-relevante Flows in `intermediate_costs_op` schreiben.
 - [ ] Bestehende `mapping`-Matrix wiederverwenden.
 - [ ] Verhalten bei fehlenden Preisen dokumentieren.
+- [ ] Warnungen fuer fehlende Preise testen.
 
 ### Schritt 5.7: Kostenfelder im Converter aus dem LCA Processor uebernehmen
 
@@ -808,7 +819,7 @@ Checkliste:
 - [ ] Test fuer Interpolation ueber `mapping`.
 - [ ] Test fuer Zuordnung anhand von `operation=True`.
 - [ ] Test fuer Uebergabe in `OptimizationModelInputs`.
-- [ ] Test fuer fehlende `market_price`: Preis wird uebersprungen oder als 0 behandelt.
+- [ ] Test fuer fehlende `market_price`: Warnung wird ausgegeben.
 
 ## Schritt 6: `create_model` API erweitern
 
@@ -1641,6 +1652,71 @@ Checkliste fuer spaeter:
 - [ ] Doppelzaehlung mit Marktpreisen dokumentieren.
 - [ ] Tests fuer Carbon Pricing ergaenzen.
 - [ ] ReadTheDocs-Doku mit eigenem Abschnitt ergaenzen.
+
+### EconomicConfig in LCAConfig
+
+Motivation:
+
+In der Minimalimplementierung wird bei fehlenden Preisen fuer kostenrelevante
+Background-Produkte fest eine Warnung ausgegeben. Das schuetzt Nutzerinnen und
+Nutzer davor, versehentlich unbezahlte Inputs im Kostenobjective zu erzeugen.
+
+Spaeter kann dieses Verhalten konfigurierbar gemacht werden.
+
+Moegliche Erweiterung:
+
+```python
+class EconomicConfig(BaseModel):
+    price_attribute: str = "market_price"
+    missing_market_price: Literal["warn", "error", "ignore"] = "warn"
+```
+
+Dann koennte `LCAConfig` erweitert werden:
+
+```python
+class LCAConfig(BaseModel):
+    ...
+    economic: EconomicConfig = Field(default_factory=EconomicConfig)
+```
+
+Moegliche User-API:
+
+```python
+config = lca_processor.LCAConfig(
+    demand=demand,
+    temporal={...},
+    characterization_methods=[...],
+    economic={
+        "price_attribute": "market_price",
+        "missing_market_price": "error",
+    },
+)
+```
+
+Moegliche zukuenftige Felder:
+
+- `price_attribute`: Name des Background-Node-Attributs fuer Marktpreise.
+- `missing_market_price`: Verhalten bei fehlenden Preisen (`warn`, `error`, `ignore`).
+- `currency`: optionale Waehrungsinformation, z. B. `EUR`.
+- `price_unit`: optionale Einheit, z. B. `EUR/kWh`.
+- `cost_scale`: optionales Objective Scaling fuer numerische Stabilitaet.
+- Carbon-pricing-bezogene Felder.
+
+Nicht sofort implementieren:
+
+```text
+Fuer die erste Version bleibt das Verhalten fest:
+fehlende Preise fuer kostenrelevante Flows erzeugen mindestens eine Warnung.
+```
+
+Checkliste fuer spaeter:
+
+- [ ] `EconomicConfig` definieren.
+- [ ] `LCAConfig` um `economic` erweitern.
+- [ ] `price_attribute` statt hart codiertem `"market_price"` verwenden.
+- [ ] `missing_market_price` mit `warn/error/ignore` implementieren.
+- [ ] Tests fuer alle Missing-Price-Modi ergaenzen.
+- [ ] Doku aktualisieren.
 
 ### Postprocessing fuer Kosten
 
