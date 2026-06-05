@@ -1049,8 +1049,8 @@ Checkliste:
 - [x] `cost_cap[t]`.
 - [x] `cost_op[t]`.
 - [x] `total_cost`.
-- [ ] Test mit `discount_rate = 0`.
-- [ ] Test mit `discount_rate > 0`.
+- [x] Test mit `discount_rate = 0`.
+- [x] Test mit `discount_rate > 0`.
 
 ## Schritt 10: Objective-Switch einfuehren
 
