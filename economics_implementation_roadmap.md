@@ -1149,7 +1149,11 @@ Moeglicher Helper:
 
 ```python
 def require_highs():
-    if not pyo.SolverFactory("highs").available():
+    try:
+        available = pyo.SolverFactory("highs").available(exception_flag=False)
+    except Exception as exc:
+        pytest.skip(f"HiGHS solver not available: {exc}")
+    if not available:
         pytest.skip("HiGHS solver not available")
     return "highs"
 ```
@@ -1167,9 +1171,9 @@ Diese Tests brauchen keinen Solver.
 
 Checkliste:
 
-- [ ] `objective="environmental"` ist Default und bleibt rueckwaertskompatibel.
-- [ ] `objective="cost"` setzt `model.OBJ` auf `model.total_cost`.
-- [ ] Ungueltiges Objective wirft `ValueError`.
+- [x] `objective="environmental"` ist Default und bleibt rueckwaertskompatibel.
+- [x] `objective="cost"` setzt `model.OBJ` auf `model.total_cost`.
+- [x] Ungueltiges Objective wirft `ValueError`.
 
 ### Schritt 12.2: Cost Objective waehlt guenstigere Route
 
@@ -1184,10 +1188,10 @@ Dieser Test braucht einen Solver. HiGHS soll verwendet werden.
 
 Checkliste:
 
-- [ ] Einfaches Zwei-Routen-System bauen.
-- [ ] Kosten so setzen, dass eine Route eindeutig guenstiger ist.
-- [ ] Modell mit `objective="cost"` und `solver_name="highs"` loesen.
-- [ ] Pruefen, dass die guenstige Route genutzt wird.
+- [x] Einfaches Zwei-Routen-System bauen.
+- [x] Kosten so setzen, dass eine Route eindeutig guenstiger ist.
+- [x] Modell mit `objective="cost"` und `solver_name="highs"` loesen.
+- [x] Pruefen, dass die guenstige Route genutzt wird.
 
 ### Schritt 12.3: Cost Objective mit Umweltbudget testen
 
@@ -1203,10 +1207,10 @@ Dieser Test braucht einen Solver. HiGHS soll verwendet werden.
 
 Checkliste:
 
-- [ ] Zwei-Routen-System mit unterschiedlichem Impact bauen.
-- [ ] Kostenobjective ohne Budget testen.
-- [ ] Kostenobjective mit Impact-Budget testen.
-- [ ] Pruefen, dass Environmental Constraints weiterhin bei Cost Objective wirken.
+- [x] Zwei-Routen-System mit unterschiedlichem Impact bauen.
+- [x] Kostenobjective ohne Budget testen.
+- [x] Kostenobjective mit Impact-Budget testen.
+- [x] Pruefen, dass Environmental Constraints weiterhin bei Cost Objective wirken.
 
 ### Schritt 12.4: `solve_model()` Denormalisierung testen
 
@@ -1221,9 +1225,9 @@ Dieser Test braucht einen Solver. HiGHS soll verwendet werden.
 
 Checkliste:
 
-- [ ] Environmental Objective liefert realen Impact.
-- [ ] Cost Objective liefert reale Kosten.
-- [ ] Cost Objective wird nicht doppelt skaliert.
+- [x] Environmental Objective liefert realen Impact.
+- [x] Cost Objective liefert reale Kosten.
+- [x] Cost Objective wird nicht doppelt skaliert.
 
 ### Schritt 12.5: Backward Compatibility testen
 
@@ -1234,8 +1238,8 @@ Ziel:
 
 Checkliste:
 
-- [ ] `create_model(inputs, name, objective_category)` funktioniert.
-- [ ] Default ist `objective="environmental"`.
+- [x] `create_model(inputs, name, objective_category)` funktioniert.
+- [x] Default ist `objective="environmental"`.
 - [ ] Bestehende Tests bleiben gruen.
 
 ## Schritt 13: Dokumentation ergaenzen
