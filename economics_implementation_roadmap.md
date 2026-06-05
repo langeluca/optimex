@@ -935,11 +935,11 @@ model.discount_reference_year = pyo.Param(
 
 Checkliste:
 
-- [ ] `intermediate_costs_cap` Param.
-- [ ] `intermediate_costs_op` Param.
-- [ ] `discount_rate` Param.
-- [ ] `discount_reference_year` Param.
-- [ ] Defaults auf 0 bzw. `min(SYSTEM_TIME)`.
+- [x] `intermediate_costs_cap` Param.
+- [x] `intermediate_costs_op` Param.
+- [x] `discount_rate` Param.
+- [x] `discount_reference_year` Param.
+- [x] Defaults auf 0 bzw. `min(SYSTEM_TIME)`.
 
 ## Schritt 8: Background-Purchase Expressions bauen
 
