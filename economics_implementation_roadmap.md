@@ -1045,10 +1045,10 @@ model.total_cost = pyo.Expression(rule=total_cost_rule)
 
 Checkliste:
 
-- [ ] `discount_factor[t]`.
-- [ ] `cost_cap[t]`.
-- [ ] `cost_op[t]`.
-- [ ] `total_cost`.
+- [x] `discount_factor[t]`.
+- [x] `cost_cap[t]`.
+- [x] `cost_op[t]`.
+- [x] `total_cost`.
 - [ ] Test mit `discount_rate = 0`.
 - [ ] Test mit `discount_rate > 0`.
 
