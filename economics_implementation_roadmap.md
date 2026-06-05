@@ -1105,8 +1105,8 @@ else:
 
 Checkliste:
 
-- [ ] Cost Objective wird nicht mit Foreground- oder Charakterisierungsskalen multipliziert.
-- [ ] Environmental Objective bleibt unveraendert.
+- [x] Cost Objective wird nicht mit Foreground- oder Charakterisierungsskalen multipliziert.
+- [x] Environmental Objective bleibt unveraendert.
 
 ## Schritt 12: Tests schreiben
 
