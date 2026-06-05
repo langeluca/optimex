@@ -1108,87 +1108,135 @@ Checkliste:
 - [x] Cost Objective wird nicht mit Foreground- oder Charakterisierungsskalen multipliziert.
 - [x] Environmental Objective bleibt unveraendert.
 
-## Schritt 12: Tests schreiben
+## Schritt 12: Tests fuer Optimizer-Integration
 
-Empfohlene neue Datei:
+Bisher bereits abgedeckt:
+
+```text
+- Serialization der neuen Kostenfelder
+- `set_market_prices()` Helper
+- Preisextraktion aus Background-Nodes
+- Interpolation ueber `mapping`
+- Uebergabe in `OptimizationModelInputs`
+- Cost Expressions:
+  - `background_purchase_cap`
+  - `background_purchase_op`
+  - `cost_cap`
+  - `cost_op`
+  - `discount_factor`
+  - `total_cost`
+```
+
+Weitere Tests sollten in:
 
 ```text
 tests/test_economics.py
 ```
 
-### Test 1: Serialization
+ergaenzt werden.
+
+Solverbasierte Tests sollen bevorzugt mit HiGHS laufen:
+
+```python
+solver_name = "highs"
+```
+
+Falls HiGHS in einer Umgebung nicht verfuegbar ist, sollen die betreffenden Tests
+sauber geskippt werden, statt die Testsuite wegen fehlendem Solver scheitern zu
+lassen.
+
+Moeglicher Helper:
+
+```python
+def require_highs():
+    if not pyo.SolverFactory("highs").available():
+        pytest.skip("HiGHS solver not available")
+    return "highs"
+```
+
+### Schritt 12.1: Objective-Switch ohne Solver testen
 
 Ziel:
 
-- `intermediate_costs_cap` setzen.
-- `intermediate_costs_op` setzen.
-- JSON speichern und laden.
-- Tuple-Keys muessen erhalten bleiben.
+- Pruefen, dass `objective="environmental"` weiterhin
+  `total_impact[objective_category]` nutzt.
+- Pruefen, dass `objective="cost"` `total_cost` nutzt.
+- Pruefen, dass ein unbekanntes Objective einen `ValueError` wirft.
 
-Check:
+Diese Tests brauchen keinen Solver.
 
-```python
-assert loaded.intermediate_costs_cap == original.intermediate_costs_cap
-assert loaded.intermediate_costs_op == original.intermediate_costs_op
-```
+Checkliste:
 
-### Test 2: Purchase Split
+- [ ] `objective="environmental"` ist Default und bleibt rueckwaertskompatibel.
+- [ ] `objective="cost"` setzt `model.OBJ` auf `model.total_cost`.
+- [ ] Ungueltiges Objective wirft `ValueError`.
 
-Ziel:
-
-- Ein Modell mit construction Edge und operation Edge.
-- Pruefen, dass Mengen korrekt getrennt werden:
-
-```python
-background_purchase_cap[i,t]
-background_purchase_op[i,t]
-```
-
-### Test 3: Cost Calculation
-
-Ziel:
-
-- Einfache Preise setzen.
-- Erwartete Kosten manuell berechnen.
-
-Check:
-
-```python
-cost_cap[t] == price_cap * purchase_cap
-cost_op[t] == price_op * purchase_op
-total_cost == sum(discounted costs)
-```
-
-### Test 4: Cost Objective Chooses Cheaper Route
+### Schritt 12.2: Cost Objective waehlt guenstigere Route
 
 Ziel:
 
 - Zwei Prozesse koennen dieselbe Nachfrage erfuellen.
 - Prozess A ist teurer.
 - Prozess B ist guenstiger.
+- Bei `objective="cost"` wird Prozess B gewaehlt.
 
-Check:
+Dieser Test braucht einen Solver. HiGHS soll verwendet werden.
 
-```python
-objective="cost"
-```
+Checkliste:
 
-waehlt den guenstigeren Prozess.
+- [ ] Einfaches Zwei-Routen-System bauen.
+- [ ] Kosten so setzen, dass eine Route eindeutig guenstiger ist.
+- [ ] Modell mit `objective="cost"` und `solver_name="highs"` loesen.
+- [ ] Pruefen, dass die guenstige Route genutzt wird.
 
-### Test 5: Cost Objective mit Umweltbudget
-
-Ziel:
-
-- Kosten minimieren.
-- `cumulative_category_impact_limits` setzen.
-- Guenstige, aber zu schmutzige Option muss ausgeschlossen werden.
-
-### Test 6: Backward Compatibility
+### Schritt 12.3: Cost Objective mit Umweltbudget testen
 
 Ziel:
 
-- Bestehender Aufruf ohne `objective` funktioniert.
-- `objective="environmental"` liefert bisheriges Verhalten.
+- Guenstige Route ist umweltschaedlicher.
+- Teurere Route ist sauberer.
+- Ohne Umweltbudget waehlt das Modell die guenstige Route.
+- Mit `cumulative_category_impact_limits` muss das Modell die sauberere Route
+  waehlen.
+
+Dieser Test braucht einen Solver. HiGHS soll verwendet werden.
+
+Checkliste:
+
+- [ ] Zwei-Routen-System mit unterschiedlichem Impact bauen.
+- [ ] Kostenobjective ohne Budget testen.
+- [ ] Kostenobjective mit Impact-Budget testen.
+- [ ] Pruefen, dass Environmental Constraints weiterhin bei Cost Objective wirken.
+
+### Schritt 12.4: `solve_model()` Denormalisierung testen
+
+Ziel:
+
+- Bei `objective="environmental"` wird der Objective-Wert wie bisher
+  denormalisiert.
+- Bei `objective="cost"` wird der Objective-Wert nicht mit `fg_scale` oder
+  Charakterisierungsskalen multipliziert.
+
+Dieser Test braucht einen Solver. HiGHS soll verwendet werden.
+
+Checkliste:
+
+- [ ] Environmental Objective liefert realen Impact.
+- [ ] Cost Objective liefert reale Kosten.
+- [ ] Cost Objective wird nicht doppelt skaliert.
+
+### Schritt 12.5: Backward Compatibility testen
+
+Ziel:
+
+- Bestehende Aufrufe ohne `objective` funktionieren weiterhin.
+- Bestehende Environmental-Optimierung bleibt unveraendert.
+
+Checkliste:
+
+- [ ] `create_model(inputs, name, objective_category)` funktioniert.
+- [ ] Default ist `objective="environmental"`.
+- [ ] Bestehende Tests bleiben gruen.
 
 ## Schritt 13: Dokumentation ergaenzen
 
