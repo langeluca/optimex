@@ -983,9 +983,9 @@ model.background_purchase_op = pyo.Expression(
 
 Checkliste:
 
-- [ ] `background_purchase_cap[i,t]` in realen Einheiten.
-- [ ] `background_purchase_op[i,t]` in realen Einheiten.
-- [ ] `fg_scale` korrekt angewendet.
+- [x] `background_purchase_cap[i,t]` in realen Einheiten.
+- [x] `background_purchase_op[i,t]` in realen Einheiten.
+- [x] `fg_scale` korrekt angewendet.
 
 ## Schritt 9: Kosten-Expressions bauen
 
