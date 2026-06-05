@@ -1079,9 +1079,9 @@ model.OBJ = pyo.Objective(sense=pyo.minimize, rule=objective_function)
 
 Checkliste:
 
-- [ ] `objective="environmental"` verhaelt sich wie vorher.
-- [ ] `objective="cost"` minimiert `model.total_cost`.
-- [ ] Unbekanntes Objective wirft `ValueError`.
+- [x] `objective="environmental"` verhaelt sich wie vorher.
+- [x] `objective="cost"` minimiert `model.total_cost`.
+- [x] Unbekanntes Objective wirft `ValueError`.
 
 ## Schritt 11: `solve_model` Denormalisierung anpassen
 
