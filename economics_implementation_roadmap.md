@@ -864,9 +864,9 @@ model._objective_category = objective_category
 
 Checkliste:
 
-- [ ] Neues Argument `objective` mit Default `"environmental"`.
-- [ ] Validierung fuer erlaubte Werte.
-- [ ] Rueckwaertskompatibilitaet erhalten.
+- [x] Neues Argument `objective` mit Default `"environmental"`.
+- [x] Validierung fuer erlaubte Werte.
+- [x] Rueckwaertskompatibilitaet erhalten.
 
 ## Schritt 7: Kosten-Parameter in Pyomo anlegen
 
