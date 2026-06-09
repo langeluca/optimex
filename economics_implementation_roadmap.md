@@ -337,7 +337,8 @@ behandelt:
 ```text
 Foreground Edge verweist auf einen Background-Node, z. B. aus der 2020 DB
     -> optimex speichert dessen code als INTERMEDIATE_FLOW
-    -> fuer jede zeitspezifische Background-Datenbank wird der Node mit gleichem code gesucht
+    -> fuer Kosten wird zuerst wie bisher der Node mit diesem code gesucht
+    -> falls das fehlschlaegt, wird fuer Kosten ueber name/location/product/unit gesucht
     -> dort wird ein market_price gelesen
     -> Preise werden ueber die bestehende mapping[bkg,t]-Matrix auf SYSTEM_TIME interpoliert
 ```
@@ -446,6 +447,23 @@ koennen:
 process/name, location, year, price
 ```
 
+Optional bei mehrdeutigen Brightway-Lookups:
+
+```text
+product/reference product
+unit
+```
+
+Wichtig:
+
+```text
+Brightway `code` wird bewusst nicht als zeitreihenuebergreifender Identifier
+verwendet. In premise-generierten zeitspezifischen Datenbanken koennen
+inhaltlich gleiche Activities in unterschiedlichen Jahren unterschiedliche
+`code`- und `id`-Werte haben. Fuer Preiszeitreihen ueber mehrere premise-
+Datenbanken ist `code` daher nicht robust genug.
+```
+
 Die Helper-Funktion schreibt daraus automatisch:
 
 ```python
@@ -466,6 +484,8 @@ def set_market_prices(
     year_col: str = "year",
     price_col: str = "price",
     location_col: str | None = "location",
+    product_col: str | None = None,
+    unit_col: str | None = None,
     price_attribute: str = "market_price",
     overwrite: bool = True,
     strict: bool = True,
@@ -482,8 +502,22 @@ Beispiel mit `list[dict]`:
 
 ```python
 price_data = [
-    {"name": "market for electricity, medium voltage", "location": "RER", "year": 2020, "price": 90.0},
-    {"name": "market for electricity, medium voltage", "location": "RER", "year": 2030, "price": 70.0},
+    {
+        "name": "market for electricity, medium voltage",
+        "location": "RER",
+        "product": "electricity, medium voltage",
+        "unit": "kilowatt hour",
+        "year": 2020,
+        "price": 90.0,
+    },
+    {
+        "name": "market for electricity, medium voltage",
+        "location": "RER",
+        "product": "electricity, medium voltage",
+        "unit": "kilowatt hour",
+        "year": 2030,
+        "price": 70.0,
+    },
 ]
 ```
 
@@ -500,7 +534,13 @@ Interne Logik:
 for row in price_data:
     year = row[year_col]
     db_name = background_databases[year]
-    node = bd.get_node(database=db_name, name=row[name_col], location=row[location_col])
+    node = bd.get_node(
+        database=db_name,
+        name=row[name_col],
+        location=row[location_col],
+        product=row[product_col],  # only if product_col is provided
+        unit=row[unit_col],  # only if unit_col is provided
+    )
     node[price_attribute] = row[price_col]
     node.save()
 ```
@@ -510,6 +550,10 @@ Verhalten:
 - `strict=True`: Fehler werfen, wenn Jahr, Datenbank oder Node nicht gefunden wird.
 - `strict=False`: Warnung loggen und mit der naechsten Zeile fortfahren.
 - `overwrite=False`: vorhandene `market_price` Attribute nicht ueberschreiben.
+- `product_col`: optionaler Disambiguator fuer Activities mit gleichem Namen
+  und gleicher Location, aber unterschiedlichem Produkt bzw. unterschiedlicher Einheit.
+- `unit_col`: optionaler Disambiguator fuer Activities mit gleichem Namen,
+  gleicher Location und gleichem Produkt, aber unterschiedlicher Einheit.
 
 Warum dieser Helper wichtig ist:
 
@@ -524,6 +568,10 @@ Checkliste:
 - [x] `set_market_prices()` implementieren.
 - [x] `list[dict]` Input unterstuetzen.
 - [x] `pandas.DataFrame` Input unterstuetzen.
+- [x] Lookup ueber Name und Location verwenden.
+- [x] Optionalen Product-Lookup zur Disambiguierung unterstuetzen.
+- [x] Optionalen Unit-Lookup zur Disambiguierung unterstuetzen.
+- [x] Dokumentieren, dass Brightway `code` ueber premise-Datenbanken hinweg nicht stabil genug ist.
 - [x] `background_databases={year: db_name}` verwenden.
 - [x] `market_price` auf korrekten Background-Node schreiben.
 - [x] `strict` und `overwrite` Verhalten definieren.
@@ -655,7 +703,14 @@ background_costs[(bkg, i)] = Preis des Background-Produkts i in Background-DB bk
 Wichtig:
 
 - Es wird nicht nur der 2020-Node gelesen.
-- Fuer jede premise Background-Datenbank wird der Node mit gleichem code gesucht.
+- `flow_code` bleibt der stabile interne `INTERMEDIATE_FLOW` Key aus dem
+  Foreground-Edge.
+- Um die bestehende optimex-Logik nicht zu veraendern, wird der Preis zunaechst
+  ueber denselben Code gelesen, den auch die Background-Inventory-Logik nutzt.
+- Wenn premise aequivalenten Activities in verschiedenen Jahren unterschiedliche
+  Codes gibt, nutzt nur die Kostenlogik einen Fallback ueber gespeicherte
+  Metadaten: `name`, `location`, `product/reference product` und `unit`.
+- Die Background-Inventory-Logik bleibt davon unberuehrt.
 - Fehlende `market_price` Attribute fuer kostenrelevante Intermediate Flows
   muessen mindestens eine Warnung erzeugen.
 - Fehlende Preise bedeuten spaeter effektiv Preis 0 und koennen Ergebnisse
@@ -793,8 +848,10 @@ Getestete Helper-Faelle:
 
 Getestete Pipeline-Faelle:
 
-- Background-Nodes mit gleichem code in mehreren zeitspezifischen Background-
+- Background-Nodes mit gleichem Code in mehreren zeitspezifischen Background-
   Datenbanken anlegen.
+- Background-Nodes mit unterschiedlichem Code, aber gleicher Activity-Identitaet
+  anlegen und pruefen, dass der Kosten-Lookup ueber Metadaten funktioniert.
 - `set_market_prices()` schreibt `market_price` auf diese Nodes.
 - Foreground-Prozess konsumiert den 2020-Referenznode ueber eine construction Edge.
 - Foreground-Prozess konsumiert einen 2020-Referenznode ueber eine operation Edge.
@@ -1528,20 +1585,44 @@ Checkliste:
 - [ ] Kurzen erklaerenden Abschnitt zu Kostenobjective einfuegen.
 - [ ] Rueckwaertskompatibilitaet des Defaults erwaehnen.
 
-## Schritt 19: Beispielseite fuer Economic Optimization ergaenzen
+## Schritt 19: Vollstaendiges Economic-Optimization-Beispiel ergaenzen
 
-Optionale, aber fuer die Bachelorarbeit sehr wertvolle Seite:
+Dieser Schritt wurde vorgezogen, um vor der weiteren Dokumentation zuerst einen
+End-to-End-Test an einem realistischeren Beispiel zu haben.
+
+Erste Umsetzung als Notebook:
+
+```text
+notebooks/methanol_and_iron_cost.ipynb
+```
+
+Ziel:
+
+Ein durchgaengiges Beispiel auf Basis von `notebooks/methanol_and_iron.ipynb`,
+das zeigt:
+
+- Kostenpreise werden auf zeitspezifische Background-Nodes geschrieben,
+- `LCADataProcessor` liest und interpoliert diese Preise,
+- `OptimizationModelInputs` enthaelt `intermediate_costs_cap/op`,
+- `create_model(..., objective="cost")` baut das Cost Objective,
+- `solve_model(..., solver_name="highs")` loest das Modell,
+- CAPEX/OPEX-artige Kosten koennen nach Jahr ausgewertet werden.
+
+Nicht im ersten Notebook-Ziel:
+
+- finale wissenschaftliche Preisdatengrundlage,
+- ReadTheDocs-Beispieltext,
+- Umweltbudget-Vergleich.
+
+Spaeter kann daraus zusaetzlich eine kurze ReadTheDocs-Beispielseite entstehen:
 
 ```text
 docs/content/examples/economic_optimization.md
 ```
 
-Ziel:
-
-Ein kleines durchgaengiges Beispiel, das zeigt:
+Moegliche Doku-Story:
 
 - zwei Technologien koennen dieselbe Nachfrage bedienen,
-- Kostenpreise werden fuer first-level Background-Produkte gesetzt,
 - `objective="cost"` waehlt die guenstigere Option,
 - ein Umweltbudget kann die Entscheidung veraendern,
 - CAPEX/OPEX-artige Kosten koennen ausgewertet werden.
@@ -1578,8 +1659,13 @@ Explain how the chosen pathway changes.
 
 Checkliste:
 
-- [ ] Kleine Story fuer Beispiel festlegen.
-- [ ] Codebeispiel schreiben.
+- [x] Methanol/Iron-Beispiel als eigenes Cost-Notebook kopieren/adaptieren.
+- [x] Illustrative Preisannahmen auf Background-Nodes schreiben.
+- [x] LCAProcessor nach dem Schreiben der Preise ausfuehren.
+- [x] Cost Objective mit `objective="cost"` anlegen.
+- [x] HiGHS als Solver im Notebook verwenden.
+- [x] Ergebniszellen fuer `total_cost`, `cost_cap` und `cost_op` ergaenzen.
+- [ ] Notebook lokal vollstaendig ausfuehren und Ergebnis pruefen.
 - [ ] Ergebnisinterpretation aufnehmen.
 - [ ] In Beispiele-Navigation verlinken.
 
