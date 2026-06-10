@@ -1299,28 +1299,64 @@ Checkliste:
 - [x] Default ist `objective="environmental"`.
 - [ ] Bestehende Tests bleiben gruen.
 
-## Schritt 13: Dokumentation ergaenzen
+## Schritt 13: API- und Feature-Dokumentation vervollstaendigen
+
+Status:
+
+```text
+abgeschlossen
+```
+
+Die grundlegende ReadTheDocs-Seite existiert bereits:
+
+```text
+docs/content/economic_optimization.md
+```
+
+Sie dokumentiert bisher vor allem:
+
+- node-basierte Preisdefinition ueber `market_price`,
+- `set_market_prices()`,
+- Lookup ueber `name`, `location` und optional `product`, `unit`,
+- premise/code-Problematik fuer Preiszeitreihen,
+- CAPEX/OPEX-artige Accounting-Trennung ueber das `operation` Edge-Attribut.
+
+Ziel dieses Schritts:
+
+Die bereits vorhandene Seite und ggf. API-nahe Dokumentation so erweitern, dass
+das implementierte Feature als Optimex-Funktion vollstaendig verstaendlich ist.
+
+Dokumentierte Punkte:
+
+- [x] `objective="environmental"` als rueckwaertskompatibler Default.
+- [x] `objective="cost"` als neue Objective-Auswahl.
+- [x] `intermediate_costs_cap`.
+- [x] `intermediate_costs_op`.
+- [x] `discount_rate`.
+- [x] `discount_reference_year`.
+- [x] First-level Background Pricing.
+- [x] Keine rekursive Background-Kostenrechnung.
+- [x] CAPEX/OPEX-artige Accounting-Trennung.
+- [x] Ergebnisgroessen:
+  - `model.cost_cap[t]`,
+  - `model.cost_op[t]`,
+  - `model.discount_factor[t]`,
+  - `model.total_cost`.
+- [x] Scaling-Hinweis:
+  Preise sind reale Preise; die gekauften Background-Mengen werden fuer die
+  Kostenberechnung wieder in reale Einheiten gebracht.
+- [x] Zusammenspiel mit Umweltconstraints:
+  `objective="cost"` kann mit `category_impact_limits` und
+  `cumulative_category_impact_limits` kombiniert werden.
 
 Moegliche Dateien:
 
 ```text
+docs/content/economic_optimization.md
 docs/api/optimizer.md
 docs/content/optimization_setup.md
 docs/content/constraints.md
-docs/content/economic_optimization.md
 ```
-
-Dokumentieren:
-
-- [ ] `objective="environmental"`.
-- [ ] `objective="cost"`.
-- [ ] `intermediate_costs_cap`.
-- [ ] `intermediate_costs_op`.
-- [ ] `discount_rate`.
-- [ ] `discount_reference_year`.
-- [ ] First-level Background Pricing.
-- [ ] Keine rekursive Background-Kostenrechnung.
-- [ ] CAPEX/OPEX-artige Accounting-Trennung.
 
 Methodischer Textvorschlag:
 
@@ -1332,9 +1368,15 @@ for environmental impacts, while economic costs are represented by time-specific
 market prices for direct background products.
 ```
 
-## Schritt 14: ReadTheDocs-Seite fuer Economic Optimization erstellen
+## Schritt 14: ReadTheDocs-Seite fuer Economic Optimization finalisieren
 
-Neue Datei:
+Status:
+
+```text
+begonnen
+```
+
+Datei:
 
 ```text
 docs/content/economic_optimization.md
@@ -1424,15 +1466,31 @@ to real units before costs are calculated.
 
 Checkliste:
 
-- [ ] Neue Seite `docs/content/economic_optimization.md` anlegen.
-- [ ] Konzept first-level pricing erklaeren.
-- [ ] Mathematische Formulierung aufnehmen.
-- [ ] CAPEX/OPEX Accounting sauber einordnen.
-- [ ] Input-Felder dokumentieren.
-- [ ] Codebeispiel fuer `objective="cost"` ergaenzen.
-- [ ] Codebeispiel fuer Kostenoptimierung mit Umweltbudget ergaenzen.
-- [ ] Ergebnisinterpretation dokumentieren.
-- [ ] Scaling-Hinweis aufnehmen.
+- [x] Neue Seite `docs/content/economic_optimization.md` anlegen.
+- [x] Konzept first-level pricing erklaeren.
+- [x] Mathematische Formulierung aufnehmen:
+  - `background_purchase_cap`,
+  - `background_purchase_op`,
+  - `cost_cap`,
+  - `cost_op`,
+  - `discount_factor`,
+  - `total_cost`.
+- [x] CAPEX/OPEX Accounting sauber einordnen.
+- [x] Input-Felder dokumentieren:
+  - `intermediate_costs_cap`,
+  - `intermediate_costs_op`,
+  - `discount_rate`,
+  - `discount_reference_year`.
+- [x] User-Input ueber `set_market_prices()` dokumentieren.
+- [x] Node-Lookup ueber `name`, `location`, optional `product`, `unit`
+  dokumentieren.
+- [x] Codebeispiel fuer `objective="cost"` ergaenzen.
+- [x] Codebeispiel fuer Kostenoptimierung mit Umweltbudget ergaenzen.
+- [x] Ergebnisinterpretation dokumentieren.
+- [x] Scaling-Hinweis aufnehmen.
+- [ ] Hinweis aufnehmen, dass die Seite den aktuellen Stand der
+  Implementierung beschreibt und spaeter ggf. um ein ausfuehrliches Beispiel
+  erweitert wird.
 
 ## Schritt 15: Navigation der Dokumentation erweitern
 
