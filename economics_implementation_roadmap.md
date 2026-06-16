@@ -337,8 +337,10 @@ behandelt:
 ```text
 Foreground Edge verweist auf einen Background-Node, z. B. aus der 2020 DB
     -> optimex speichert dessen code als INTERMEDIATE_FLOW
-    -> fuer Kosten wird zuerst wie bisher der Node mit diesem code gesucht
-    -> falls das fehlschlaegt, wird fuer Kosten ueber name/location/product/unit gesucht
+    -> optimex speichert zusaetzlich die Activity-Identitaet
+       ueber name/location/product
+    -> Background-Inventory und Kosten nutzen dieselbe Activity-Aufloesung
+       ueber diese Identitaetsattribute
     -> dort wird ein market_price gelesen
     -> Preise werden ueber die bestehende mapping[bkg,t]-Matrix auf SYSTEM_TIME interpoliert
 ```
@@ -705,12 +707,10 @@ Wichtig:
 - Es wird nicht nur der 2020-Node gelesen.
 - `flow_code` bleibt der stabile interne `INTERMEDIATE_FLOW` Key aus dem
   Foreground-Edge.
-- Um die bestehende optimex-Logik nicht zu veraendern, wird der Preis zunaechst
-  ueber denselben Code gelesen, den auch die Background-Inventory-Logik nutzt.
 - Wenn premise aequivalenten Activities in verschiedenen Jahren unterschiedliche
-  Codes gibt, nutzt nur die Kostenlogik einen Fallback ueber gespeicherte
-  Metadaten: `name`, `location`, `product/reference product` und `unit`.
-- Die Background-Inventory-Logik bleibt davon unberuehrt.
+  Codes gibt, werden die Background-Nodes ueber gespeicherte Metadaten
+  aufgeloest: `name`, `location`, `product/reference product` und optional `unit`.
+- Kostenlogik und Background-Inventory-Logik nutzen dieselbe Activity-Aufloesung.
 - Fehlende `market_price` Attribute fuer kostenrelevante Intermediate Flows
   muessen mindestens eine Warnung erzeugen.
 - Fehlende Preise bedeuten spaeter effektiv Preis 0 und koennen Ergebnisse
@@ -851,7 +851,7 @@ Getestete Pipeline-Faelle:
 - Background-Nodes mit gleichem Code in mehreren zeitspezifischen Background-
   Datenbanken anlegen.
 - Background-Nodes mit unterschiedlichem Code, aber gleicher Activity-Identitaet
-  anlegen und pruefen, dass der Kosten-Lookup ueber Metadaten funktioniert.
+  anlegen und pruefen, dass die Activity-Aufloesung ueber Metadaten funktioniert.
 - `set_market_prices()` schreibt `market_price` auf diese Nodes.
 - Foreground-Prozess konsumiert den 2020-Referenznode ueber eine construction Edge.
 - Foreground-Prozess konsumiert einen 2020-Referenznode ueber eine operation Edge.
