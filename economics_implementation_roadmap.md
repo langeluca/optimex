@@ -1936,9 +1936,10 @@ Checkliste fuer spaeter:
 Moegliche spaetere Komfortfunktionen:
 
 ```python
-extract_costs_by_year(model)
-extract_cost_breakdown(model)
-extract_capex_opex_summary(model)
+PostProcessor.get_costs()
+PostProcessor.get_cost_breakdown()
+PostProcessor.get_cost_summary()
+PostProcessor.plot_costs()
 ```
 
 Ziel:
@@ -1947,6 +1948,20 @@ Ziel:
 - `cost_cap` und `cost_op` vergleichen,
 - diskontierte und undiskontierte Kosten ausweisen,
 - Kosten nach Background-Flow aufschluesseln.
+- Szenariovergleiche fuer `objective="environmental"`, `objective="cost"` und
+  `objective="cost"` mit Umweltbudget vereinfachen.
+- Notebook-nahe KPIs wie CAPEX/OPEX-Anteile, diskontierte Gesamtkosten und
+  jaehrliche Kostenpfade ohne lokale Helper-Funktionen verfuegbar machen.
+- Klar benennen, dass `cost_cap` installationsbezogene Kosten inklusive
+  Construction- und End-of-Life-Exchanges meint, waehrend `cost_op` nur
+  Exchanges mit `operation=True` umfasst.
+
+Motivation aus `basic_example_econ`:
+
+- Das Notebook kann zunaechst kleine lokale Helper fuer Kosten-Tabellen nutzen.
+- Diese Helper sollen spaeter in `src/optimex/postprocessing.py` ueberfuehrt
+  werden, damit die Economics-Erweiterung denselben Komfort bietet wie
+  Installation, Operation, Production, Demand und Impacts.
 
 ### Automatische Kostendaten aus Brightway/LCA Processor
 
