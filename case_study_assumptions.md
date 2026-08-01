@@ -62,6 +62,8 @@ Bachelorarbeit interpretiert werden.
 | Zeitpunkt der Investitionskosten | DECIDED | Installationsbezogene Kosten fallen vollständig im Installationsjahr an; keine Verteilung als Annuität über die Anlagenlebensdauer |
 | Restwert am Zeithorizont | OUT_OF_SCOPE | Kein Salvage Value für nach 2050 verbleibende Anlagenlebensdauer; Investitionen tragen ihre vollständigen Kosten im Installationsjahr |
 | Ökonomische Systemgrenze | DECIDED | Bepreisung ausschließlich der direkten Hintergrundkäufe aus `LCADataProcessor.cost_relevant_op_flows` und `cost_relevant_cap_flows` |
+| Wärme aus Erdgas | PROXY | `0.011231884 EUR_2025/MJ Wärme`: THE-Day-Ahead-Gaspreis 2025 von `37.2 EUR/MWh` nach FfE/EEX, geteilt durch `3600 MJ/MWh` und den Gasboiler-Wirkungsgrad `0.920` aus Tiggeloven (2026), Tabelle C.2, gedruckte Seite 169/PDF 184; nur Brennstoffkosten, ohne Kessel-CAPEX und O&M; bis zur Preisprojektion real konstant |
+| Absorptionskühlung | PROXY | `0.020543646 EUR_2025/MJ Kühlenergie`: `1.67 MJ` Wärme aus Erdgas zu `0.011231884 EUR/MJ` plus `0.0200 kWh` Strom zu `0.08932 EUR/kWh`; Wasser bleibt unbepreist; bis zu den Gas- und Strompreisprojektionen real konstant |
 | Nicht inventarisierte Kosten | OUT_OF_SCOPE | Personal, Versicherung, Verwaltung, fixe Wartung und weitere Kosten werden nur berücksichtigt, wenn sie als explizite bepreisbare Flows im Inventar vorkommen; kein separates Zusatzkostenmodell |
 | Prüfung der Preisvollständigkeit | DECIDED | Keine zusätzliche Strict-Implementierung; fehlende `market_price`-Werte erzeugen die bestehende Warnung des `LCADataProcessor`, und die Prüfung vor finalen Läufen bleibt User Responsibility |
 | Zeitliche Preisentwicklung | DECIDED | Für jeden kostenrelevanten Flow wird eine zeitliche Entwicklung recherchiert oder mindestens eine quellenbasierte Entwicklungshypothese begründet; real konstante Preise sind kein automatischer Default |
@@ -89,91 +91,52 @@ Kapazitätsdaten bereits auf diese effektive Basis umgerechnet wurden.
 
 ## Infrastruktur und Installationsskalierung
 
-### Problem
+### Inventory-Uebernahmeregel
 
-Klassische Brightway-LCI-Datensätze geben Infrastruktur häufig bereits
-amortisiert pro Produkteinheit an, zum Beispiel:
+Normale Brightway-LCI-Inventory-Mengen werden fuer die Case Study unveraendert
+uebernommen. Das gilt auch fuer Infrastrukturkoeffizienten wie:
 
 ```text
 unit factory / kg product
 ```
 
-Ein `operation=False`-Exchange in optimex wird dagegen mit der installierten
-Kapazität skaliert und muss deshalb auf folgender Basis angegeben werden:
+`operation=False` klassifiziert den Exchange als Installation und steuert seine
+zeitliche Skalierung. Es aendert weder den Betrag noch die Bezugsbasis des
+Quellinventars. Daher gibt es keine Umrechnung von `unit/kg` auf
+`unit/(kg/a)` und keine Multiplikation mit einer Quellen- oder
+Modelllebensdauer.
 
-```text
-unit factory / (kg product/a)
-```
-
-Ein amortisierter LCA-Wert darf nicht unverändert als Installations-Exchange
-übernommen werden. Dies würde sowohl Bauwirkungen als auch Investitionskosten
-falsch skalieren.
-
-### Vorläufige Umrechnungsregel
-
-Wenn ein Ausgangswert nachweislich über die gesamte Lebensproduktion amortisiert
-wurde und die optimex-Kapazität als effektive Jahresproduktion definiert ist:
-
-```text
-installation amount [infrastructure unit / (kg/a)]
-    = static LCI amount [infrastructure unit / kg]
-    * operating lifetime [a]
-```
-
-Die Regel gilt nur, wenn:
-
-1. Einheit und Referenzprodukt des Infrastrukturdatensatzes eindeutig sind.
-2. Der Ausgangswert tatsächlich pro kg Produkt amortisiert wurde.
-3. Die zugrunde liegende Lebensdauer bekannt ist.
-4. Die ursprüngliche Kapazitäts- und Auslastungsannahme zur effektiven
-   Jahreskapazität passt oder entsprechend umgerechnet wurde.
-5. Keine Komponentenwechsel innerhalb der Anlagenlebensdauer fehlen.
-
-Falls der Ausgangswert bereits pro Kapazität vorliegt, beispielsweise
-`electrolyzer unit/MW`, darf keine erneute Multiplikation mit der Lebensdauer
-erfolgen.
-
-Für Steam Cracking ist die Quellenannahme inzwischen dokumentiert: Seite 11 der
-ecoinvent-3.12-Datensatzdokumentation
-`unsaturated hydrocarbons production, steam cracking operation, average`
-gibt für `chemical factory construction, organics` einen Koeffizienten von
-`1.1516356618335166e-10 unit/kg Ethylen` und eine Lebensdauer von 50 Jahren an.
-Der Installationskoeffizient beträgt daher
-`5.758178309167583e-9 unit/(kg Ethylen/a)`. Die 50 Jahre werden vorläufig auch
-als Modelllebensdauer des Steam Crackers verwendet.
-
-Die statischen disco2very-Infrastrukturkoeffizienten für DAC,
-CO2-Hydrierung, MTO, eCO2R-Reaktor und eCO2R-Aufbereitung werden für den
-Demonstrationslauf weiterhin sichtbar mit der Proxy-Amortisationsdauer von
-`20 Jahren` multipliziert. Die PEM-Stack- und Balance-of-Plant-Koeffizienten
-aus `methanol_and_iron.ipynb` werden als bereits kapazitätsbezogene Proxys
-nicht noch einmal mit 20 multipliziert, bleiben aber ebenfalls prüfpflichtig.
+Die Optimex-Modelllebensdauer bleibt davon getrennt. Sie steuert
+Verfuegbarkeit und Ersatz der Foreground-Kapazitaetsvintages, nicht die
+Inventory-Menge. Die Regel setzt den korrigierten `var_installation`-Pfad
+voraus; vor finalen Szenariolaeufen muss dessen mehrjaehrige Aequivalenz zu
+einer statischen LCA getestet werden. Dabei sind auch die Brownfield-Kapazitaeten
+erneut gegen die korrigierte Variablensemantik zu pruefen.
 
 ### Einheiten der ecoinvent-Infrastruktur
 
 - `chemical factory construction, organics`: Preis und Exchange bezogen auf `unit`
 - `chemical factory construction`: Preis und Exchange bezogen auf `kg factory`
 
-Für die in `my_activities.py` dokumentierten Mengen muss mit dem ursprünglichen
-Ersteller geklärt werden, welcher Datensatz und welche Einheit bei der Berechnung
-verwendet wurden. Ein fehlerhafter Kommentar bedeutet nicht automatisch, dass
-der Zahlenwert falsch ist.
+Fuer die in `my_activities.py` dokumentierten Mengen bleibt lediglich zu
+pruefen, welcher konkrete Datensatz und welche Einheit verwendet wurden. Eine
+Quellenlebensdauer ist fuer ihre Uebernahme nicht erforderlich.
 
 ### Wahrscheinliche `operation=False`-Exchanges
 
 | Anlage | Installations- oder EoL-Kandidaten | Status |
 |---|---|---|
-| MTO | `chemical factory construction, organics` | PROXY: statischer Wert vorläufig mit 20 Jahren multipliziert; Einheit und Skalierung prüfen |
-| CO2-Hydrierung | `chemical factory construction, organics` | PROXY: statischer Wert vorläufig mit 20 Jahren multipliziert; Einheit und Skalierung prüfen |
-| PEM | Stahl, Aluminium, Kupfer, Kunststoff, Elektronik, Beton, Titan, Edelstahl, Nafion, Aktivkohle, Iridium, Platin | BLOCKER: Infrastrukturanteile und Ersatzzyklen prüfen |
+| MTO | `chemical factory construction, organics` | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
+| CO2-Hydrierung | `chemical factory construction, organics` | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
+| PEM | Stahl, Aluminium, Kupfer, Kunststoff, Elektronik, Beton, Titan, Edelstahl, Nafion, Aktivkohle, Iridium, Platin | Inventory-Mengen unveraendert uebernommen; separate Komponentenwechsel sind eine optionale Modellerweiterung |
 | PEM EoL | zugehörige Recycling- und Entsorgungsprozesse | OPEN: Zeitpunkt und Skalierung prüfen |
-| DAC | `construction of direct air capture, 2016` | PROXY: statischer Wert vorläufig mit 20 Jahren multipliziert; Kapazitätsbasis prüfen |
+| DAC | `construction of direct air capture, 2016` | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
 | DAC EoL | `treatment of direct air capture, 2016` | OPEN: Zeitpunkt und Skalierung prüfen |
-| eCO2R-Reaktor | `chemical factory construction` | PROXY: statischer Wert vorläufig mit 20 Jahren multipliziert; Einheit `kg factory` und Skalierung prüfen |
-| eCO2R-Reaktor | Kupferelektrode | PROXY: vorläufig als Installation mit 20 Jahren modelliert; Infrastruktur oder Verbrauchsmaterial klären |
-| eCO2R-Aufbereitung | Stahl des Vapor-Liquid-Separators | PROXY: statischer Wert vorläufig mit 20 Jahren multipliziert; Skalierung prüfen |
+| eCO2R-Reaktor | `chemical factory construction` | Inventory-Menge unveraendert uebernommen; Einheit `kg factory` pruefen |
+| eCO2R-Reaktor | Kupferelektrode | Inventory-Menge unveraendert uebernommen; Infrastruktur oder Verbrauchsmaterial klaeren |
+| eCO2R-Aufbereitung | Stahl des Vapor-Liquid-Separators | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
 | eCO2R-Aufbereitung | Anlagen für DeOx, Amine Wash, TSA und Kryotrennung | OPEN: explizite Infrastruktur fehlt weitgehend |
-| Steam Cracking | `chemical factory construction, organics` | PROXY: dokumentierten statischen ecoinvent-Wert mit der Quellenlebensdauer von 50 Jahren entamortisiert und separat als Installation modelliert |
+| Steam Cracking | `chemical factory construction, organics` | Dokumentierter ecoinvent-Koeffizient `1.1516356618335166e-10 unit/kg Ethylen` unveraendert als Installation modelliert |
 
 Strom, Wärme, Kühlenergie, Wasser, Abwasser, CO2, H2, Methanol und andere
 produktionsabhängige Zwischenprodukte werden grundsätzlich als
@@ -187,12 +150,12 @@ werden, ob sie Betriebs- oder Installationsflüsse sind.
 |---|---|---|---|
 | Betriebslebensdauer | alle Foreground-Anlagen | BLOCKER | Wert, Einheit, Quelle, Unsicherheit |
 | Bauzeit / Betriebsbeginn | alle Foreground-Anlagen | DECIDED | Keine Bauzeit im Modell; Same-year-Konvention entsprechend `methanol_and_iron.ipynb` |
-| Infrastrukturmenge pro effektiver Jahreskapazität | alle Anlagen mit `operation=False` | BLOCKER | Ausgangswert, vollständige Umrechnung, Quelle |
-| Komponentenstandzeiten und Ersatz | PEM, DAC, eCO2R | BLOCKER | Ersatzintervall und Anzahl über Anlagenleben |
+| Installationenskalierung | alle Anlagen mit `operation=False` | SOFTWARE PREREQUISITE | Korrigierten `var_installation`-Pfad mit einem mehrjaehrigen Static-LCA-Aequivalenztest validieren |
+| Komponentenstandzeiten und Ersatz | PEM, DAC, eCO2R | OPTIONAL | Nur fuer eine explizite Komponentenwechsel-Modellierung erforderlich; nicht fuer die Uebernahme normaler Inventory-Mengen |
 | Altersstruktur bestehender Kapazität | Steam Cracking | BLOCKER | Installationsjahre der zwei Kohorten und resultierende Restlebensdauern in Abstimmung mit der recherchierten Anlagenlebensdauer festlegen |
 | Früheste Verfügbarkeit | neue Routen | OPEN | Jahr und Quelle |
 | Infrastruktur der eCO2R-Aufbereitung | Aufbereitungsanlage | OPEN | Umfang und Kapazitätsnormalisierung |
-| Modellierung Steam Cracking | fossile Route | BLOCKER | Direkte Betriebs- und Biosphere-Exchanges sowie die 50-jährige ecoinvent-Infrastrukturannahme sind umgesetzt; Neubau-CAPEX und die Eignung von 50 Jahren als reale beziehungsweise ökonomische Lebensdauer bleiben zu prüfen |
+| Modellierung Steam Cracking | fossile Route | BLOCKER | Direkte Betriebs- und Biosphere-Exchanges sowie der unveraenderte ecoinvent-Infrastrukturkoeffizient sind umgesetzt; Neubau-CAPEX und die Eignung von 50 Jahren als Optimex-Modelllebensdauer bleiben zu pruefen |
 | Realer Diskontsatz | Gesamtsystem | PLACEHOLDER | Vorläufig `3 %` mit Referenzjahr 2025; endgültigen Wert und zitierfähige methodische Begründung recherchieren |
 | Preisbasis | alle Kostendaten | DECIDED | `EUR_2025`; ursprünglichen Wert, ursprüngliche Währung und ursprüngliches Preisjahr sowie Inflations- und Währungsumrechnung dokumentieren |
 | Preisentwicklung 2025-2050 | alle kostenrelevanten `op`- und `cap`-Flows | BLOCKER | Für jeden Flow Zeitreihe, dokumentierten Proxy oder begründete Entwicklungshypothese sowie Quellen, Stützjahre und Umgang mit Datenlücken festhalten |
@@ -292,11 +255,10 @@ Stand 2026-07-18:
   modelliert: 17 direkte Technosphere-Inputs und 44 direkte Biosphere-Exchanges
   bilden den Betrieb ab. Kumulierte Biosphere-Flows der Lieferketten werden nicht
   übernommen, sondern weiterhin durch Brightway berechnet.
-- `chemical factory construction, organics` wird ausschließlich als Installation
-  verwendet. Der statische ecoinvent-Koeffizient wird mit der dokumentierten
-  Quellenlebensdauer von 50 Jahren in
-  `5.758178309167583e-9 unit/(kg Ethylen/a)` umgerechnet. Dadurch entfallen die
-  negative Betriebskompensation und die frühere `cap_and_op`-Sonderbehandlung.
+- `chemical factory construction, organics` wird ausschliesslich als
+  Installation verwendet. Der statische ecoinvent-Koeffizient
+  `1.1516356618335166e-10 unit/kg Ethylen` wird unveraendert uebernommen. Eine
+  Multiplikation mit der Modell- oder Quellenlebensdauer findet nicht statt.
 - Bei 50 Jahren Modelllebensdauer bleiben die Bestandsvintages von 2005 und 2015
   bis zum Ende des Zeithorizonts 2050 verfügbar. Sie sind weiterhin nicht
   must-run und können durch andere Routen ersetzt werden.
