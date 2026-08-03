@@ -496,7 +496,7 @@ inhaltlich verbessern.
 |---|---|---|
 | `chemical factory construction` | eCO2R-CAPEX aus Tiggeloven | Nicht direkt eintragen: generischer kg-Fabrikflow und route-spezifischer TPC haben inkompatible Bezugsbasen. |
 | `chemical factory construction, organics` | Steam- und MTO-CAPEX aus Tiggeloven | Nicht direkt eintragen: derselbe Flow wird fuer zwei Anlagen mit verschiedenen Kosten verwendet. |
-| `direct air capture system, solvent-based, 1MtCO2` | nur DAC-Produktpreis, kein Anlagen-CAPEX | Vorhandenen Proxy behalten; weitere Recherche erforderlich. |
+| `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Deutz-und-Bardow-Inventar und kapazitaetsgleiche Kostendaten aus Sievert et al. | Der fruehere solvent-basierte 1-Mt-Proxy wurde entfernt. Den TPC aus Sievert et al. auf `EUR_2025` umrechnen und direkt je 4-kt-Einheit eintragen; bis dahin bleibt `1 EUR/Einheit` ein technischer `PLACEHOLDER`. |
 | `electrolyzer production, 1MWe, PEM, Balance of Plant` | AEC-Lebensdauertrennung, kein PEM-CAPEX | Vorhandene IRENA-Proxys behalten; AEC-CAPEX nicht uebertragen. |
 | `electrolyzer production, 1MWe, PEM, Stack` | AEC-Stack 9 a, Kostenanteil 23.8 %, kein PEM-CAPEX | Lebensdauerhinweis dokumentieren; vorhandene IRENA-Proxys behalten. |
 | `market for copper, cathode` | keine Preisangabe | Vorhandenen Proxy behalten. |
@@ -509,7 +509,7 @@ inhaltlich verbessern.
 |---|---|---|
 | `cooling energy production, at -25 °C, propylene compression refrigeration system 1 MW` | keine | Vorhandenen Proxy behalten. |
 | `heat production, at heat pump 30kW, allocation exergy` | keine | Vorhandenen Proxy behalten. |
-| `market for activated carbon, granular` | keine | Vorhandenen Proxy behalten. |
+| `adsorbent, amine on alumina` | disco2very-Inventar aus PEI und Aluminiumoxid; Kostendaten aus Sievert et al. | Der unpassende Aktivkohleproxy wurde entfernt. Sorbenspreis auf `EUR_2025/kg` uebertragen; bis dahin technischer `PLACEHOLDER`. |
 | `market for butane` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for compressed air, 700 kPa gauge` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for cooling energy` | keine | Vorhandenen Proxy behalten. |
@@ -644,7 +644,7 @@ Aktuell dokumentiert beziehungsweise noch umzusetzen:
 
 - Temperaturabhaengige Kuehlkosten.
 - Waermepumpenwaerme.
-- Aktivkohle.
+- Amine-on-Alumina-Sorbens.
 - Unbelastetes Abwasser.
 - Behandlung verbrauchten Anionenaustauscherharzes.
 - Kupfer und niedriglegierter Stahl mit konsistenten Europa- und

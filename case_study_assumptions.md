@@ -24,7 +24,7 @@ Bachelorarbeit interpretiert werden.
 | Punkt | Status | Festlegung |
 |---|---|---|
 | Brightway-Projekt | DECIDED | `optimex_remind` |
-| Prozessdaten | DECIDED | Foreground-Activities und Exchanges werden im Case-Study-Notebook manuell nach dem Muster von `methanol_and_iron.ipynb` angelegt; die Zahlenbasis stammt aus den ausgewählten disco2very-Inventaren und dokumentierten Proxys |
+| Prozessdaten | DECIDED | Foreground-Activities und Exchanges werden im Case-Study-Notebook manuell nach dem Muster von `methanol_and_iron.ipynb` angelegt; die Zahlenbasis stammt aus den ausgewählten disco2very-Inventaren und dokumentierten Proxys. Die DAC-Hilfsaktivitäten PEI, Amine-on-Alumina und 4-kt-DAC-Konstruktion werden reproduzierbar in jeder premise-Stützjahresdatenbank angelegt. |
 | Workflow-Blueprints | DECIDED | `notebooks/basic_example_econ.ipynb` und `notebooks/methanol_and_iron.ipynb` |
 | Routen | DECIDED | Steam Cracking; DAC + PEM + CO2-Hydrierung + MTO; DAC + eCO2R + Aufbereitung |
 | MTO-Koppelproduktbehandlung | DECIDED | Massenallokation: `allocation="weight"`, kein Avoided Burden |
@@ -75,7 +75,7 @@ Bachelorarbeit interpretiert werden.
 | Öffentliche Notebook-Fassung | DECIDED | Das Notebook bleibt leserorientiert und enthält nur einen kompakten Abschnitt für Kostenflussliste, CSV und Preisstatus; Research Mode, Blocker-Gates und Entwicklerworkflow werden nicht gezeigt |
 | Veröffentlichung der Kosten-CSV | DECIDED | Die fertig recherchierte CSV wird als reproduzierbarer Modellinput im öffentlichen Repository versioniert; Weitergaberechte der Preisquellen und enthaltenen Daten vor Veröffentlichung prüfen |
 | Aktivitätsidentität in der CSV | DECIDED | Öffentliche Preiszeilen verwenden `name`, `product`, `location`, `unit` und `year`; keine datenbankspezifischen Brightway-Activity-Codes |
-| Voraussetzungen des öffentlichen Notebooks | DECIDED | `optimex_remind`, die benötigten premise-Datenbanken und die Biosphere-Datenbank werden vorausgesetzt; die `disco2very`-Datenbank ist keine Laufzeitabhängigkeit der Case Study |
+| Voraussetzungen des öffentlichen Notebooks | DECIDED | `optimex_remind`, die benötigten premise-Datenbanken und die Biosphere-Datenbank werden vorausgesetzt; die `disco2very`-Datenbank und der lokale Pfad zum disco2very-Repository sind keine Laufzeitabhängigkeiten, weil die drei benötigten DAC-Hilfsinventare sichtbar im Case-Study-Notebook reproduziert werden. |
 
 Die Kapazitätsbasis bezieht sich jeweils auf das Referenzprodukt der Anlage:
 
@@ -130,13 +130,35 @@ Quellenlebensdauer ist fuer ihre Uebernahme nicht erforderlich.
 | CO2-Hydrierung | `chemical factory construction, organics` | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
 | PEM | Stahl, Aluminium, Kupfer, Kunststoff, Elektronik, Beton, Titan, Edelstahl, Nafion, Aktivkohle, Iridium, Platin | Inventory-Mengen unveraendert uebernommen; separate Komponentenwechsel sind eine optionale Modellerweiterung |
 | PEM EoL | zugehörige Recycling- und Entsorgungsprozesse | OPEN: Zeitpunkt und Skalierung prüfen |
-| DAC | `construction of direct air capture, 2016` | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
-| DAC EoL | `treatment of direct air capture, 2016` | OPEN: Zeitpunkt und Skalierung prüfen |
+| DAC | `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Material- und Landnutzungsinventar der disco2very-Activity `construction of direct air capture, 2016` übernommen; Name, Code und Kommentar spezifizieren die Nennkapazität von 4 kt CO2/a und Deutz und Bardow (2021) als Quelle. Der Koeffizient `1.25e-8 unit/kg CO2` bleibt unverändert. |
+| DAC EoL | `treatment of direct air capture, 2016` | In der disco2very-Konstruktionsactivity enthalten, für die Baseline aber bewusst nicht übernommen, da Anlagen-EoL außerhalb der Systemgrenze liegt. |
 | eCO2R-Reaktor | `chemical factory construction` | Inventory-Menge unveraendert uebernommen; Einheit `kg factory` pruefen |
 | eCO2R-Reaktor | Kupferelektrode | Inventory-Menge unveraendert uebernommen; Infrastruktur oder Verbrauchsmaterial klaeren |
 | eCO2R-Aufbereitung | Stahl des Vapor-Liquid-Separators | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
 | eCO2R-Aufbereitung | Anlagen für DeOx, Amine Wash, TSA und Kryotrennung | OPEN: explizite Infrastruktur fehlt weitgehend |
 | Steam Cracking | `chemical factory construction, organics` | Dokumentierter ecoinvent-Koeffizient `1.1516356618335166e-10 unit/kg Ethylen` unveraendert als Installation modelliert |
+
+### Abgleich der disco2very-Background-Inputs
+
+Der Abgleich mit dem vollständigen disco2very-Repository ergab folgende
+bewusste Abweichungen im Case-Study-Modell:
+
+| Prozess | Ergebnis |
+|---|---|
+| Steam Cracking | Keine Proxy-Ersetzung; das ecoinvent-Inventar wird lediglich eine Ebene tiefer aufgeschlüsselt. |
+| DAC | Korrigiert: Amine-on-Alumina ersetzt den früheren Aktivkohleproxy; die 4-kt-Solid-Sorbent-Konstruktion ersetzt die frühere premise-Activity für ein solvent-basiertes System. |
+| PEM | Die disco2very-Material- und Entsorgungsinputs sind bewusst durch die Stack- und Balance-of-Plant-Inventare aus `methanol_and_iron` ersetzt; Betriebsstrom, Wasser und Abwasser entsprechen disco2very. |
+| CO2-Hydrierung | Betriebsinputs entsprechen disco2very; als Installation wird bewusst `methanol production facility, construction` statt `chemical factory construction, organics` verwendet. |
+| MTO | Mengen entsprechen `allocation="weight"`; die disco2very-Kühlaktivitäten bei -30 °C und -75 °C werden durch verfügbare premise-Proxys bei -25 °C beziehungsweise -100 °C ersetzt. |
+| eCO2R-Reaktion | Direkte Background-Inputs und Mengen entsprechen disco2very. |
+| eCO2R-Aufbereitung | Die Aggregation erhält die ursprünglichen Mengen; lediglich die disco2very-Kühlaktivität bei -75 °C wird durch den premise-Proxy bei -100 °C ersetzt. |
+
+Die DAC-Konstruktionsactivity beschreibt ein System mit `4 kt CO2/a`
+Nennkapazität. Diese Kapazitätsbasis stimmt mit den betrachteten Kostendaten aus
+Sievert et al. überein und ermöglicht später eine direkte Zuordnung des dort
+abgeleiteten TPC. Die im disco2very-Quellinventar genannten `20 Jahre` bleiben
+eine Quellenannahme des Inventars und werden nicht als Optimex-Modelllebensdauer
+oder zusätzlicher Multiplikationsfaktor verwendet.
 
 Strom, Wärme, Kühlenergie, Wasser, Abwasser, CO2, H2, Methanol und andere
 produktionsabhängige Zwischenprodukte werden grundsätzlich als

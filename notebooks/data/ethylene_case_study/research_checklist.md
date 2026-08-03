@@ -131,12 +131,16 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 
 - [x] REPO DAC-Installationskoeffizient `1.25e-8 unit/kg CO2` unveraendert
   uebernommen.
-- [x] REPO Technischer CAPEX-Proxy von 250 Mio. EUR fuer das 1-Mt-CO2-System
-  vorhanden.
-- [ ] RESEARCH DAC-Anlagen-CAPEX mit passender Kapazitaetsbasis und
-  Zukunftstrajektorie recherchieren.
-- [ ] DECISION Pruefen, ob der aktuelle IEA-basierte Capture-Cost-Proxy als
-  Anlagen-CAPEX interpretiert werden darf.
+- [x] REPO DAC-Installationsflow auf die reproduzierte disco2very-Konstruktion
+  eines Solid-Sorbent-Systems mit `4 kt CO2/a` umgestellt; die interne
+  Anlagen-EoL-Kante bleibt entsprechend der Baseline ausgeschlossen.
+- [x] REPO Die Nennkapazitaet des Deutz-und-Bardow-Inventars stimmt mit der
+  Kapazitaetsbasis der Kostendaten aus Sievert et al. ueberein.
+- [ ] RESEARCH Den TPC aus Sievert et al. auf `EUR_2025` umrechnen und direkt
+  als Preis einer 4-kt-Einheit eintragen; der technische CSV-Fallback von
+  `1 EUR/Einheit` darf nicht interpretiert werden.
+- [ ] RESEARCH Zukunftstrajektorie des DAC-TPC festlegen oder eine reale
+  konstante Fortschreibung transparent begruenden.
 
 ### OPEX
 
@@ -145,9 +149,12 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
   `0.005511044 EUR_2025/MJ`.
 - [ ] DECISION Waermepumpenpreis nach Einfuehrung der Stromtrajektorie je
   Stuetzjahr neu berechnen.
-- [x] REPO Aktivkohle mit `2.5 EUR_2025/kg` und Adsorbentbehandlung mit
-  `-0.5 EUR_2025/kg` als generische Proxys vorhanden.
-- [ ] SCREEN Aktivkohle und Behandlung wegen `0.0075 kg/kg CO2` auf
+- [x] REPO Der unpassende Aktivkohleproxy wurde durch die originale
+  disco2very-Activity `adsorbent, amine on alumina` ersetzt; ihr Inventar
+  besteht aus PEI und Aluminiumoxid.
+- [ ] RESEARCH Sorbenspreis aus Sievert et al. auf die Einheit
+  `EUR_2025/kg adsorbent` uebertragen und den technischen CSV-Fallback ersetzen.
+- [ ] SCREEN Sorbens und Behandlung wegen `0.0075 kg/kg CO2` auf
   Kostenrelevanz pruefen und Quellenqualitaet bewerten.
 
 ## 3. CO2 Hydrogenation
@@ -324,5 +331,5 @@ In sinnvoller Arbeitsreihenfolge bleiben damit:
    und eCO2R.
 5. DAC- und PEM-CAPEX absichern.
 6. Modelllebensdauern fuer Steam Cracking und eCO2R final festlegen.
-7. Wasser, Abwasser, Aktivkohle und Abfallbehandlungen screenen.
+7. Wasser, Abwasser, Amine-on-Alumina-Sorbens und Abfallbehandlungen screenen.
 8. Cut-off-Entscheidungen dokumentieren und alle PLACEHOLDER ersetzen.

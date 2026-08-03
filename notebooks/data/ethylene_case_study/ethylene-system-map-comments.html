@@ -1215,8 +1215,8 @@ html&gt;body{padding:0}&lt;/style&gt;
         ],
         dac: [
           ['Electricity, medium voltage, DE', 'market for electricity, medium voltage', '0.7 kWh', 'operation'], ['Heat from heat pump', 'heat production, at heat pump 30kW, allocation exergy', '4.7 MJ', 'operation'],
-          ['Granular activated carbon', 'market for activated carbon, granular', '0.0075 kg', 'operation'], ['Spent resin treatment', 'treatment of spent anion exchange resin from potable water production, municipal incineration', '-0.0075 kg', 'operation'],
-          ['Fossil CO2 uptake', 'Carbon dioxide, fossil (air)', '-1 kg', 'biosphere'], ['DAC system', 'direct air capture system, solvent-based, 1MtCO2', '1.25e-8 unit/kg', 'installation'],
+          ['Amine-on-alumina adsorbent', 'adsorbent, amine on alumina', '0.0075 kg', 'operation'], ['Spent resin treatment', 'treatment of spent anion exchange resin from potable water production, municipal incineration', '-0.0075 kg', 'operation'],
+          ['Fossil CO2 uptake', 'Carbon dioxide, fossil (air)', '-1 kg', 'biosphere'], ['Solid-sorbent DAC system, 4 ktCO2/a', 'direct air capture system construction, solid sorbent, 4 ktCO2/a', '1.25e-8 unit/kg', 'installation'],
         ],
         pem: [
           ['Electricity, medium voltage, DE', 'market for electricity, medium voltage', '56.0051 kWh', 'operation'], ['Deionised water, Europe', 'market for water, deionised', '8.9360 kg', 'operation'],
@@ -1679,7 +1679,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       <optgroup label="Background – Direct air capture">
         <option value="background:dac:electricity">Electricity, medium voltage, DE</option>
         <option value="background:dac:heat-pump">Heat from heat pump</option>
-        <option value="background:dac:activated-carbon">Granular activated carbon</option>
+        <option value="background:dac:activated-carbon">Amine-on-alumina adsorbent</option>
         <option value="background:dac:spent-resin">Spent resin treatment</option>
       </optgroup>
       <optgroup label="Background – PEM electrolysis">
@@ -1717,7 +1717,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         <option value="installation:steam:organic-chemical-factory">Organic chemical factory</option>
       </optgroup>
       <optgroup label="Installation – Direct air capture">
-        <option value="installation:dac:dac-system">DAC system</option>
+        <option value="installation:dac:dac-system">Solid-sorbent DAC system, 4 ktCO2/a</option>
       </optgroup>
       <optgroup label="Installation – PEM electrolysis">
         <option value="installation:pem:stack">PEM stack</option>
@@ -1776,12 +1776,16 @@ html&gt;body{padding:0}&lt;/style&gt;
   const coolingMinus55PriceComment = 'Kostenproxy aus ecoinvent-Strombedarf: 0,526 kWh Strom pro MJ Kühlenergie bei -55 °C. Mit 0,08932 EUR/kWh ergeben sich 0,04698232 EUR/MJ. Weitere variable Inputs werden vorläufig nicht bepreist; die Strompreisprojektion bis 2050 bleibt offen.';
   const coolingMinus100PriceComment = 'Kostenproxy aus ecoinvent-Strombedarf: 0,6975 kWh Strom pro MJ Kühlenergie bei -100 °C. Mit 0,08932 EUR/kWh ergeben sich 0,0623007 EUR/MJ. Weitere variable Inputs werden vorläufig nicht bepreist; die Strompreisprojektion bis 2050 bleibt offen.';
   const eco2rAggregateCapexComment = 'Gemeinsamer CAPEX-Proxy für Electrochemical CO2 reduction und eCO2R separation: Tiggeloven (2026), Tabelle C.1, setzt für "CO2 electrolysis" einen nicht annualisierten Total Plant Cost von TPC = 9,461 Mio. EUR_2022/(t CO2/h) × CO2-Kapazität an; der größenunabhängige Anteil ist 0, die Instandhaltung beträgt 2 % des TPC pro Jahr und die angenommene Lebensdauer 25 Jahre. Der Parameter basiert auf dem optimistischen Tandemsystem von Sisler et al. (2021) und umfasst neben den Elektrolysezellen auch Balance of Plant, Installation und zugehörige Gasabtrennung. Er liegt deshalb fachlich näher an der Kombination beider derzeit getrennten Foreground-Prozesse als an einem reinen Reaktor-CAPEX. Nach Tiggelovens Output-Verhältnis von 0,602 t Ethylen je t CO2 entspricht der Proxy bei 8.760 h/a rund 1,794 EUR_2022 je kg Ethylen/a Nennkapazität. Status: PROXY. Bis zur Modellanpassung darf der Gesamtwert nur einmal angesetzt werden; eine zusätzliche separate Bepreisung der eCO2R-Aufbereitung würde Kosten doppelt zählen. Geplante Modellierungsänderung: Electrochemical CO2 reduction und eCO2R separation werden zu einem gemeinsamen Foreground-Prozess aggregiert und der CAPEX-Proxy anschließend dieser kombinierten Installation zugeordnet.';
+  const dacAdsorbentComment = 'Inventar korrigiert: Der DAC-Prozess verwendet die disco2very-Activity "adsorbent, amine on alumina" mit 55,7735849 % Polyethyleneimin und 44,2264151 % Aluminiumoxid. Quelle des Inventars: Deutz und Bardow (2021) sowie Leonzio et al. (2022). Der Preis in cost_inputs.csv ist weiterhin ein technischer PLACEHOLDER und wird durch den aus Sievert et al. abgeleiteten Sorbenspreis ersetzt.';
+  const dac4ktInstallationComment = 'Installation korrigiert: Die Activity bildet ein Solid-Sorbent-TVSA-DAC-System mit 4 kt CO2/a Nennkapazitaet ab. Materialmengen und Landnutzung stammen aus der disco2very-Konstruktion auf Basis von Deutz und Bardow (2021). Die dort enthaltene EoL-Behandlung ist fuer die cradle-to-gate Baseline ausgeschlossen. Die 4-kt-Kapazitaetsbasis stimmt mit den Kostendaten aus Sievert et al. ueberein; der TPC muss noch auf EUR_2025 uebertragen werden.';
   const defaultComments = {
     'process:eco2r': { label: 'Electrochemical CO2 reduction', text: eco2rAggregateCapexComment, updatedAt: '2026-08-02T00:00:00.000Z' },
     'process:separation': { label: 'eCO2R separation', text: eco2rAggregateCapexComment, updatedAt: '2026-08-02T00:00:00.000Z' },
     'background:steam:naphtha': { label: 'Naphtha', text: naphthaFeedstockPriceComment, updatedAt: '2026-08-01T00:00:00.000Z' },
     'background:steam:electricity': { label: 'Electricity, medium voltage, DEU', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:dac:electricity': { label: 'Electricity, medium voltage, DE', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
+    'background:dac:activated-carbon': { label: 'Amine-on-alumina adsorbent', text: dacAdsorbentComment, updatedAt: '2026-08-03T00:00:00.000Z' },
+    'installation:dac:dac-system': { label: 'Solid-sorbent DAC system, 4 ktCO2/a', text: dac4ktInstallationComment, updatedAt: '2026-08-03T00:00:00.000Z' },
     'background:pem:electricity': { label: 'Electricity, medium voltage, DE', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:hydrogenation:electricity': { label: 'Electricity, medium voltage, DE', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:mto:electricity': { label: 'Electricity, medium voltage, DE', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
