@@ -18,10 +18,12 @@ nicht ausgefuehrt. `ethylene_case_study.ipynb` und
 `case_study_assumptions.md` wurden an die unveraenderte Uebernahme der
 Inventory-Mengen angepasst. `cost_inputs.csv` bleibt unveraendert.
 
-Die Quellen liefern keine ausreichenden Wechselkurs- und Inflationsindizes fuer
-eine belastbare Umrechnung auf `EUR_2025`. Daher bleiben alle neu extrahierten
-Werte in ihrer Originalwaehrung und ihrem Originalpreisjahr. Es wird keine
-stillschweigende Umrechnung vorgenommen.
+Die Quellenwerte werden grundsaetzlich zunaechst in Originalwaehrung und
+Originalpreisjahr dokumentiert. Eine Umrechnung auf `EUR_2025` erfolgt nur mit
+einem expliziten Faktor und einer separaten Indexquelle. Fuer Naphtha wurde
+dies inzwischen mit den HICP-Jahresraten des Euroraums fuer 2023-2025
+umgesetzt; die uebrigen neu extrahierten Werte bleiben vorerst in ihrer
+Originalbasis. Es wird keine stillschweigende Umrechnung vorgenommen.
 
 ## Kurzfazit
 
@@ -34,10 +36,13 @@ stillschweigende Umrechnung vorgenommen.
    Steam Cracking und MTO im Modell denselben Flow
    `chemical factory construction, organics`, obwohl ihre recherchierten
    Anlagenkosten unterschiedlich sind.
-3. Fuer Naphtha liegt ein direkt brauchbarer Rohpreis vor. Strom, Erdgaswaerme
-   und Ethane koennen nur als Szenario- oder Regionsproxys verwendet werden.
-   Der Grossteil der Hilfsstoffe, Kuehlmedien, Wasser- und Abfallbehandlungen
-   bleibt durch die bereitgestellten Quellen ungedeckt.
+3. Fuer Naphtha liegt ein direkt brauchbarer Rohpreis vor. Er wird fuer diese
+   Fallstudie als `PROXY` fuer den gesamten allokierten Steam-Cracker-Feedstock-
+   Slate verwendet. Die spaetere Buendelung der Feedstock-Inputs in einer
+   eigenen Brightway-Activity ist noch nicht implementiert. Strom,
+   Erdgaswaerme und Ethane koennen nur als Szenario- oder Regionsproxys
+   verwendet werden. Der Grossteil der Hilfsstoffe, Kuehlmedien, Wasser- und
+   Abfallbehandlungen bleibt durch die bereitgestellten Quellen ungedeckt.
 4. Diepers stuetzt die aktuellen Optimex-Annahmen fuer DAC (15 Jahre), PEM
    (8 Jahre) und CO2-Hydrierung (15 Jahre). Tiggeloven nennt 25 Jahre fuer
    Steam Cracking, MTO und CO2-Elektrolyse.
@@ -416,11 +421,38 @@ sind nicht enthalten. Der Wert ist daher `PROXY`.
 
 | Flow | Rohwert | Mechanische Umrechnung | Eignung |
 |---|---:|---:|---|
-| Naphtha | 732 EUR_2022/t | 0.732 EUR_2022/kg | `DIRECT` als Rohwert |
+| Naphtha | 732 EUR_2022/t | 0.732 EUR_2022/kg; 0.806635610112 EUR_2025/kg nach HICP-Umrechnung | `DIRECT` als Rohwert, `PROXY` fuer den gebuendelten Feedstock-Slate |
 | Ethane | 330 USD_2023/t | 0.330 USD_2023/kg | `PROXY`, USA |
 | Strom NL 2019 | 41.2 EUR/MWh | 0.0412 EUR/kWh | `PROXY` |
 | Strom Chemelot 2030/2040/2050 | 108.2 / 272.9 / 20.5 EUR/MWh | 0.1082 / 0.2729 / 0.0205 EUR/kWh | `PROXY`, stark szenarioabhaengig |
 | Strom Zeeland 2030/2040/2050 | 79.7 / 253.7 / 13.0 EUR/MWh | 0.0797 / 0.2537 / 0.0130 EUR/kWh | `PROXY`, stark szenarioabhaengig |
+
+#### Entscheidung zum Steam-Cracker-Feedstock
+
+Tiggeloven nennt `732 EUR_2022/t` als durchschnittlichen Naphtha-Preis fuer
+2022 und verweist auf die INSEE-Spotpreisreihe fuer nordwesteuropaeisches
+Naphtha. Der Quellenwert stammt damit nicht aus einer eigenen Preisschaetzung
+von Tiggeloven. Die unveraenderte Fortschreibung in Tabelle 4.2 ist dagegen
+eine Modellannahme.
+
+Fuer `EUR_2025` wird der Quellenwert mit den HICP-Jahresraten des Euroraums fuer
+2023 bis 2025 umgerechnet:
+
+```text
+0.732 * 1.054 * 1.024 * 1.021
+= 0.806635610112 EUR_2025/kg
+```
+
+Der Wert wird vorlaeufig real konstant fuer alle Stutzjahre auf `market for
+naphtha` eingetragen. Inhaltlich ist er ein Naphtha-aequivalenter Preisproxy
+fuer den gesamten allokierten Feedstock-Slate. Im aktuellen Modell wird damit
+jedoch nur die bestehende Naphtha-Exchange-Menge bewertet; die vollstaendige
+Mix-Bewertung ist noch nicht hergestellt. Geplant ist eine eigene
+Background-Activity `steam cracking feedstock mix`, welche die anhand der
+ecoinvent-Dokumentation bestaetigten Feedstock-Inputs buendelt. Nur der direkte
+Mix-Flow soll dann bepreist werden; die internen Exchanges bilden weiterhin die
+oekologische Zusammensetzung ab. Diese Modellierung ist noch nicht umgesetzt,
+und `cost_inputs.csv` enthaelt deshalb noch keine Identitaet fuer den Mix.
 
 ## Empfohlene Modelllebensdauern
 
@@ -493,7 +525,7 @@ inhaltlich verbessern.
 | `market for heat, district or industrial, natural gas` | 0.016908 bis 0.017814 EUR_2022/MJ Brennstoffwaerme | `PROXY`; deckt keinen Kessel-CAPEX/O&M ab. |
 | `market for inert waste, for final disposal` | keine | Negativer Preisvorzeichenkonvention folgen; weitere Recherche. |
 | `market for methanol` | kein geeigneter Marktpreis | Steam-Cracker-Hilfsinput bleibt offen. Nicht den foreground-intern erzeugten Methanolfluss zusaetzlich bepreisen. |
-| `market for naphtha` | 0.732 EUR_2022/kg | Bester direkter Ersatzkandidat; EUR_2025-Umrechnung noch offen. |
+| `market for naphtha` | 0.732 EUR_2022/kg; 0.806635610112 EUR_2025/kg | Temporaere CSV-Identitaet fuer den Naphtha-aequivalenten Feedstock-Proxy; nach Implementierung der Mix-Activity ersetzen. |
 | `market for natural gas liquids` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for nitrogen, liquid` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for propane` | keine passende fossile Preisangabe | `PLACEHOLDER`; weitere Recherche. |
@@ -558,13 +590,15 @@ Die Fallstudie beruecksichtigt in dieser Fassung keinen CO2-Preis. Ein
 Literaturpreis fuer DAC-CO2 ist keine CO2-Steuer und darf nicht als solche
 eingetragen werden.
 
-## Vorgeschlagene spaetere CSV-Aktionen
+## CSV-Stand und offene Aktionen
 
-Noch nicht umgesetzt:
+Aktuell dokumentiert beziehungsweise noch umzusetzen:
 
-1. `market for naphtha`: `0.732 EUR_2022/kg` als Rohwert fuer 2030, 2040 und
-   2050 vormerken; 2020 nur bei expliziter Rueckschreibung. Vor Eintragung mit
-   dokumentiertem Preisindex auf `EUR_2025` umrechnen.
+1. Steam-Cracker-Feedstock: Die temporaere Naphtha-Identitaet ist mit
+   `0.806635610112 EUR_2025/kg` fuer alle Stutzjahre umgesetzt. Nach Einfuehrung
+   der Brightway-Activity `steam cracking feedstock mix` die CSV-Identitaet
+   ersetzen und sicherstellen, dass nur der Mix als direkte Kostenposition
+   erscheint. Noch keine vorweggenommene Mix-Zeile anlegen.
 2. `market for ethane`: `0.330 USD_2023/kg` als US-Proxy vormerken. Vor
    Eintragung Wechselkurs, Inflation und regionale Eignung dokumentieren.
 3. Beide Stromflows: gemeinsam eine Trajektorie waehlen. Tiggelovens
@@ -595,7 +629,10 @@ Noch nicht umgesetzt:
 
 ### Prioritaet B: ersetzt technische Platzhalter
 
-- Butan, Diesel, Natural Gas Liquids, Propan und Raffineriegas.
+- Steam-Cracker-Kohlenwasserstoffinputs anhand der ecoinvent-Dokumentation in
+  Feedstocks und Energieinputs einordnen. Bestaetigte Feedstocks gehen in die
+  geplante Mix-Activity ein und benoetigen dann keine Einzelpreise; verbleibende
+  Energieinputs muessen separat bepreist oder begruendet abgegrenzt werden.
 - Druckluft und Fluessigstickstoff.
 - Natronlauge.
 - Deionisiertes Wasser fuer den CH-Flow.
@@ -617,7 +654,8 @@ Noch nicht umgesetzt:
 
 1. Tiggeloven, Julia (2026): *Breaking and re-forming the chemical industry:
    Optimizing the transition from fossil-based clusters to net zero*.
-   Relevante Fundstellen: Tabelle 4.2, gedruckte Seite 88/PDF 103;
+   Relevante Fundstellen: Naphtha-Preis und INSEE-Verweis, gedruckte Seite
+   58/PDF 73; Tabelle 4.2, gedruckte Seite 88/PDF 103;
    Gleichung 4.4, gedruckte Seite 90/PDF 105; Elektrolyseurkomponenten,
    gedruckte Seite 159/PDF 174; Tabellen C.1 und C.2, gedruckte Seiten
    168-169/PDF 183-184; Abbildung C.1, gedruckte Seite 172/PDF 187.
@@ -634,3 +672,9 @@ Noch nicht umgesetzt:
 5. Kaetelhoen et al. (2016): *Stochastic Technology Choice Model for
    Consequential Life Cycle Assessment*. Relevante Fundstelle: Methodik auf
    PDF-Seite 4; keine direkt verwendbaren Ethylen-Kostenwerte.
+6. INSEE (2022): *International prices of imported raw materials - Naphtha
+   (European Northwest)*. Spotpreisreihe:
+   https://www.insee.fr/fr/statistiques/serie/001641575.
+7. European Central Bank: *Past macroeconomic projections*, HICP-Jahresraten
+   des Euroraums 2023-2025:
+   https://www.ecb.europa.eu/mopo/devel/ecana/html/table.en.html.

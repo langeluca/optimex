@@ -236,6 +236,49 @@ werden. Es wird dafür keine zusätzliche automatische Strict-Prüfung implement
 die vom `LCADataProcessor` ausgegebenen Warnungen müssen vor einem finalen Lauf
 vom Nutzer geprüft und aufgelöst werden.
 
+### Steam-Cracker-Feedstock-Proxy
+
+Entscheidung vom 2026-08-01: Der von Tiggeloven (2026) angegebene
+nordwesteuropäische Naphtha-Preis von `732 EUR_2022/t` wird als Preisproxy für
+den allokierten Feedstock-Slate der fossilen Steam-Cracking-Route verwendet.
+Tiggeloven bezeichnet den Wert als Durchschnittspreis für 2022 und verweist auf
+die INSEE-Spotpreisreihe für nordwesteuropäisches Naphtha. Die konstante
+Fortschreibung ist eine Modellannahme und keine Marktpreisprognose.
+
+Für die einheitliche CSV-Preisbasis wird der Wert mit den HICP-Jahresraten des
+Euroraums für 2023, 2024 und 2025 umgerechnet:
+
+```text
+0.732 EUR_2022/kg * 1.054 * 1.024 * 1.021
+= 0.806635610112 EUR_2025/kg
+```
+
+Dieser Wert steht vorläufig für alle vier Stützjahre auf der bestehenden
+CSV-Identität `market for naphtha`. Der Status ist `PROXY`, weil der Preis nicht
+nur Naphtha, sondern vereinfachend den gesamten allokierten Feedstock-Slate
+bewertet. Die übrigen direkten Kohlenwasserstoffinputs behalten bis zur
+Modelländerung ihre bisherigen CSV-Zeilen; damit sind zwischenzeitliche
+Kostenläufe weiterhin nur vorläufig interpretierbar. Insbesondere bewertet der
+aktuelle Modellstand numerisch nur die vorhandene Naphtha-Exchange-Menge mit
+diesem Preis. Die beabsichtigte Bewertung der gesamten Feedstock-Mix-Menge wird
+erst durch die neue Activity hergestellt und ist noch nicht implementiert.
+
+Geplante, noch nicht implementierte Modelländerung:
+
+1. Die anhand der ecoinvent-Dokumentation bestätigten Feedstock-Inputs werden in
+   einer eigenen Background-Activity `steam cracking feedstock mix` gebündelt.
+2. Der Steam-Cracking-Prozess konsumiert anschließend nur diesen Mix als direkten
+   Betriebsinput. Energie-, Hilfsstoff- und Abfallflüsse bleiben außerhalb der
+   Bündelung.
+3. Die internen Exchanges der Mix-Activity erhalten die bisherige ökologische
+   Zusammensetzung. Nur der direkte Mix-Flow wird in Optimex bepreist, damit die
+   Bestandteile nicht zusätzlich als einzelne Kostenpositionen erscheinen.
+4. Erst nach dieser Brightway-Anpassung wird die temporäre Naphtha-Identität in
+   `cost_inputs.csv` durch die tatsächliche Identität der Mix-Activity ersetzt.
+   Vorher wird keine vorweggenommene CSV-Zeile für diese Activity angelegt.
+5. Nach der Umsetzung werden LCIA-Gleichheit zum bisherigen Inventar und die
+   Ausgabe von `cost_relevant_op_flows` geprüft.
+
 ## Implementierungsstand Meilenstein 1
 
 Stand 2026-07-18:
@@ -292,6 +335,7 @@ Stand 2026-07-18:
 | Alternative premise-Szenarien | OUT_OF_SCOPE | Als mögliche Stellschraube dokumentiert, aber kein Szenariovergleich in der Bachelorarbeit |
 | Sensitivitätsanalyse | OUT_OF_SCOPE | Keine systematische Unsicherheits- oder Parametersensitivität; der Emissionsbudget-Sweep bleibt eine eigene Capability-Demonstration |
 | Alternative Preispfade | DEFERRED | Nur bei späterem Bedarf als gezieltes alternatives Szenario; keine vorab aufgebaute Low-/High-Sensitivität |
+| Steam-Cracker-Feedstock-Bündelung | PENDING | Bestätigte Feedstock-Inputs in einer Background-Activity bündeln und danach die temporäre Naphtha-Identität in der Kosten-CSV ersetzen |
 | Technologiespezifische Ausbaugrenzen | OUT_OF_SCOPE | Bereits bestehendes optimex-Feature und kein Beitrag der ökonomischen Erweiterung; ein theoretisch sofortiger Großausbau wird als Modellvereinfachung akzeptiert |
 | Restwertmodellierung | OUT_OF_SCOPE | Keine Gutschrift für verbleibende technische Lebensdauer nach 2050; mögliche Benachteiligung später Investitionen wird als Endhorizont-Limitation ausgewiesen |
 | Steigender Ethylen-Demand | DEFERRED | Optionale spätere Stellschraube; kann Kapazitätsaufbau beeinflussen, erzeugt aber ohne weitere Randbedingungen nicht automatisch Frühinvestitionen |
