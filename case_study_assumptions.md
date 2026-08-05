@@ -55,6 +55,9 @@ Bachelorarbeit interpretiert werden.
 | Bestehende grüne Kapazitäten | DECIDED | Baseline startet ohne bestehende DAC-, PEM-, grüne Methanol- oder eCO2R-Kapazität; diese Anlagen werden endogen gebaut. Brownfield bezieht sich damit zunächst auf die bestehende fossile Infrastruktur |
 | Ausbaugrenzen | OUT_OF_SCOPE | Keine jährlichen technologiespezifischen Ramp-up- oder Deployment-Limits in der Baseline; der Optimierer darf benötigte Kapazität grundsätzlich in einem Modelljahr installieren |
 | Bauzeit und Betriebsbeginn | DECIDED | Keine Inbetriebnahmeverzögerung: Konstruktion und erster möglicher Betrieb liegen im Installationsjahr; `operation_time_limits` beginnen bei `0` |
+| DAC-Modelllebensdauer | DECIDED | `20 Jahre` nach Deutz und Bardow (2021), DOI `10.1038/s41560-020-00771-9`; `operation_time_limits=(0, 19)` bildet damit genau 20 Betriebsjahre ab |
+| Übrige Modelllebensdauern | DECIDED | Jeweils `25 Jahre` nach Tiggeloven (2026), Tabelle C.1: Steam Cracking, PEM-Anlage als AEC-Proxy, CO2-Hydrierung, MTO, eCO2R-Reaktor als CO2-Elektrolyse-Proxy und eCO2R-Aufbereitung als ASU-Proxy; jeweils `operation_time_limits=(0, 24)` |
+| PEM-Stackersatz | OUT_OF_SCOPE | Tiggeloven nennt `9 Jahre` für AEC-Stacks und `25 Jahre` für die übrige Anlage. Das aktuelle Ein-Prozess-Modell verwendet `25 Jahre` für die PEM-Anlage und bildet keinen separaten Stacktausch ab. |
 | Aktuelle Kostenstufe | DECIDED | Zunächst Kostenoptimierung ohne CO2-Preis |
 | Ökonomische Perspektive | DECIDED | Zentraler Systemplaner mit einem einheitlichen realen Diskontsatz; keine technologiespezifischen Investoren-WACC |
 | Diskontierung | PLACEHOLDER | Einheitlicher realer Diskontsatz von `3 %`, Referenzjahr 2025, entsprechend `basic_example_econ.ipynb`; Wert und Quelle vor finalen Kostenläufen prüfen |
@@ -156,9 +159,11 @@ bewusste Abweichungen im Case-Study-Modell:
 Die DAC-Konstruktionsactivity beschreibt ein System mit `4 kt CO2/a`
 Nennkapazität. Diese Kapazitätsbasis stimmt mit den betrachteten Kostendaten aus
 Sievert et al. überein und ermöglicht später eine direkte Zuordnung des dort
-abgeleiteten TPC. Die im disco2very-Quellinventar genannten `20 Jahre` bleiben
-eine Quellenannahme des Inventars und werden nicht als Optimex-Modelllebensdauer
-oder zusätzlicher Multiplikationsfaktor verwendet.
+abgeleiteten TPC. Die im Deutz-und-Bardow-Quellinventar genannten `20 Jahre`
+werden auch als Optimex-Modelllebensdauer der DAC-Anlage verwendet. Sie steuern
+die zeitliche Verfügbarkeit und Ersetzung der DAC-Kapazitätsvintages, bleiben
+aber weiterhin ohne Einfluss auf den unverändert übernommenen
+Installationskoeffizienten.
 
 Strom, Wärme, Kühlenergie, Wasser, Abwasser, CO2, H2, Methanol und andere
 produktionsabhängige Zwischenprodukte werden grundsätzlich als
@@ -170,14 +175,14 @@ werden, ob sie Betriebs- oder Installationsflüsse sind.
 
 | Parameter | Betroffene Prozesse | Status | Benötigte Dokumentation |
 |---|---|---|---|
-| Betriebslebensdauer | alle Foreground-Anlagen | BLOCKER | Wert, Einheit, Quelle, Unsicherheit |
+| Betriebslebensdauer | alle Foreground-Anlagen | DECIDED | DAC `20 Jahre` nach Deutz und Bardow; alle übrigen Anlagen `25 Jahre` nach Tiggeloven, mit dokumentierten Technologie-Proxys für PEM und eCO2R |
 | Bauzeit / Betriebsbeginn | alle Foreground-Anlagen | DECIDED | Keine Bauzeit im Modell; Same-year-Konvention entsprechend `methanol_and_iron.ipynb` |
 | Installationenskalierung | alle Anlagen mit `operation=False` | SOFTWARE PREREQUISITE | Korrigierten `var_installation`-Pfad mit einem mehrjaehrigen Static-LCA-Aequivalenztest validieren |
 | Komponentenstandzeiten und Ersatz | PEM, DAC, eCO2R | OPTIONAL | Nur fuer eine explizite Komponentenwechsel-Modellierung erforderlich; nicht fuer die Uebernahme normaler Inventory-Mengen |
 | Altersstruktur bestehender Kapazität | Steam Cracking | BLOCKER | Installationsjahre der zwei Kohorten und resultierende Restlebensdauern in Abstimmung mit der recherchierten Anlagenlebensdauer festlegen |
 | Früheste Verfügbarkeit | neue Routen | OPEN | Jahr und Quelle |
 | Infrastruktur der eCO2R-Aufbereitung | Aufbereitungsanlage | OPEN | Umfang und Kapazitätsnormalisierung |
-| Modellierung Steam Cracking | fossile Route | BLOCKER | Direkte Betriebs- und Biosphere-Exchanges sowie der unveraenderte ecoinvent-Infrastrukturkoeffizient sind umgesetzt; Neubau-CAPEX und die Eignung von 50 Jahren als Optimex-Modelllebensdauer bleiben zu pruefen |
+| Modellierung Steam Cracking | fossile Route | BLOCKER | Direkte Betriebs- und Biosphere-Exchanges, der unveraenderte ecoinvent-Infrastrukturkoeffizient und die 25-jaehrige Modelllebensdauer nach Tiggeloven sind umgesetzt; Neubau-CAPEX bleibt zu pruefen |
 | Realer Diskontsatz | Gesamtsystem | PLACEHOLDER | Vorläufig `3 %` mit Referenzjahr 2025; endgültigen Wert und zitierfähige methodische Begründung recherchieren |
 | Preisbasis | alle Kostendaten | DECIDED | `EUR_2025`; ursprünglichen Wert, ursprüngliche Währung und ursprüngliches Preisjahr sowie Inflations- und Währungsumrechnung dokumentieren |
 | Preisentwicklung 2025-2050 | alle kostenrelevanten `op`- und `cap`-Flows | BLOCKER | Für jeden Flow Zeitreihe, dokumentierten Proxy oder begründete Entwicklungshypothese sowie Quellen, Stützjahre und Umgang mit Datenlücken festhalten |
@@ -312,8 +317,9 @@ Stand 2026-07-18:
   werden direkt im Notebook angelegt. Die Case Study benötigt zur Laufzeit keine
   vorbereiteten `disco2very`-Activities.
 - Lebensdauern, Installationskoeffizienten, Brownfield-Jahre und Diskontsatz
-  stehen gemeinsam in einer sichtbaren Annahmentabelle. Alle vorläufigen Werte
-  sind als `PROXY` oder `PLACEHOLDER` markiert und können gezielt ersetzt werden.
+  stehen gemeinsam in einer sichtbaren Annahmentabelle. Werte sind dort als
+  `RESEARCHED`, `PROXY` oder `PLACEHOLDER` gekennzeichnet und können gezielt
+  ersetzt werden.
 - Die beiden Vintages 2005 und 2015 stellen mit jeweils `0.5e9 kg/a` die
   vollständige Steam-Cracker-Kapazität im Startjahr bereit.
 - Der Steam Cracker wird eine Ebene unterhalb der gebündelten ecoinvent-Activity
@@ -324,9 +330,10 @@ Stand 2026-07-18:
   Installation verwendet. Der statische ecoinvent-Koeffizient
   `1.1516356618335166e-10 unit/kg Ethylen` wird unveraendert uebernommen. Eine
   Multiplikation mit der Modell- oder Quellenlebensdauer findet nicht statt.
-- Bei 50 Jahren Modelllebensdauer bleiben die Bestandsvintages von 2005 und 2015
-  bis zum Ende des Zeithorizonts 2050 verfügbar. Sie sind weiterhin nicht
-  must-run und können durch andere Routen ersetzt werden.
+- Bei 25 Jahren Modelllebensdauer ist das Bestandsvintage von 2005 bis
+  einschließlich 2029 und das Vintage von 2015 bis einschließlich 2039
+  verfügbar. Sie sind weiterhin nicht must-run und können früher durch andere
+  Routen ersetzt werden.
 - DAC wird von CO2-Hydrierung und eCO2R über denselben Produktknoten genutzt.
   Die eCO2R-Aufbereitung bleibt aggregiert und enthält `6.091081 kg CO2/kg
   Ethylen` aus der Oxidation der Nebenprodukte, nicht aus Produkt-EoL.

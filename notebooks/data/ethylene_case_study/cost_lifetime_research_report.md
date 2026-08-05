@@ -43,9 +43,12 @@ Originalbasis. Es wird keine stillschweigende Umrechnung vorgenommen.
    Erdgaswaerme und Ethane koennen nur als Szenario- oder Regionsproxys
    verwendet werden. Der Grossteil der Hilfsstoffe, Kuehlmedien, Wasser- und
    Abfallbehandlungen bleibt durch die bereitgestellten Quellen ungedeckt.
-4. Diepers stuetzt die aktuellen Optimex-Annahmen fuer DAC (15 Jahre), PEM
-   (8 Jahre) und CO2-Hydrierung (15 Jahre). Tiggeloven nennt 25 Jahre fuer
-   Steam Cracking, MTO und CO2-Elektrolyse.
+4. Deutz und Bardow stuetzen die gewaehlte DAC-Modelllebensdauer von 20 Jahren.
+   Diepers nennt als alternative Fallstudienannahmen 15 Jahre fuer DAC und
+   CO2-Hydrierung sowie 8 Jahre fuer PEM. Fuer die aktuelle Case Study werden
+   stattdessen Tiggelovens 25 Jahre fuer
+   Steam Cracking, die Elektrolyseanlage, direkte Methanolsynthese aus CO2, MTO,
+   CO2-Elektrolyse und die ASU-basierte Aufbereitung uebernommen.
 5. Die Literaturwerte werden nur als Optimex-Modelllebensdauern verwendet.
    Installationsexchanges werden mit ihren normalen Inventory-Mengen
    unveraendert uebernommen; eine Recherche der Quellenlebensdauern und eine
@@ -70,13 +73,13 @@ muessen ebenfalls geklaert sein.
 
 | Prozess | Aktueller Wert | Status im Notebook |
 |---|---:|---|
-| Steam Cracking | 50 a | Proxy fuer die Optimex-Modelllebensdauer |
-| DAC | 15 a | Proxy |
-| PEM-Elektrolyse | 8 a | Proxy |
-| CO2-Hydrierung | 15 a | Proxy |
-| MTO | 25 a | Proxy |
-| eCO2R-Reaktor | 15 a | Proxy |
-| eCO2R-Aufbereitung | 15 a | Proxy |
+| Steam Cracking | 25 a | Recherchierter Wert aus Tiggeloven, Tabelle C.1 |
+| DAC | 20 a | Recherchierter Wert aus Deutz und Bardow (2021) |
+| PEM-Elektrolyse | 25 a | Tiggeloven-AEC-Anlagenproxy; separater 9-jaehriger Stacktausch nicht modelliert |
+| CO2-Hydrierung | 25 a | Recherchierter Wert fuer direkte Methanolsynthese aus CO2 aus Tiggeloven |
+| MTO | 25 a | Recherchierter Wert aus Tiggeloven |
+| eCO2R-Reaktor | 25 a | Tiggeloven-Proxy fuer CO2-Elektrolyse |
+| eCO2R-Aufbereitung | 25 a | Tiggeloven-ASU-Proxy |
 
 ### Installationskoeffizienten aus den Inventories
 
@@ -232,14 +235,15 @@ Seite 68, PDF-Seite 88.
 
 | Prozess | Modelllebensdauer | Eignung |
 |---|---:|---|
-| DAC | 15 a | `PROXY`, direkt aus dem Optimex-Fallstudienvorbild |
+| DAC | 15 a | `PROXY`, alternative Annahme aus dem Optimex-Fallstudienvorbild; nicht fuer die aktuelle Case Study gewaehlt |
 | PEM-Elektrolyse | 8 a | `PROXY`, direkt aus dem Optimex-Fallstudienvorbild |
 | CO2-Hydrierung | 15 a | `PROXY`, direkt aus dem Optimex-Fallstudienvorbild |
 | Erdgasreformierung | 25 a | keine direkte Uebertragung auf Steam Cracking |
 
-Die Quelle ist besonders geeignet, um konsistente Modelllebensdauern fuer die
-Optimex-Demonstration zu begruenden. Fuer die unveraenderte Uebernahme der
-disco2very-Inventory-Mengen werden keine weiteren Lebensdauerangaben benoetigt.
+Die Werte bleiben als Vergleich mit dem Optimex-Fallstudienvorbild dokumentiert,
+werden fuer die aktuelle Ethylen-Case-Study aber nicht verwendet. Fuer die
+unveraenderte Uebernahme der disco2very-Inventory-Mengen werden keine weiteren
+Lebensdauerangaben benoetigt.
 
 ### 4. Zibunas et al. (2022)
 
@@ -462,13 +466,13 @@ Inventory-Koeffizienten.
 
 | Prozess | Aktuell | Literatur | Vorlaeufige Empfehlung | Begruendung |
 |---|---:|---|---:|---|
-| Steam Cracking | 50 a | 25 a Tiggeloven; 30 a Cattry/Zibunas | 25 a, `PROXY` | technologiespezifischer als generische 30 a; der aktuelle 50-a-Wert bleibt bis zur Anpassung ein Modellproxy |
-| DAC | 15 a | 15 a Diepers | 15 a, `PROXY` | konsistent mit Optimex-Vorbild |
-| PEM-Elektrolyse | 8 a | 8 a Diepers; Stack 9 a und restliche Anlage 25 a bei Tiggeloven-AEC | 8 a fuer aktuellen Prozess, `PROXY` | passt zum Optimex-Vorbild; getrennte Stack-/BOP-Ersetzung bleibt eine optionale Modellerweiterung |
-| CO2-Hydrierung | 15 a | 15 a Diepers; 25 a Tiggeloven | 15 a, `PROXY` | konsistent mit Optimex-Vorbild; Literaturspanne 15-25 a dokumentieren |
-| MTO | 25 a | 25 a Tiggeloven; 30 a generische Chemieanlage Zibunas | 25 a, `PROXY` | technologiespezifische Quelle |
-| eCO2R-Reaktor | 15 a | 25 a Tiggeloven CO2-Elektrolyse | 25 a, `PROXY` | beste verfuegbare technologiespezifische Naeherung |
-| eCO2R-Aufbereitung | 15 a | 25 a fuer ASU und Chemieanlagen bei Tiggeloven; 30 a generisch bei Zibunas | 25 a, `PROXY` | nur Anlagenproxy, keine direkte Quelle fuer die konkrete Trennkette |
+| Steam Cracking | 25 a | 25 a Tiggeloven; 30 a Cattry/Zibunas | 25 a, `RESEARCHED` | technologiespezifischer Wert aus Tiggelovens Tabelle C.1 |
+| DAC | 20 a | 20 a Deutz und Bardow; 15 a Diepers | 20 a, `RESEARCHED` | Deutz und Bardow liefern das verwendete DAC-LCI und nehmen fuer dasselbe System 20 Jahre an |
+| PEM-Elektrolyse | 25 a | 8 a Diepers; Stack 9 a und restliche Anlage 25 a bei Tiggeloven-AEC | 25 a, `PROXY` | AEC-Anlagenlebensdauer wird auf PEM uebertragen; separater Stacktausch bleibt außerhalb des Ein-Prozess-Modells |
+| CO2-Hydrierung | 25 a | 15 a Diepers; 25 a Tiggeloven | 25 a, `RESEARCHED` | direkter Wert fuer Methanolsynthese aus CO2 in Tiggelovens Tabelle C.1 |
+| MTO | 25 a | 25 a Tiggeloven; 30 a generische Chemieanlage Zibunas | 25 a, `RESEARCHED` | technologiespezifischer Wert aus Tiggelovens Tabelle C.1 |
+| eCO2R-Reaktor | 25 a | 25 a Tiggeloven CO2-Elektrolyse | 25 a, `PROXY` | beste verfuegbare technologiespezifische Naeherung |
+| eCO2R-Aufbereitung | 25 a | 25 a fuer ASU und Chemieanlagen bei Tiggeloven; 30 a generisch bei Zibunas | 25 a, `PROXY` | ASU ist nur ein Anlagenproxy fuer die konkrete Trennkette |
 
 Alle Empfehlungen bleiben Annahmen fuer eine Framework-Demonstration.
 
@@ -666,15 +670,20 @@ Aktuell dokumentiert beziehungsweise noch umzusetzen:
    7-8 und 11-13.
 3. Diepers: `Dissertation_Diepers_Einreichung.pdf`. Relevante Fundstellen:
    Fallstudiensystem und Lebensdauern, gedruckte Seite 68/PDF 88.
-4. Zibunas et al. (2022): *Cost-optimal pathways towards net-zero chemicals
+4. Deutz, S.; Bardow, A. (2021): *Life-cycle assessment of an industrial
+   direct air capture process based on temperature-vacuum swing adsorption*.
+   Nature Energy 6, 203-213. DOI:
+   https://doi.org/10.1038/s41560-020-00771-9. Verwendete Fundstelle:
+   20-jaehrige Lebensdauer des zugrunde liegenden DAC-Inventars.
+5. Zibunas et al. (2022): *Cost-optimal pathways towards net-zero chemicals
    and plastics based on a circular carbon economy*. Relevante Fundstellen:
    PDF-Seiten 4-5 sowie Sensitivitaetsangaben im Ergebnisteil.
-5. Kaetelhoen et al. (2016): *Stochastic Technology Choice Model for
+6. Kaetelhoen et al. (2016): *Stochastic Technology Choice Model for
    Consequential Life Cycle Assessment*. Relevante Fundstelle: Methodik auf
    PDF-Seite 4; keine direkt verwendbaren Ethylen-Kostenwerte.
-6. INSEE (2022): *International prices of imported raw materials - Naphtha
+7. INSEE (2022): *International prices of imported raw materials - Naphtha
    (European Northwest)*. Spotpreisreihe:
    https://www.insee.fr/fr/statistiques/serie/001641575.
-7. European Central Bank: *Past macroeconomic projections*, HICP-Jahresraten
+8. European Central Bank: *Past macroeconomic projections*, HICP-Jahresraten
    des Euroraums 2023-2025:
    https://www.ecb.europa.eu/mopo/devel/ecana/html/table.en.html.

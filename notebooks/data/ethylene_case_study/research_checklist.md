@@ -287,18 +287,15 @@ organics`, obwohl die Literatur unterschiedliche Anlagenkosten liefert.
 Die folgenden Lebensdauern steuern Verfuegbarkeit, Stilllegung und
 Ersatzinvestitionen. Sie dienen nicht zur Skalierung der Inventory-Mengen.
 
-- [ ] DECISION Steam Cracking von aktuell 50 Jahren auf den
-  technologiespezifischen 25-Jahre-Proxy aus Tiggeloven umstellen oder einen
-  anderen Wert begruenden.
-- [x] REPO DAC: 15 Jahre als dokumentierter Proxy vorhanden.
-- [x] REPO PEM: 8 Jahre als dokumentierter Prozessproxy vorhanden.
-- [x] REPO CO2-Hydrierung: 15 Jahre als dokumentierter Proxy vorhanden;
-  Literaturspanne 15 bis 25 Jahre festhalten.
-- [x] REPO MTO: 25 Jahre als technologiespezifischer Proxy vorhanden.
-- [ ] DECISION eCO2R-Reaktor von aktuell 15 auf den besten verfuegbaren
-  25-Jahre-Proxy umstellen oder Abweichung begruenden.
-- [ ] DECISION eCO2R-Aufbereitung von aktuell 15 auf einen 25-Jahre-Anlagenproxy
-  umstellen oder Abweichung begruenden.
+- [x] REPO Steam Cracking: 25 Jahre nach Tiggeloven, Tabelle C.1.
+- [x] REPO DAC: 20 Jahre nach Deutz und Bardow (2021).
+- [x] REPO PEM: 25 Jahre als AEC-Anlagenproxy nach Tiggeloven; der dort genannte
+  separate Stacktausch nach 9 Jahren ist im Ein-Prozess-Modell ausgeschlossen.
+- [x] REPO CO2-Hydrierung: 25 Jahre nach Tiggelovens direkter Methanolsynthese
+  aus CO2.
+- [x] REPO MTO: 25 Jahre nach Tiggeloven.
+- [x] REPO eCO2R-Reaktor: 25 Jahre als CO2-Elektrolyse-Proxy nach Tiggeloven.
+- [x] REPO eCO2R-Aufbereitung: 25 Jahre als ASU-Anlagenproxy nach Tiggeloven.
 - [ ] DECISION Brownfield-Vintages 2005 und 2015 nach Festlegung der
   Steam-Cracker-Lebensdauer pruefen; Restlebensdauer ab 2025 dokumentieren.
 - [ ] RESEARCH Realen Diskontsatz von aktuell 3 Prozent zitierfaehig
@@ -330,6 +327,6 @@ In sinnvoller Arbeitsreihenfolge bleiben damit:
 4. Route-spezifische CAPEX-Abbildung fuer Steam Cracking, CO2-Hydrierung, MTO
    und eCO2R.
 5. DAC- und PEM-CAPEX absichern.
-6. Modelllebensdauern fuer Steam Cracking und eCO2R final festlegen.
+6. Brownfield-Installationsjahre der Steam-Cracker final begruenden.
 7. Wasser, Abwasser, Amine-on-Alumina-Sorbens und Abfallbehandlungen screenen.
 8. Cut-off-Entscheidungen dokumentieren und alle PLACEHOLDER ersetzen.
