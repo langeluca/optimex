@@ -1101,8 +1101,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         &lt;option value=&quot;pem&quot;&gt;PEM electrolysis&lt;/option&gt;
         &lt;option value=&quot;hydrogenation&quot;&gt;CO2 hydrogenation to methanol&lt;/option&gt;
         &lt;option value=&quot;mto&quot;&gt;Methanol-to-olefins&lt;/option&gt;
-        &lt;option value=&quot;eco2r&quot;&gt;Electrochemical CO2 reduction&lt;/option&gt;
-        &lt;option value=&quot;separation&quot;&gt;eCO2R product separation&lt;/option&gt;
+        &lt;option value=&quot;eco2r&quot;&gt;eCO2R ethylene production&lt;/option&gt;
       &lt;/select&gt;
     &lt;/label&gt;
     &lt;div class=&quot;viz-row&quot; aria-label=&quot;Visible exchange layers&quot;&gt;
@@ -1175,42 +1174,37 @@ html&gt;body{padding:0}&lt;/style&gt;
 
       const processes = {
         steam: { label: 'Steam cracking', route: 'steam', x: 930, y: 90 },
-        dac: { label: 'Direct air capture', route: 'h2mto', x: 420, y: 220 },
-        pem: { label: 'PEM electrolysis', route: 'h2mto', x: 420, y: 420 },
+        dac: { label: 'Direct air capture', route: 'h2mto', x: 420, y: 420 },
+        pem: { label: 'PEM electrolysis', route: 'h2mto', x: 420, y: 220 },
         hydrogenation: { label: 'CO2 hydrogenation', route: 'h2mto', x: 800, y: 285 },
         mto: { label: 'Methanol-to-olefins', route: 'h2mto', x: 1220, y: 285 },
-        eco2r: { label: 'Electrochemical CO2 reduction', route: 'eco2r', x: 800, y: 500 },
-        separation: { label: 'eCO2R separation', route: 'eco2r', x: 1220, y: 500 },
+        eco2r: { label: 'eCO2R ethylene production', route: 'eco2r', x: 1030, y: 500 },
       };
 
       const products = {
         ethylene: { label: 'Ethylene', x: 1460, y: 285 },
-        capturedCO2: { label: 'Captured CO2', x: 610, y: 220 },
-        hydrogen: { label: 'Hydrogen', x: 610, y: 420 },
+        capturedCO2: { label: 'Captured CO2', x: 610, y: 420 },
+        hydrogen: { label: 'Hydrogen', x: 610, y: 220 },
         methanol: { label: 'Methanol', x: 1020, y: 285 },
-        rawEthylene: { label: 'Raw eCO2R ethylene', x: 1020, y: 500 },
       };
 
       const foregroundEdges = [
         ['steam', 'ethylene', '1 kg'], ['dac', 'capturedCO2', '1 kg'], ['pem', 'hydrogen', '1 kg'],
         ['capturedCO2', 'hydrogenation', '1.4358 kg'], ['hydrogen', 'hydrogenation', '0.1973 kg'],
         ['hydrogenation', 'methanol', '1 kg'], ['methanol', 'mto', '2.3921 kg'], ['mto', 'ethylene', '1 kg'],
-        ['capturedCO2', 'eco2r', '9.229 kg'], ['eco2r', 'rawEthylene', '1 kg'],
-        ['rawEthylene', 'separation', '1 kg'], ['separation', 'ethylene', '1 kg'],
+        ['capturedCO2', 'eco2r', '9.229 kg'], ['eco2r', 'ethylene', '1 kg'],
       ];
 
       const flows = {
         steam: [
-          ['Butane', 'market for butane', '0.197115 kg', 'operation'], ['Compressed air, 700 kPa', 'market for compressed air, 700 kPa gauge', '0.014664 m3', 'operation'],
-          ['Diesel', 'market for diesel', '0.048670 kg', 'operation'], ['Ethane', 'market for ethane', '0.054754 kg', 'operation'],
+          ['Feedstock mix: butane 16.2%, ethane 4.5%, naphtha 64.0%, NGL 2.2%, propane 7.6%, refinery gas 1.5%, atmospheric gas oil via diesel 4.0%', 'steam cracking feedstock mix', '1.216760 kg', 'operation'],
+          ['Compressed air, 700 kPa', 'market for compressed air, 700 kPa gauge', '0.014664 m3', 'operation'],
           ['Hazardous-waste incineration', 'market for hazardous waste, for incineration', '-0.003802 kg', 'operation'], ['Hazardous-waste underground deposit', 'market for hazardous waste, for underground deposit', '-0.001058 kg', 'operation'],
           ['Inert-waste disposal', 'market for inert waste, for final disposal', '-0.000376 kg', 'operation'], ['Background methanol', 'market for methanol', '0.000233 kg', 'operation'],
-          ['Naphtha', 'market for naphtha', '0.778726 kg', 'operation'], ['Natural gas liquids', 'market for natural gas liquids', '0.026769 kg', 'operation'],
-          ['Liquid nitrogen', 'market for nitrogen, liquid', '0.011272 kg', 'operation'], ['Propane', 'market for propane', '0.092474 kg', 'operation'],
-          ['Refinery gas', 'market for refinery gas', '0.018251 kg', 'operation'], ['Sodium hydroxide, 50%', 'market for sodium hydroxide, without water, in 50% solution state', '0.004937 kg', 'operation'],
+          ['Liquid nitrogen', 'market for nitrogen, liquid', '0.011272 kg', 'operation'], ['Sodium hydroxide, 50%', 'market for sodium hydroxide, without water, in 50% solution state', '0.004937 kg', 'operation'],
           ['Wastewater, average', 'market for wastewater, average', '-0.000680 m3', 'operation'], ['Deionised water, CH', 'market for water, deionised', '2.186876 kg', 'operation'],
           ['Electricity, medium voltage, DEU', 'market group for electricity, medium voltage', '0.120674 kWh', 'operation'],
-          ['Organic chemical factory', 'chemical factory construction, organics', '1.151636e-10 unit/kg', 'installation'],
+          ['Steam cracker installation', 'steam cracker installation', '1.151636e-10 unit/kg', 'installation'],
           ['44 direct biosphere exchanges', 'Loaded from steam_cracking_inventory.biosphere()', '44 flows per kg ethylene', 'biosphere'],
         ],
         dac: [
@@ -1230,19 +1224,16 @@ html&gt;body{padding:0}&lt;/style&gt;
         mto: [
           ['Electricity, medium voltage, DE', 'market for electricity, medium voltage', '0.1428 kWh', 'operation'], ['Cooling energy', 'market for cooling energy', '0.1722 MJ', 'operation'],
           ['Cooling at -25 C', 'cooling energy production, at -25 C, propylene compression refrigeration system 1 MW', '1.352 MJ', 'operation'], ['Cooling at -100 C', 'market for cooling energy, at -100 C', '0.2153 MJ', 'operation'],
-          ['Wastewater, unpolluted', 'market for wastewater, unpolluted', '-0.001278 m3', 'operation'], ['Organic chemical factory', 'chemical factory construction, organics', '3.584e-12 unit/kg', 'installation'],
+          ['Wastewater, unpolluted', 'market for wastewater, unpolluted', '-0.001278 m3', 'operation'], ['Methanol-to-olefins installation', 'methanol-to-olefins installation', '3.584e-12 unit/kg', 'installation'],
         ],
         eco2r: [
-          ['Electricity, medium voltage, DE', 'market for electricity, medium voltage', '74.878 kWh', 'operation'], ['Deionised water, Europe', 'market for water, deionised', '4.4249 kg', 'operation'],
-          ['Chemical factory construction', 'chemical factory construction', '7.32e-7 kg/kg', 'installation'], ['Copper cathode', 'market for copper, cathode', '7.4e-11 kg/kg', 'installation'],
-        ],
-        separation: [
-          ['Electricity, medium voltage, DE', 'market for electricity, medium voltage', '0.6663 kWh', 'operation'], ['Cooling energy', 'market for cooling energy', '5.0883 MJ', 'operation'],
-          ['Industrial heat, natural gas', 'market for heat, district or industrial, natural gas', '31.5666 MJ', 'operation'], ['Cooling at -15 C', 'market for cooling energy, at -15 C', '0.1791 MJ', 'operation'],
-          ['Cooling at -25 C', 'cooling energy production, at -25 C, propylene compression refrigeration system 1 MW', '0.0578 MJ', 'operation'], ['Cooling at -45 C', 'market for cooling energy, at -45 C', '0.1156 MJ', 'operation'],
-          ['Cooling at -55 C', 'market for cooling energy, at -55 C', '0.0578 MJ', 'operation'], ['Cooling at -100 C', 'market for cooling energy, at -100 C', '0.6072 MJ', 'operation'],
-          ['Wastewater, unpolluted', 'market for wastewater, unpolluted', '-0.000764 m3', 'operation'], ['Fossil CO2 emission', 'Carbon dioxide, fossil (air)', '6.091081 kg', 'biosphere'],
-          ['Low-alloyed steel', 'market for steel, low-alloyed', '3.017679e-6 kg/kg', 'installation'],
+          ['Electricity, medium voltage, DE', 'market for electricity, medium voltage', '74.878 + 0.6663 = 75.5443 kWh', 'operation'], ['Deionised water, Europe', 'market for water, deionised', '4.4249 kg', 'operation'],
+          ['Cooling energy', 'market for cooling energy', '5.0883 MJ', 'operation'], ['Industrial heat, natural gas', 'market for heat, district or industrial, natural gas', '31.5666 MJ', 'operation'],
+          ['Cooling at -15 C', 'market for cooling energy, at -15 C', '0.1791 MJ', 'operation'], ['Cooling at -25 C', 'cooling energy production, at -25 C, propylene compression refrigeration system 1 MW', '0.0578 MJ', 'operation'],
+          ['Cooling at -45 C', 'market for cooling energy, at -45 C', '0.1156 MJ', 'operation'], ['Cooling at -55 C', 'market for cooling energy, at -55 C', '0.0578 MJ', 'operation'],
+          ['Cooling at -100 C', 'market for cooling energy, at -100 C', '0.6072 MJ', 'operation'], ['Wastewater, unpolluted', 'market for wastewater, unpolluted', '-0.000764 m3', 'operation'],
+          ['Fossil CO2 emission', 'Carbon dioxide, fossil (air)', '6.091081 kg', 'biosphere'],
+          ['eCO2R system installation', 'eCO2R system installation', '7.32e-7 kg/kg', 'installation'],
         ],
       };
 
@@ -1647,30 +1638,22 @@ html&gt;body{padding:0}&lt;/style&gt;
         <option value="process:pem">PEM electrolysis</option>
         <option value="process:hydrogenation">CO₂ hydrogenation</option>
         <option value="process:mto">Methanol-to-olefins</option>
-        <option value="process:eco2r">Electrochemical CO₂ reduction</option>
-        <option value="process:separation">eCO₂R separation</option>
+        <option value="process:eco2r">eCO₂R ethylene production</option>
       </optgroup>
       <optgroup label="Produkte">
         <option value="product:ethylene">Ethylene</option>
         <option value="product:captured-co2">Captured CO₂</option>
         <option value="product:hydrogen">Hydrogen</option>
         <option value="product:methanol">Methanol</option>
-        <option value="product:raw-ethylene">Raw eCO₂R ethylene</option>
       </optgroup>
       <optgroup label="Background – Steam cracking">
-        <option value="background:steam:butane">Butane</option>
+        <option value="background:steam:feedstock-mix">Steam-cracking feedstock mix</option>
         <option value="background:steam:compressed-air">Compressed air, 700 kPa</option>
-        <option value="background:steam:diesel">Diesel</option>
-        <option value="background:steam:ethane">Ethane</option>
         <option value="background:steam:hazardous-waste-incineration">Hazardous-waste incineration</option>
         <option value="background:steam:hazardous-waste-underground">Hazardous-waste underground deposit</option>
         <option value="background:steam:inert-waste-disposal">Inert-waste disposal</option>
         <option value="background:steam:methanol">Background methanol</option>
-        <option value="background:steam:naphtha">Naphtha</option>
-        <option value="background:steam:natural-gas-liquids">Natural gas liquids</option>
         <option value="background:steam:liquid-nitrogen">Liquid nitrogen</option>
-        <option value="background:steam:propane">Propane</option>
-        <option value="background:steam:refinery-gas">Refinery gas</option>
         <option value="background:steam:sodium-hydroxide">Sodium hydroxide, 50%</option>
         <option value="background:steam:wastewater">Wastewater, average</option>
         <option value="background:steam:deionised-water">Deionised water, CH</option>
@@ -1698,23 +1681,20 @@ html&gt;body{padding:0}&lt;/style&gt;
         <option value="background:mto:cooling-minus-100">Cooling at −100 °C</option>
         <option value="background:mto:wastewater">Wastewater, unpolluted</option>
       </optgroup>
-      <optgroup label="Background – Electrochemical CO₂ reduction">
+      <optgroup label="Background – aggregated eCO₂R">
         <option value="background:eco2r:electricity">Electricity, medium voltage, DE</option>
         <option value="background:eco2r:deionised-water">Deionised water, Europe</option>
-      </optgroup>
-      <optgroup label="Background – eCO₂R separation">
-        <option value="background:separation:electricity">Electricity, medium voltage, DE</option>
-        <option value="background:separation:cooling-energy">Cooling energy</option>
-        <option value="background:separation:industrial-heat">Industrial heat, natural gas</option>
-        <option value="background:separation:cooling-minus-15">Cooling at −15 °C</option>
-        <option value="background:separation:cooling-minus-25">Cooling at −25 °C</option>
-        <option value="background:separation:cooling-minus-45">Cooling at −45 °C</option>
-        <option value="background:separation:cooling-minus-55">Cooling at −55 °C</option>
-        <option value="background:separation:cooling-minus-100">Cooling at −100 °C</option>
-        <option value="background:separation:wastewater">Wastewater, unpolluted</option>
+        <option value="background:eco2r:cooling-energy">Cooling energy</option>
+        <option value="background:eco2r:industrial-heat">Industrial heat, natural gas</option>
+        <option value="background:eco2r:cooling-minus-15">Cooling at −15 °C</option>
+        <option value="background:eco2r:cooling-minus-25">Cooling at −25 °C</option>
+        <option value="background:eco2r:cooling-minus-45">Cooling at −45 °C</option>
+        <option value="background:eco2r:cooling-minus-55">Cooling at −55 °C</option>
+        <option value="background:eco2r:cooling-minus-100">Cooling at −100 °C</option>
+        <option value="background:eco2r:wastewater">Wastewater, unpolluted</option>
       </optgroup>
       <optgroup label="Installation – Steam cracking">
-        <option value="installation:steam:organic-chemical-factory">Organic chemical factory</option>
+        <option value="installation:steam:steam-cracker-installation">Steam cracker installation</option>
       </optgroup>
       <optgroup label="Installation – Direct air capture">
         <option value="installation:dac:dac-system">Solid-sorbent DAC system, 4 ktCO2/a</option>
@@ -1727,14 +1707,10 @@ html&gt;body{padding:0}&lt;/style&gt;
         <option value="installation:hydrogenation:methanol-facility">Methanol production facility</option>
       </optgroup>
       <optgroup label="Installation – Methanol-to-olefins">
-        <option value="installation:mto:organic-chemical-factory">Organic chemical factory</option>
+        <option value="installation:mto:mto-installation">Methanol-to-olefins installation</option>
       </optgroup>
-      <optgroup label="Installation – Electrochemical CO₂ reduction">
-        <option value="installation:eco2r:chemical-factory">Chemical factory construction</option>
-        <option value="installation:eco2r:copper-cathode">Copper cathode</option>
-      </optgroup>
-      <optgroup label="Installation – eCO₂R separation">
-        <option value="installation:separation:low-alloyed-steel">Low-alloyed steel</option>
+      <optgroup label="Installation – aggregated eCO₂R">
+        <option value="installation:eco2r:system-installation">eCO₂R system installation</option>
       </optgroup>
       <optgroup label="Routen">
         <option value="route:steam">Steam-cracking route</option>
@@ -1761,7 +1737,7 @@ html&gt;body{padding:0}&lt;/style&gt;
 (() => {
   const storageKey = 'optimex-ethylene-system-map-comments-v1';
   const electricityPriceComment = 'Strompreisproxy: 89,32 EUR/MWh (= 0,08932 EUR/kWh), durchschnittlicher deutscher Day-Ahead-Großhandelspreis 2025. Quelle: SMARD, "Der Strommarkt im Jahr 2025" (https://www.smard.de/page/home/topic-article/216804/218954/hoechste-pv-einspeisung-in-jedem-quartal). Der Großhandelspreis wird vorläufig ohne zusätzliche industrielle Endkundenkomponenten verwendet. Eine Projektion der Strompreise bis 2050 wird später gesondert untersucht.';
-  const naphthaFeedstockPriceComment = 'Feedstock-Preisproxy: Tiggeloven (2026) verwendet einen durchschnittlichen nordwesteuropäischen Naphtha-Preis von 732 EUR_2022/t (= 0,732 EUR_2022/kg), basierend auf der INSEE-Spotpreisreihe für 2022. Mit den HICP-Raten des Euroraums für 2023 bis 2025 (5,4 %, 2,4 %, 2,1 %) ergibt sich 0,732 × 1,054 × 1,024 × 1,021 = 0,806635610112 EUR_2025/kg. Der Wert wird vorläufig real konstant für 2020, 2030, 2040 und 2050 auf dem bestehenden Naphtha-Flow geführt und ist als künftiger PROXY für den gesamten allokierten Steam-Cracker-Feedstock-Slate vorgesehen. Im aktuellen Modell bewertet er numerisch noch ausschließlich die vorhandene Naphtha-Exchange-Menge. Geplante Modellierungsänderung: Die bestätigten Feedstock-Inputs des ecoinvent-Steam-Cracking-Inventars werden in einer eigenen Background-Activity "steam cracking feedstock mix" gebündelt. Der Steam-Cracker soll anschließend nur diese Mix-Activity beziehen und nur dieser direkte Mix-Flow soll bepreist werden; seine internen Exchanges erhalten die ökologische Zusammensetzung. Diese Bündelung ist noch nicht implementiert und in cost_inputs.csv existiert deshalb noch keine Zeile für die künftige Mix-Activity. Quellen: Tiggeloven (2026), gedruckte S. 58/PDF-S. 73 und Tabelle 4.2, gedruckte S. 88/PDF-S. 103; INSEE https://www.insee.fr/fr/statistiques/serie/001641575; HICP https://www.ecb.europa.eu/mopo/devel/ecana/html/table.en.html.';
+  const naphthaFeedstockPriceComment = 'Feedstock-Preisproxy: Tiggeloven (2026) verwendet einen durchschnittlichen nordwesteuropäischen Naphtha-Preis von 732 EUR_2022/t (= 0,732 EUR_2022/kg), basierend auf der INSEE-Spotpreisreihe für 2022. Mit den HICP-Raten des Euroraums für 2023 bis 2025 (5,4 %, 2,4 %, 2,1 %) ergibt sich 0,732 × 1,054 × 1,024 × 1,021 = 0,806635610112 EUR_2025/kg. Der Wert wird real konstant für 2020, 2030, 2040 und 2050 auf der Case-Study-Activity "steam cracking feedstock mix" geführt. Sie bündelt Butan 16,2 %, Ethan 4,5 %, Naphtha 64,0 %, Natural Gas Liquids 2,2 %, Propan 7,6 %, Refinery Gas 1,5 % und Atmospheric Gas Oil 4,0 %, das wie in ecoinvent durch Diesel approximiert wird. Der Steam Cracker bezieht 1,21675954200327 kg Mix je kg Ethylen. Nur dieser direkte Mix-Flow wird bepreist; die sieben internen premise-Inputs werden nicht zusätzlich als Kostenpositionen geführt. Quellen: Tiggeloven (2026), gedruckte S. 58/PDF-S. 73 und Tabelle 4.2, gedruckte S. 88/PDF-S. 103; INSEE https://www.insee.fr/fr/statistiques/serie/001641575; HICP https://www.ecb.europa.eu/mopo/devel/ecana/html/table.en.html.';
   const compressedAirPriceComment = 'Kostenproxy aus ecoinvent-Strombedarf: 0,157176 kWh Strom pro m³ Druckluft bei 700 kPa. Mit 0,08932 EUR/kWh ergeben sich 0,01403896 EUR/m³. Weitere variable Inputs werden vorläufig nicht bepreist; die Strompreisprojektion bis 2050 bleibt offen.';
   const heatPumpPriceComment = 'Kostenproxy aus ecoinvent-Strombedarf: 0,0617 kWh Strom pro MJ Wärme. Mit 0,08932 EUR/kWh ergeben sich 0,005511044 EUR/MJ Wärme. Weitere variable Inputs werden vorläufig nicht bepreist; die Strompreisprojektion bis 2050 bleibt offen.';
   const legacyAbsorptionCoolingPriceComments = [
@@ -1775,15 +1751,18 @@ html&gt;body{padding:0}&lt;/style&gt;
   const coolingMinus45PriceComment = 'Kostenproxy aus ecoinvent-Strombedarf: 0,439 kWh Strom pro MJ Kühlenergie bei -45 °C. Mit 0,08932 EUR/kWh ergeben sich 0,03921148 EUR/MJ. Weitere variable Inputs werden vorläufig nicht bepreist; die Strompreisprojektion bis 2050 bleibt offen.';
   const coolingMinus55PriceComment = 'Kostenproxy aus ecoinvent-Strombedarf: 0,526 kWh Strom pro MJ Kühlenergie bei -55 °C. Mit 0,08932 EUR/kWh ergeben sich 0,04698232 EUR/MJ. Weitere variable Inputs werden vorläufig nicht bepreist; die Strompreisprojektion bis 2050 bleibt offen.';
   const coolingMinus100PriceComment = 'Kostenproxy aus ecoinvent-Strombedarf: 0,6975 kWh Strom pro MJ Kühlenergie bei -100 °C. Mit 0,08932 EUR/kWh ergeben sich 0,0623007 EUR/MJ. Weitere variable Inputs werden vorläufig nicht bepreist; die Strompreisprojektion bis 2050 bleibt offen.';
-  const eco2rAggregateCapexComment = 'Gemeinsamer CAPEX-Proxy für Electrochemical CO2 reduction und eCO2R separation: Tiggeloven (2026), Tabelle C.1, setzt für "CO2 electrolysis" einen nicht annualisierten Total Plant Cost von TPC = 9,461 Mio. EUR_2022/(t CO2/h) × CO2-Kapazität an; der größenunabhängige Anteil ist 0, die Instandhaltung beträgt 2 % des TPC pro Jahr und die angenommene Lebensdauer 25 Jahre. Der Parameter basiert auf dem optimistischen Tandemsystem von Sisler et al. (2021) und umfasst neben den Elektrolysezellen auch Balance of Plant, Installation und zugehörige Gasabtrennung. Er liegt deshalb fachlich näher an der Kombination beider derzeit getrennten Foreground-Prozesse als an einem reinen Reaktor-CAPEX. Nach Tiggelovens Output-Verhältnis von 0,602 t Ethylen je t CO2 entspricht der Proxy bei 8.760 h/a rund 1,794 EUR_2022 je kg Ethylen/a Nennkapazität. Status: PROXY. Bis zur Modellanpassung darf der Gesamtwert nur einmal angesetzt werden; eine zusätzliche separate Bepreisung der eCO2R-Aufbereitung würde Kosten doppelt zählen. Geplante Modellierungsänderung: Electrochemical CO2 reduction und eCO2R separation werden zu einem gemeinsamen Foreground-Prozess aggregiert und der CAPEX-Proxy anschließend dieser kombinierten Installation zugeordnet.';
+  const eco2rAggregateCapexComment = 'Gemeinsamer CAPEX-Proxy für den aggregierten Prozess aus Electrochemical CO2 reduction und eCO2R separation: Tiggeloven (2026), Tabelle C.1, setzt für "CO2 electrolysis" einen nicht annualisierten Total Plant Cost von TPC = 9,461 Mio. EUR_2022/(t CO2/h) × CO2-Kapazität an; der größenunabhängige Anteil ist 0, die Instandhaltung beträgt 2 % des TPC pro Jahr und die angenommene Lebensdauer 25 Jahre. Der Parameter basiert auf dem optimistischen Tandemsystem von Sisler et al. (2021) und umfasst neben den Elektrolysezellen auch Balance of Plant, Installation und zugehörige Gasabtrennung. Er liegt deshalb fachlich näher am aggregierten Foreground-Prozess als an einem reinen Reaktor-CAPEX. Nach Tiggelovens Output-Verhältnis von 0,602 t Ethylen je t CO2 entspricht der Proxy bei 8.760 h/a rund 1,794 EUR_2022 je kg Ethylen/a Nennkapazität. Status: PROXY. Die Modellaggregation und der eindeutige Flow "eCO2R system installation" sind umgesetzt; der CSV-Preis bleibt bis zur Umrechnung des TPC auf die Fabrikmassen-Wrapper-Einheit ein technischer PLACEHOLDER.';
+  const routeInstallationPlaceholderComment = 'Der route-spezifische Installations-Flow trennt die Kostenidentität von seinem generischen internen Umweltinventar. In cost_inputs.csv steht vorläufig 1 EUR_2025 je Wrapper-Einheit mit Status PLACEHOLDER. Vor einem interpretierbaren Kostenlauf muss der recherchierte TPC nachvollziehbar auf diese Wrapper-Einheit umgerechnet werden.';
   const dacAdsorbentComment = 'Sorbens-Kostenproxy: Der DAC-Prozess verwendet die disco2very-Activity "adsorbent, amine on alumina" mit 55,7735849 % Polyethyleneimin und 44,2264151 % Aluminiumoxid. Das Inventar basiert auf Deutz und Bardow (2021) sowie Leonzio et al. (2022). Sievert et al. (2024), SI Tabelle S21, verwenden fuer das aminhaltige Sorbens Lewatit VP OC 1065 einen Preis von 8.821 USD_2022/t = 8,821 USD_2022/kg. Da dies nicht exakt PEI auf Aluminiumoxid ist, wird der Wert als PROXY eingestuft. Mit dem disco2very-Verbrauch von 0,0075 kg Sorbens/kg CO2 ergeben sich 66,1575 USD_2022/t CO2 beziehungsweise 264.630 USD_2022/a bei 4 kt CO2/a. Das liegt innerhalb der von Sievert ausgewiesenen Ersatzkosten von 42,27 bis 126,8 USD_2022/t CO2 fuer eine Sorbenslebensdauer von ein bis drei Jahren. Der laufende disco2very-Flow wird deshalb als Sorbensersatz interpretiert; die initiale Sorbensbefuellung bleibt Bestandteil des Anlagen-TPC. Vor Eintragung in cost_inputs.csv wird der Preis noch nachvollziehbar auf EUR_2025/kg umgerechnet; bis dahin bleibt dort der technische PLACEHOLDER bestehen.';
   const dac4ktInstallationComment = 'DAC-Anlagenkostenproxy: Die Activity bildet ein Solid-Sorbent-TVSA-DAC-System mit 4 kt CO2/a Nennkapazitaet ab. Materialmengen und Landnutzung stammen aus der disco2very-Konstruktion auf Basis von Deutz und Bardow (2021); die Anlagen-EoL-Behandlung ist fuer die cradle-to-gate Baseline ausgeschlossen. Sievert et al. (2024), SI Tabellen S12 und S15-S16, betrachten dieselbe Technologie und exakt 4.000 t CO2/a. Der EPC-Wert betraegt 15,5 Mio. USD_2022 je Anlage und umfasst direkte Materialien, Installation sowie Engineering und Procurement, darunter 0,5 Mio. USD_2022 fuer die initiale Sorbensbefuellung. Der nicht annualisierte TPC ergibt sich aus EPC plus 35 % Projektkontingenz und 5 bis 20 % Prozesskontingenz: 21,7 bis 24,025 Mio. USD_2022; mit dem Mittelwert von 12,5 % Prozesskontingenz werden vorlaeufig 22,8625 Mio. USD_2022 je 4-kt-Anlage angesetzt. Status: starker PROXY, da Technologie und Kapazitaet passen, die Kostendaten aber aus einer anderen Anlagenmodellierung stammen. Verwendet wird TPC, nicht TOC oder levelisierte Kosten; CO2-Transport und -Speicherung sind ausgeschlossen. Vor Eintragung in cost_inputs.csv wird der Wert noch nachvollziehbar auf EUR_2025 je 4-kt-Einheit umgerechnet.';
   const pemStackCapexComment = 'PEM-Stack-CAPEX: IRENA (2020), Tabelle ES1 und Tabelle 6 (gedruckte Seiten 12 und 65), nennt fuer PEM-Stacks ab 1 MW im Jahr 2020 Kosten von 400 USD_2020/kW und als 2050-Ziel weniger als 100 USD_2020/kW. Fuer die 1-MWe-Stack-Activity entsprechen die Ausgangswerte 400.000 USD_2020 je Einheit und als vorlaeufiger Zielwert 100.000 USD_2020 je Einheit. Status: starker PROXY. IRENA nennt ausserdem 50.000 bis 80.000 Betriebsstunden fuer heutige PEM-Stacks und 100.000 bis 120.000 Stunden als 2050-Ziel; die aktuelle Optimex-Annahme von acht Kalenderjahren liegt bei Volllast innerhalb der heutigen Bandbreite, bleibt aber von der tatsaechlichen Auslastung abhaengig. Die bestehenden Werte in cost_inputs.csv bilden diese Groessenordnung nur ueber eine ungefaehre USD-EUR-Umrechnung ab. Vor der finalen Uebernahme werden Ausgangswert, Wechselkurs und Inflation nachvollziehbar auf EUR_2025 umgerechnet. Die Werte fuer 2030 und 2040 sind keine direkten IRENA-Werte, sondern muessen als transparente Modellinterpolation oder Szenarioannahme ausgewiesen werden. Quelle: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2020/Dec/IRENA_Green_hydrogen_cost_2020.pdf';
   const pemBopCapexComment = 'PEM-Balance-of-Plant-CAPEX: IRENA (2020), Tabelle ES1 und Tabelle 6 (gedruckte Seiten 12 und 65), nennt fuer vollstaendige PEM-Systeme ab 10 MW im Jahr 2020 eine Bandbreite von 700 bis 1.400 USD_2020/kW. Mit dem Mittelwert von 1.050 USD_2020/kW und dem separat ausgewiesenen Stack von 400 USD_2020/kW ergibt sich ein abgeleiteter BoP-Proxy von 650 USD_2020/kW beziehungsweise 650.000 USD_2020 je 1-MWe-Einheit; die aus der Bandbreite folgende BoP-Spanne betraegt 300 bis 1.000 USD_2020/kW. Das System umfasst Stack, Stromversorgung beziehungsweise Gleichrichter, Wasseraufbereitung und -zirkulation, interne Wasserstoffaufbereitung, Kuehlung und Inbetriebnahme. Versand, Bauarbeiten, Standortvorbereitung sowie nachgelagerte Kompression und Speicherung sind ausgeschlossen. Status: PROXY, weil der BoP-Wert als Differenz abgeleitet wird und die IRENA-Systemkosten fuer Anlagen ab 10 MW gelten, waehrend unsere Activity auf 1 MWe normiert ist. Das 2050-Systemziel liegt unter 200 USD_2020/kW; zusammen mit dem Stack-Ziel von 100 USD_2020/kW wird vorlaeufig ein BoP-Ziel von etwa 100 USD_2020/kW angesetzt. Vor der finalen Uebernahme erfolgt die nachvollziehbare Umrechnung auf EUR_2025. Die Werte fuer 2030 und 2040 sind eigene Modellannahmen, da IRENA keine getrennte Stack-/BoP-Zeitreihe fuer diese Jahre liefert. Quelle: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2020/Dec/IRENA_Green_hydrogen_cost_2020.pdf';
   const defaultComments = {
-    'process:eco2r': { label: 'Electrochemical CO2 reduction', text: eco2rAggregateCapexComment, updatedAt: '2026-08-02T00:00:00.000Z' },
-    'process:separation': { label: 'eCO2R separation', text: eco2rAggregateCapexComment, updatedAt: '2026-08-02T00:00:00.000Z' },
-    'background:steam:naphtha': { label: 'Naphtha', text: naphthaFeedstockPriceComment, updatedAt: '2026-08-01T00:00:00.000Z' },
+    'process:eco2r': { label: 'eCO2R ethylene production', text: eco2rAggregateCapexComment, updatedAt: '2026-08-05T00:00:00.000Z' },
+    'background:steam:feedstock-mix': { label: 'Steam-cracking feedstock mix', text: naphthaFeedstockPriceComment, updatedAt: '2026-08-05T00:00:00.000Z' },
+    'installation:steam:steam-cracker-installation': { label: 'Steam cracker installation', text: routeInstallationPlaceholderComment, updatedAt: '2026-08-05T00:00:00.000Z' },
+    'installation:mto:mto-installation': { label: 'Methanol-to-olefins installation', text: routeInstallationPlaceholderComment, updatedAt: '2026-08-05T00:00:00.000Z' },
+    'installation:eco2r:system-installation': { label: 'eCO2R system installation', text: routeInstallationPlaceholderComment, updatedAt: '2026-08-05T00:00:00.000Z' },
     'background:steam:electricity': { label: 'Electricity, medium voltage, DEU', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:dac:electricity': { label: 'Electricity, medium voltage, DE', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:dac:activated-carbon': { label: 'Amine-on-alumina adsorbent', text: dacAdsorbentComment, updatedAt: '2026-08-03T00:00:00.000Z' },
@@ -1794,19 +1773,18 @@ html&gt;body{padding:0}&lt;/style&gt;
     'background:hydrogenation:electricity': { label: 'Electricity, medium voltage, DE', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:mto:electricity': { label: 'Electricity, medium voltage, DE', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:eco2r:electricity': { label: 'Electricity, medium voltage, DE', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
-    'background:separation:electricity': { label: 'Electricity, medium voltage, DE', text: electricityPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:steam:compressed-air': { label: 'Compressed air, 700 kPa', text: compressedAirPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:dac:heat-pump': { label: 'Heat from heat pump', text: heatPumpPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:mto:cooling-energy': { label: 'Cooling energy', text: absorptionCoolingPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:mto:cooling-minus-25': { label: 'Cooling at -25 °C', text: coolingMinus25PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
     'background:mto:cooling-minus-100': { label: 'Cooling at -100 °C', text: coolingMinus100PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
-    'background:separation:cooling-energy': { label: 'Cooling energy', text: absorptionCoolingPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
-    'background:separation:industrial-heat': { label: 'Industrial heat, natural gas', text: industrialHeatPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
-    'background:separation:cooling-minus-15': { label: 'Cooling at -15 °C', text: coolingMinus15PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
-    'background:separation:cooling-minus-25': { label: 'Cooling at -25 °C', text: coolingMinus25PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
-    'background:separation:cooling-minus-45': { label: 'Cooling at -45 °C', text: coolingMinus45PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
-    'background:separation:cooling-minus-55': { label: 'Cooling at -55 °C', text: coolingMinus55PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
-    'background:separation:cooling-minus-100': { label: 'Cooling at -100 °C', text: coolingMinus100PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
+    'background:eco2r:cooling-energy': { label: 'Cooling energy', text: absorptionCoolingPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
+    'background:eco2r:industrial-heat': { label: 'Industrial heat, natural gas', text: industrialHeatPriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
+    'background:eco2r:cooling-minus-15': { label: 'Cooling at -15 °C', text: coolingMinus15PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
+    'background:eco2r:cooling-minus-25': { label: 'Cooling at -25 °C', text: coolingMinus25PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
+    'background:eco2r:cooling-minus-45': { label: 'Cooling at -45 °C', text: coolingMinus45PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
+    'background:eco2r:cooling-minus-55': { label: 'Cooling at -55 °C', text: coolingMinus55PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
+    'background:eco2r:cooling-minus-100': { label: 'Cooling at -100 °C', text: coolingMinus100PriceComment, updatedAt: '2026-07-30T00:00:00.000Z' },
   };
   const fieldSelect = document.getElementById('field-select');
   const commentText = document.getElementById('comment-text');
@@ -1815,7 +1793,35 @@ html&gt;body{padding:0}&lt;/style&gt;
   const readComments = () => {
     try {
       const stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
-      ['background:mto:cooling-energy', 'background:separation:cooling-energy'].forEach((key) => {
+      const migrations = {
+        'process:separation': 'process:eco2r',
+        'product:raw-ethylene': 'process:eco2r',
+        'background:steam:naphtha': 'background:steam:feedstock-mix',
+        'background:separation:electricity': 'background:eco2r:electricity',
+        'background:separation:cooling-energy': 'background:eco2r:cooling-energy',
+        'background:separation:industrial-heat': 'background:eco2r:industrial-heat',
+        'background:separation:cooling-minus-15': 'background:eco2r:cooling-minus-15',
+        'background:separation:cooling-minus-25': 'background:eco2r:cooling-minus-25',
+        'background:separation:cooling-minus-45': 'background:eco2r:cooling-minus-45',
+        'background:separation:cooling-minus-55': 'background:eco2r:cooling-minus-55',
+        'background:separation:cooling-minus-100': 'background:eco2r:cooling-minus-100',
+        'background:separation:wastewater': 'background:eco2r:wastewater',
+        'installation:steam:organic-chemical-factory': 'installation:steam:steam-cracker-installation',
+        'installation:mto:organic-chemical-factory': 'installation:mto:mto-installation',
+        'installation:eco2r:chemical-factory': 'installation:eco2r:system-installation',
+        'installation:eco2r:copper-cathode': 'installation:eco2r:system-installation',
+        'installation:separation:low-alloyed-steel': 'installation:eco2r:system-installation',
+      };
+      Object.entries(migrations).forEach(([oldKey, newKey]) => {
+        if (!stored[oldKey]) return;
+        if (!stored[newKey]) {
+          stored[newKey] = stored[oldKey];
+        } else if (stored[newKey].text !== stored[oldKey].text) {
+          stored[newKey].text += `\n\nFormer ${stored[oldKey].label}:\n${stored[oldKey].text}`;
+        }
+        delete stored[oldKey];
+      });
+      ['background:mto:cooling-energy', 'background:eco2r:cooling-energy'].forEach((key) => {
         if (legacyAbsorptionCoolingPriceComments.includes(stored[key]?.text)) delete stored[key];
       });
       return { ...defaultComments, ...stored };

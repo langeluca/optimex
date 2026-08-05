@@ -31,15 +31,15 @@ Originalbasis. Es wird keine stillschweigende Umrechnung vorgenommen.
    Steam Cracking, direkte Methanolsynthese aus CO2, MTO und
    CO2-Elektrolyse. Die Werte sind `EUR_2022` und enthalten einen
    kapazitaetsabhaengigen sowie teilweise einen fixen Kostenanteil.
-2. Diese route-spezifischen Anlagenkosten koennen nicht direkt als Preis der
-   generischen Brightway-Infrastruktur eingetragen werden. Insbesondere teilen
-   Steam Cracking und MTO im Modell denselben Flow
-   `chemical factory construction, organics`, obwohl ihre recherchierten
-   Anlagenkosten unterschiedlich sind.
+2. Diese route-spezifischen Anlagenkosten werden nicht als Preis der generischen
+   Brightway-Infrastruktur eingetragen. Steam Cracking, MTO und das aggregierte
+   eCO2R-System verwenden stattdessen eindeutig benannte Installations-Wrapper;
+   ihre Preise bleiben bis zur Umrechnung der recherchierten TPC-Werte technische
+   `PLACEHOLDER`.
 3. Fuer Naphtha liegt ein direkt brauchbarer Rohpreis vor. Er wird fuer diese
    Fallstudie als `PROXY` fuer den gesamten allokierten Steam-Cracker-Feedstock-
-   Slate verwendet. Die spaetere Buendelung der Feedstock-Inputs in einer
-   eigenen Brightway-Activity ist noch nicht implementiert. Strom,
+   Slate verwendet. Sieben Feedstock-Inputs sind dazu in der Case-Study-Activity
+   `steam cracking feedstock mix` gebuendelt. Strom,
    Erdgaswaerme und Ethane koennen nur als Szenario- oder Regionsproxys
    verwendet werden. Der Grossteil der Hilfsstoffe, Kuehlmedien, Wasser- und
    Abfallbehandlungen bleibt durch die bereitgestellten Quellen ungedeckt.
@@ -85,15 +85,13 @@ muessen ebenfalls geklaert sein.
 
 | Installation | Unveraendert uebernommener Koeffizient | Inventory-Basis |
 |---|---:|---|
-| Steam-Cracker-Fabrik | `1.1516356618335166e-10` | `unit/kg ethylene` |
+| Steam-Cracker-Installation | `1.1516356618335166e-10` | `unit steam cracker installation/kg ethylene`; Wrapper enthält `1 unit chemical factory construction, organics` |
 | DAC-System | `1.25e-8` | `unit/kg CO2` |
 | PEM-Stack | `1.34989e-6` | `unit/kg H2` |
 | PEM Balance of Plant | `3.37373e-7` | `unit/kg H2` |
 | Methanolanlage | `3.5842e-12` | `unit/kg methanol` |
-| MTO-Fabrik | `3.584e-12` | `unit/kg ethylene` |
-| eCO2R-Fabrik | `7.32e-7` | `kg factory/kg raw ethylene` |
-| eCO2R-Kupfer | `7.4e-11` | `kg/kg raw ethylene` |
-| Stahl der Aufbereitung | `3.017679e-6` | `kg/kg ethylene` |
+| MTO-Installation | `3.584e-12` | `unit methanol-to-olefins installation/kg ethylene`; Wrapper enthält `1 unit chemical factory construction, organics` |
+| eCO2R-Systeminstallation | `7.32e-7` | `kg installation proxy/kg ethylene`; intern `1 kg factory`, `0.000101092896 kg copper` und `4.122512295082 kg steel` je kg Wrapper |
 
 Die Betrags- und Referenzproduktbasis bleibt damit identisch zum
 Quellinventory. `operation=False` kennzeichnet die zeitliche Skalierung als
@@ -447,16 +445,17 @@ Fuer `EUR_2025` wird der Quellenwert mit den HICP-Jahresraten des Euroraums fuer
 = 0.806635610112 EUR_2025/kg
 ```
 
-Der Wert wird vorlaeufig real konstant fuer alle Stutzjahre auf `market for
-naphtha` eingetragen. Inhaltlich ist er ein Naphtha-aequivalenter Preisproxy
-fuer den gesamten allokierten Feedstock-Slate. Im aktuellen Modell wird damit
-jedoch nur die bestehende Naphtha-Exchange-Menge bewertet; die vollstaendige
-Mix-Bewertung ist noch nicht hergestellt. Geplant ist eine eigene
-Background-Activity `steam cracking feedstock mix`, welche die anhand der
-ecoinvent-Dokumentation bestaetigten Feedstock-Inputs buendelt. Nur der direkte
-Mix-Flow soll dann bepreist werden; die internen Exchanges bilden weiterhin die
-oekologische Zusammensetzung ab. Diese Modellierung ist noch nicht umgesetzt,
-und `cost_inputs.csv` enthaelt deshalb noch keine Identitaet fuer den Mix.
+Der Wert wird real konstant fuer alle Stutzjahre auf `steam cracking feedstock
+mix` eingetragen. Die Activity buendelt Butan, Ethan, Naphtha, Natural Gas
+Liquids, Propan, Refinery Gas und Atmospheric Gas Oil, das im ecoinvent-Inventar
+durch Diesel approximiert wird. Ihre internen Massenanteile betragen
+`16.2/4.5/64.0/2.2/7.6/1.5/4.0 %`; der Steam Cracker bezieht insgesamt
+`1.21675954200327 kg Mix/kg Ethylen`.
+
+Nur der direkte Mix-Flow wird bepreist. Die sieben internen premise-Inputs
+erscheinen deshalb nicht mehr als eigene direkte Kostenpositionen. Die statische
+Modell- und CSV-Umstellung ist umgesetzt; die Laufzeitprüfung des
+`LCADataProcessor` und der LCIA-Gleichheit steht aus.
 
 ## Empfohlene Modelllebensdauern
 
@@ -471,8 +470,7 @@ Inventory-Koeffizienten.
 | PEM-Elektrolyse | 25 a | 8 a Diepers; Stack 9 a und restliche Anlage 25 a bei Tiggeloven-AEC | 25 a, `PROXY` | AEC-Anlagenlebensdauer wird auf PEM uebertragen; separater Stacktausch bleibt außerhalb des Ein-Prozess-Modells |
 | CO2-Hydrierung | 25 a | 15 a Diepers; 25 a Tiggeloven | 25 a, `RESEARCHED` | direkter Wert fuer Methanolsynthese aus CO2 in Tiggelovens Tabelle C.1 |
 | MTO | 25 a | 25 a Tiggeloven; 30 a generische Chemieanlage Zibunas | 25 a, `RESEARCHED` | technologiespezifischer Wert aus Tiggelovens Tabelle C.1 |
-| eCO2R-Reaktor | 25 a | 25 a Tiggeloven CO2-Elektrolyse | 25 a, `PROXY` | beste verfuegbare technologiespezifische Naeherung |
-| eCO2R-Aufbereitung | 25 a | 25 a fuer ASU und Chemieanlagen bei Tiggeloven; 30 a generisch bei Zibunas | 25 a, `PROXY` | ASU ist nur ein Anlagenproxy fuer die konkrete Trennkette |
+| Aggregierter eCO2R-Prozess | 25 a | 25 a Tiggeloven CO2-Elektrolyse und ASU-/Chemieanlagenproxy | 25 a, `PROXY` | gemeinsame Modelllebensdauer fuer Reaktion und Aufbereitung |
 
 Alle Empfehlungen bleiben Annahmen fuer eine Framework-Demonstration.
 
@@ -498,14 +496,13 @@ inhaltlich verbessern.
 
 | CSV-Flow | Neue Evidenz | Bewertung und naechster Schritt |
 |---|---|---|
-| `chemical factory construction` | eCO2R-CAPEX aus Tiggeloven | Nicht direkt eintragen: generischer kg-Fabrikflow und route-spezifischer TPC haben inkompatible Bezugsbasen. |
-| `chemical factory construction, organics` | Steam- und MTO-CAPEX aus Tiggeloven | Nicht direkt eintragen: derselbe Flow wird fuer zwei Anlagen mit verschiedenen Kosten verwendet. |
+| `eCO2R system installation` | eCO2R-CAPEX aus Tiggeloven | Eindeutiger kg-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/kg` als `PLACEHOLDER`, bis der aggregierte TPC auf die Fabrikmassenbasis umgerechnet ist. |
+| `steam cracker installation` | Steam-Cracker-CAPEX aus Tiggeloven | Eindeutiger unit-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/unit` als `PLACEHOLDER`, bis der TPC auf die Wrapper-Einheit umgerechnet ist. |
+| `methanol-to-olefins installation` | MTO-CAPEX aus Tiggeloven | Eindeutiger unit-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/unit` als `PLACEHOLDER`, bis der TPC auf die Wrapper-Einheit umgerechnet ist. |
 | `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Deutz-und-Bardow-Inventar und kapazitaetsgleiche Kostendaten aus Sievert et al. | Der fruehere solvent-basierte 1-Mt-Proxy wurde entfernt. Den TPC aus Sievert et al. auf `EUR_2025` umrechnen und direkt je 4-kt-Einheit eintragen; bis dahin bleibt `1 EUR/Einheit` ein technischer `PLACEHOLDER`. |
 | `electrolyzer production, 1MWe, PEM, Balance of Plant` | AEC-Lebensdauertrennung, kein PEM-CAPEX | Vorhandene IRENA-Proxys behalten; AEC-CAPEX nicht uebertragen. |
 | `electrolyzer production, 1MWe, PEM, Stack` | AEC-Stack 9 a, Kostenanteil 23.8 %, kein PEM-CAPEX | Lebensdauerhinweis dokumentieren; vorhandene IRENA-Proxys behalten. |
-| `market for copper, cathode` | keine Preisangabe | Vorhandenen Proxy behalten. |
-| `market for steel, low-alloyed` | keine Preisangabe | Vorhandenen Proxy behalten. |
-| `methanol production facility, construction` | direkte CO2-Methanolsynthese-CAPEX-Funktion | Technisch gut passend; vor Nutzung bleibt eine geeignete route-spezifische Kostenabbildung zu entwickeln. |
+| `methanol production facility, construction` | direkte CO2-Methanolsynthese-CAPEX-Funktion | Technisch gut passend und bereits eindeutig benannt; recherchierten TPC auf die vorhandene unit-Basis umrechnen und direkt eintragen. |
 
 ### Betriebsflows
 
@@ -514,26 +511,20 @@ inhaltlich verbessern.
 | `cooling energy production, at -25 °C, propylene compression refrigeration system 1 MW` | keine | Vorhandenen Proxy behalten. |
 | `heat production, at heat pump 30kW, allocation exergy` | keine | Vorhandenen Proxy behalten. |
 | `adsorbent, amine on alumina` | disco2very-Inventar aus PEI und Aluminiumoxid; Kostendaten aus Sievert et al. | Der unpassende Aktivkohleproxy wurde entfernt. Sorbenspreis auf `EUR_2025/kg` uebertragen; bis dahin technischer `PLACEHOLDER`. |
-| `market for butane` | keine | `PLACEHOLDER`; weitere Recherche. |
+| `steam cracking feedstock mix` | 0.732 EUR_2022/kg Naphtha; 0.806635610112 EUR_2025/kg nach HICP-Umrechnung | `PROXY` fuer den gesamten siebenkomponentigen Feedstock-Mix; interne Feedstocks werden nicht separat bepreist. |
 | `market for compressed air, 700 kPa gauge` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for cooling energy` | keine | Vorhandenen Proxy behalten. |
 | `market for cooling energy, at -100 °C` | keine | Vorhandenen Proxy behalten. |
 | `market for cooling energy, at -15 °C` | keine | Vorhandenen Proxy behalten. |
 | `market for cooling energy, at -45 °C` | keine | Vorhandenen Proxy behalten. |
 | `market for cooling energy, at -55 °C` | keine | Vorhandenen Proxy behalten. |
-| `market for diesel` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for electricity, medium voltage`, DE | NL- und Standort-Szenariowerte | Nur `PROXY`; fuer beide Stromflows eine gemeinsame, bewusst gewaehlte Trajektorie verwenden. |
-| `market for ethane` | 0.330 USD_2023/kg | US-`PROXY`; besser als technischer Einheitsplatzhalter, aber Waerungs- und Regionalumrechnung offen. |
 | `market for hazardous waste, for incineration` | keine | Negativer Preisvorzeichenkonvention folgen; weitere Recherche. |
 | `market for hazardous waste, for underground deposit` | keine | Negativer Preisvorzeichenkonvention folgen; weitere Recherche. |
 | `market for heat, district or industrial, natural gas` | 0.016908 bis 0.017814 EUR_2022/MJ Brennstoffwaerme | `PROXY`; deckt keinen Kessel-CAPEX/O&M ab. |
 | `market for inert waste, for final disposal` | keine | Negativer Preisvorzeichenkonvention folgen; weitere Recherche. |
 | `market for methanol` | kein geeigneter Marktpreis | Steam-Cracker-Hilfsinput bleibt offen. Nicht den foreground-intern erzeugten Methanolfluss zusaetzlich bepreisen. |
-| `market for naphtha` | 0.732 EUR_2022/kg; 0.806635610112 EUR_2025/kg | Temporaere CSV-Identitaet fuer den Naphtha-aequivalenten Feedstock-Proxy; nach Implementierung der Mix-Activity ersetzen. |
-| `market for natural gas liquids` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for nitrogen, liquid` | keine | `PLACEHOLDER`; weitere Recherche. |
-| `market for propane` | keine passende fossile Preisangabe | `PLACEHOLDER`; weitere Recherche. |
-| `market for refinery gas` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for sodium hydroxide, without water, in 50% solution state` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for wastewater, average` | keine | Negativer Preisvorzeichenkonvention folgen; weitere Recherche. |
 | `market for wastewater, unpolluted` | keine | Vorhandenen Proxy behalten. |
@@ -546,20 +537,19 @@ inhaltlich verbessern.
 
 ### Route-spezifischer CAPEX gegen generische Brightway-Infrastruktur
 
-Ein `market_price` wird einem konkreten Brightway-Flow zugeordnet. Ein Preis
-fuer `chemical factory construction, organics` wirkt deshalb gleich, wo immer
-dieser Flow verwendet wird. Steam Cracking und MTO benoetigen jedoch
-unterschiedliche route-spezifische Kostenfunktionen. Eine Kalibrierung des
-gemeinsamen Flowpreises auf eine der beiden Routen verfaelscht die andere.
+Ein `market_price` wird einem konkreten Brightway-Flow zugeordnet. Deshalb
+verwenden Steam Cracking und MTO nun die getrennten Flows `steam cracker
+installation` und `methanol-to-olefins installation`. Beide verweisen intern
+auf `chemical factory construction, organics`, dessen Umweltinventar dadurch
+erhalten bleibt, ohne ihm einen gemeinsamen route-unspezifischen Preis zu geben.
 
-Moegliche spaetere Loesung:
+Analog fasst `eCO2R system installation` Fabrik, Kupfer und Stahl hinter einer
+einzigen direkten CAPEX-Identitaet zusammen. Die drei generischen Inputs werden
+nicht mehr einzeln durch optimex bepreist.
 
-- separate kostenbezogene Installationsflows je Foreground-Prozess oder
-- eine andere route-spezifische CAPEX-Abbildung ausserhalb des generischen
-  ecoinvent-Fabrikpreises.
-
-Die LCA-Infrastruktur kann dabei unveraendert bleiben. Diese Architekturfrage
-muss vor dem Eintragen der route-spezifischen TPC-Werte entschieden werden.
+Die LCA-Infrastruktur bleibt durch die internen Wrapper-Exchanges unveraendert.
+Offen ist nicht mehr die Architektur, sondern die nachvollziehbare Umrechnung
+der route-spezifischen TPC-Werte auf die jeweiligen Wrapper-Einheiten.
 
 ### Fixe Anlagenkosten
 
@@ -598,21 +588,21 @@ eingetragen werden.
 
 Aktuell dokumentiert beziehungsweise noch umzusetzen:
 
-1. Steam-Cracker-Feedstock: Die temporaere Naphtha-Identitaet ist mit
-   `0.806635610112 EUR_2025/kg` fuer alle Stutzjahre umgesetzt. Nach Einfuehrung
-   der Brightway-Activity `steam cracking feedstock mix` die CSV-Identitaet
-   ersetzen und sicherstellen, dass nur der Mix als direkte Kostenposition
-   erscheint. Noch keine vorweggenommene Mix-Zeile anlegen.
-2. `market for ethane`: `0.330 USD_2023/kg` als US-Proxy vormerken. Vor
-   Eintragung Wechselkurs, Inflation und regionale Eignung dokumentieren.
+1. Steam-Cracker-Feedstock: `steam cracking feedstock mix` ist mit
+   `0.806635610112 EUR_2025/kg` fuer alle Stutzjahre umgesetzt. Nur der Mix ist
+   direkte Kostenposition; die sieben internen Feedstocks wurden aus der CSV
+   entfernt. Laufzeitpruefung steht aus.
+2. Steam-, MTO- und eCO2R-CAPEX: Die route-spezifischen Wrapper sind umgesetzt,
+   enthalten aber zunaechst `1 EUR_2025/Einheit` als `PLACEHOLDER`. Die
+   recherchierten TPC-Werte auf die jeweilige Wrapper-Einheit umrechnen.
 3. Beide Stromflows: gemeinsam eine Trajektorie waehlen. Tiggelovens
    standortspezifische Werte nicht automatisch uebernehmen, weil sie stark
    szenarioabhaengig und nicht REMIND-konsistent sind.
 4. Erdgaswaerme: die abgeleitete Brennstoffkomponente als Proxy pruefen. Vorher
    entscheiden, ob der bestehende Marktpreis bereits Erzeugungsanlage und
    Betrieb umfasst.
-5. Route-spezifische CAPEX-Flows entwerfen, bevor Steam-, MTO-, Methanol- oder
-   eCO2R-TPC eingetragen werden.
+5. Den bereits eindeutig benannten Methanolanlagen-CAPEX separat absichern;
+   hierfuer ist kein zusaetzlicher Wrapper erforderlich.
 6. `PLACEHOLDER`-Flows ohne neue Evidenz unveraendert lassen und gezielt
    nachrecherchieren.
 7. Negative Abfall- und Abwasser-Exchanges weiterhin mit negativen
@@ -633,10 +623,6 @@ Aktuell dokumentiert beziehungsweise noch umzusetzen:
 
 ### Prioritaet B: ersetzt technische Platzhalter
 
-- Steam-Cracker-Kohlenwasserstoffinputs anhand der ecoinvent-Dokumentation in
-  Feedstocks und Energieinputs einordnen. Bestaetigte Feedstocks gehen in die
-  geplante Mix-Activity ein und benoetigen dann keine Einzelpreise; verbleibende
-  Energieinputs muessen separat bepreist oder begruendet abgegrenzt werden.
 - Druckluft und Fluessigstickstoff.
 - Natronlauge.
 - Deionisiertes Wasser fuer den CH-Flow.

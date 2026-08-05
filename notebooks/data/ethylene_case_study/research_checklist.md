@@ -66,13 +66,14 @@ BA-Interpretation belastbar ist. Viele vorhandene Werte sind weiterhin
 
 ### CAPEX
 
-- [x] REPO `chemical factory construction, organics` wird unveraendert mit
-  `1.1516356618335166e-10 unit/kg Ethylen` inventarisiert.
+- [x] REPO `steam cracker installation` kapselt `1 unit chemical factory
+  construction, organics`; der äußere Koeffizient bleibt unverändert
+  `1.1516356618335166e-10 unit/kg Ethylen`.
 - [x] REPO Tiggeloven liefert eine route-spezifische CAPEX-Funktion fuer einen
   konventionellen Naphtha-Cracker.
-- [ ] DECISION Route-spezifischen Steam-Cracker-CAPEX auf einen eigenen
-  Installations-Flow abbilden; nicht direkt als Preis des generischen
-  ecoinvent-Fabrikflows eintragen.
+- [x] REPO Route-spezifischen Steam-Cracker-CAPEX auf den eigenen
+  Installations-Flow abgebildet; bis zur TPC-Umrechnung bleibt dessen Preis ein
+  technischer `PLACEHOLDER`.
 - [ ] DECISION Kapazitaetsbasis, Auslastung, Kostenumfang und fixe
   Instandhaltung von 4 Prozent TPC/a dokumentieren.
 
@@ -84,19 +85,18 @@ BA-Interpretation belastbar ist. Viele vorhandene Werte sind weiterhin
 - [x] DECISION Den Naphtha-Wert vorlaeufig real konstant als
   Naphtha-aequivalenten Preisproxy fuer den gesamten allokierten
   Steam-Cracker-Feedstock-Slate verwenden.
-- [ ] IMPLEMENT Die anhand der ecoinvent-Dokumentation bestaetigten
-  Feedstock-Inputs in einer eigenen Brightway-Background-Activity
-  `steam cracking feedstock mix` buendeln; Energie- und Hilfsstoffinputs nicht
-  versehentlich einbeziehen.
-- [ ] IMPLEMENT Nach der Brightway-Aenderung die temporaeren Naphtha-Zeilen in
-  `cost_inputs.csv` durch die echte Identitaet der Mix-Activity ersetzen. Vorher
-  keine Mix-Zeile anlegen.
+- [x] REPO Die sieben anhand der ecoinvent-Dokumentation bestaetigten
+  Feedstock-Inputs in `steam cracking feedstock mix` gebuendelt: Butan, Ethan,
+  Naphtha, NGL, Propan, Refinery Gas und Diesel als Proxy fuer Atmospheric Gas
+  Oil. Energie-, Hilfsstoff- und Behandlungsinputs bleiben außerhalb.
+- [x] REPO Die sieben einzelnen Feedstock-Zeilen in `cost_inputs.csv` durch die
+  echte Mix-Identitaet mit `0.806635610112 EUR_2025/kg` ersetzt.
 - [ ] VERIFY LCIA-Gleichheit zum bisherigen direkten Inventar pruefen und
   sicherstellen, dass `cost_relevant_op_flows` nur den Mix statt seiner
   Feedstock-Bestandteile als direkte Kostenposition ausweist.
 - [x] REPO Ethane-Rohwert von `0.330 USD_2023/kg` aus Cattry gefunden.
-- [ ] OPTIONAL Separate europaeische Preise fuer Ethane, Butan, Diesel und
-  Propan nur recherchieren, falls der gebuendelte Feedstock-Proxy spaeter durch
+- [ ] OPTIONAL Separate europaeische Preise fuer die sieben Mixbestandteile nur
+  recherchieren, falls der gebuendelte Naphtha-Proxy spaeter durch
   bestandteilspezifische Kosten ersetzt werden soll.
 - [x] REPO Strompreis wird aus der gemeinsamen Stromtrajektorie uebernommen.
 - [x] REPO Deionisiertes Wasser wird aus der gemeinsamen Wasserannahme
@@ -184,8 +184,8 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 - [x] REPO Installationskoeffizient `3.584e-12 unit/kg Ethylen` unveraendert
   uebernommen.
 - [x] REPO Tiggeloven liefert eine route-spezifische MTO-CAPEX-Funktion.
-- [ ] DECISION Eigenen MTO-Installations-Flow verwenden, wenn der MTO-CAPEX
-  vom Steam-Cracker-CAPEX abweicht.
+- [x] REPO `methanol-to-olefins installation` als eigenen Installations-Flow
+  umgesetzt; der äußere Koeffizient bleibt `3.584e-12 unit/kg Ethylen`.
 - [ ] DECISION Kapazitaetsbasis auf Methanoldurchsatz und fixe
   Instandhaltung von 2.5 Prozent TPC/a dokumentieren.
 
@@ -222,17 +222,21 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 - [ ] CUTOFF Sehr kleine Abwassermenge nach dokumentiertem Screening auf null
   setzen.
 
-## 6. Electrochemical CO2 Reduction
+## 6. Aggregated eCO2R Reaction and Separation
 
 ### CAPEX
 
-- [x] REPO Fabrik- und Kupferkoeffizient unveraendert aus disco2very
-  uebernommen.
+- [x] REPO Reaktion und Separation zu einem Foreground-Prozess aggregiert;
+  Betriebswerte und `6.091081 kg CO2/kg Ethylen` bleiben sichtbar erhalten.
+- [x] REPO `eCO2R system installation` auf Fabrikmassenbasis umgesetzt. Der
+  äußere Koeffizient bleibt `7.32e-7 kg/kg Ethylen`; Fabrik, Kupfer und Stahl
+  liegen intern im vereinbarten Verhältnis.
 - [x] REPO Tiggeloven liefert eine CO2-Elektrolyse-CAPEX-Funktion als Proxy.
 - [ ] DECISION Systemgrenze und Kapazitaetsbasis mit dem modellierten
   eCO2R-Reaktor vergleichen.
-- [ ] DECISION Route-spezifischen eCO2R-CAPEX abbilden; nicht direkt als Preis
-  des generischen `kg factory`-Flows eintragen.
+- [x] REPO Route-spezifischen aggregierten eCO2R-CAPEX auf den eindeutigen
+  Wrapper abgebildet; bis zur TPC-Umrechnung bleibt dessen Preis ein technischer
+  `PLACEHOLDER`.
 - [ ] DECISION Klaeren, ob Kupfer dauerhafte Infrastruktur oder regelmaessig
   ersetztes Elektrodenmaterial ist.
 
@@ -242,18 +246,20 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
   Preisannahmen uebernommen.
 - [x] REPO Foreground-CO2 erhaelt keinen zusaetzlichen Marktpreis.
 
-## 7. eCO2R Separation
+### Separation-specific open questions
 
 ### CAPEX
 
-- [x] REPO Stahlkoeffizient `3.017679e-6 kg/kg Ethylen` unveraendert
-  uebernommen.
+- [x] REPO Stahlkoeffizient `3.017679e-6 kg/kg Ethylen` unveraendert als
+  interner Bestandteil des eCO2R-Installations-Wrappers uebernommen.
 - [x] REPO Air-Separation-Unit-CAPEX aus Tiggeloven als Teilproxy vorhanden.
 - [ ] RESEARCH beziehungsweise DECISION Infrastruktur fuer Deoxygenierung,
   Aminwaesche, TSA und kryogene Trennung vollstaendig abgrenzen.
 - [ ] DECISION Klaeren, welche Apparate der vorhandene Stahlkoeffizient bereits
   abbildet.
-- [ ] DECISION Route-spezifischen Gesamt-CAPEX der Aufbereitung definieren.
+- [x] REPO Kein separater Aufbereitungs-CAPEX angesetzt; der verfügbare
+  CO2-Elektrolyse-Proxy wird genau einmal dem aggregierten Gesamtsystem
+  zugeordnet.
 
 ### OPEX
 
@@ -264,25 +270,26 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 - [ ] DECISION Alle Kuehlpreise mit den neuen Strom- und Gastrajektorien je
   Stuetzjahr aktualisieren.
 - [ ] SCREEN Abwasserbehandlung.
-- [x] REPO Das rohe eCO2R-Produkt erhaelt keinen zusaetzlichen Marktpreis.
+- [x] REPO Das frühere rohe eCO2R-Zwischenprodukt wurde durch die Aggregation
+  vollständig aus dem Foreground entfernt.
 
-## 8. Route-spezifische CAPEX-Abbildung
+## 7. Route-spezifische CAPEX-Abbildung
 
-Mit dem aktuellen Ansatz traegt ein Brightway-Node genau einen Marktpreis.
-Steam Cracking und MTO verwenden jedoch beide `chemical factory construction,
-organics`, obwohl die Literatur unterschiedliche Anlagenkosten liefert.
+Ein Brightway-Node traegt genau einen Marktpreis. Steam Cracking, MTO und eCO2R
+verwenden deshalb eindeutige Installations-Wrapper, die intern weiterhin die
+generischen Umweltinventare beziehen.
 
-- [ ] DECISION Recherchewerte mit einer Spalte `foreground_process`
-  getrennt halten.
-- [ ] DECISION Route-spezifische Installations-Proxy-Nodes oder eine andere
-  explizite CAPEX-Abbildung festlegen.
+- [x] REPO Route-spezifische Installations-Proxy-Nodes fuer Steam, MTO und das
+  aggregierte eCO2R-System umgesetzt.
+- [x] REPO Generische Fabrik-, Kupfer- und Stahlidentitaeten aus den direkten
+  CAPEX-Zeilen der CSV entfernt.
 - [ ] DECISION Fixe Kostenanteile der CAPEX-Funktionen korrekt skalieren.
 - [ ] DECISION Instandhaltung aus Tiggeloven nur ergaenzen, wenn sie nicht
   bereits in anderen OPEX-Positionen enthalten ist.
 - [ ] DECISION Aggregierte Produktionskosten aus Cattry nicht gemeinsam mit
   einzeln bepreisten Feedstocks, Energie und CAPEX verwenden.
 
-## 9. Optimex-Modelllebensdauern und Brownfield
+## 8. Optimex-Modelllebensdauern und Brownfield
 
 Die folgenden Lebensdauern steuern Verfuegbarkeit, Stilllegung und
 Ersatzinvestitionen. Sie dienen nicht zur Skalierung der Inventory-Mengen.
@@ -294,14 +301,14 @@ Ersatzinvestitionen. Sie dienen nicht zur Skalierung der Inventory-Mengen.
 - [x] REPO CO2-Hydrierung: 25 Jahre nach Tiggelovens direkter Methanolsynthese
   aus CO2.
 - [x] REPO MTO: 25 Jahre nach Tiggeloven.
-- [x] REPO eCO2R-Reaktor: 25 Jahre als CO2-Elektrolyse-Proxy nach Tiggeloven.
-- [x] REPO eCO2R-Aufbereitung: 25 Jahre als ASU-Anlagenproxy nach Tiggeloven.
+- [x] REPO Aggregierter eCO2R-Prozess: gemeinsame Modelllebensdauer von 25
+  Jahren als CO2-Elektrolyse- und Anlagenproxy nach Tiggeloven.
 - [ ] DECISION Brownfield-Vintages 2005 und 2015 nach Festlegung der
   Steam-Cracker-Lebensdauer pruefen; Restlebensdauer ab 2025 dokumentieren.
 - [ ] RESEARCH Realen Diskontsatz von aktuell 3 Prozent zitierfaehig
   begruenden oder ersetzen.
 
-## 10. Transparenter Cut-off und CSV-Abschluss
+## 9. Transparenter Cut-off und CSV-Abschluss
 
 - [ ] SCREEN Grobe Kostenbeitraege als `abs(amount * proxy price)` berechnen.
 - [ ] DECISION Zielabdeckung festlegen, zum Beispiel mindestens 95 Prozent der
@@ -310,7 +317,7 @@ Ersatzinvestitionen. Sie dienen nicht zur Skalierung der Inventory-Mengen.
   Begruendung in `notes` in der CSV belassen.
 - [ ] DECISION Positive Entsorgungsgebuehren bei negativen Waste-Exchanges als
   negative Marktpreise eintragen.
-- [ ] DECISION Alle 38 kostenrelevanten CSV-Identitaeten entweder als
+- [ ] DECISION Alle 31 kostenrelevanten CSV-Identitaeten entweder als
   recherchiert, dokumentierter Proxy oder begruendeter Cut-off klassifizieren.
 - [ ] DECISION Nach jeder Preisaenderung abgeleitete Utility-Preise fuer alle
   Stuetzjahre konsistent neu berechnen.
@@ -320,12 +327,11 @@ Ersatzinvestitionen. Sie dienen nicht zur Skalierung der Inventory-Mengen.
 In sinnvoller Arbeitsreihenfolge bleiben damit:
 
 1. Strompreis-Perspektive und Trajektorie 2020 bis 2050.
-2. Steam-Cracker-Feedstock-Mix in Brightway implementieren, anschliessend die
-   temporaere Naphtha-CSV-Identitaet ersetzen und die Kostenfluss-Abgrenzung
-   pruefen.
+2. Statische Steam-Cracker-Feedstock-Buendelung durch einen Brightway-/LCIA-Lauf
+   pruefen und bestaetigen, dass nur der Mix als direkter Kostenfluss erscheint.
 3. Gaspreisentwicklung und Aktualisierung aller Waerme- und Kuehlproxies.
-4. Route-spezifische CAPEX-Abbildung fuer Steam Cracking, CO2-Hydrierung, MTO
-   und eCO2R.
+4. Recherchierte Steam-, MTO- und aggregierte eCO2R-TPC-Werte auf die bereits
+   umgesetzten Wrapper-Einheiten umrechnen; CO2-Hydrierungs-CAPEX absichern.
 5. DAC- und PEM-CAPEX absichern.
 6. Brownfield-Installationsjahre der Steam-Cracker final begruenden.
 7. Wasser, Abwasser, Amine-on-Alumina-Sorbens und Abfallbehandlungen screenen.

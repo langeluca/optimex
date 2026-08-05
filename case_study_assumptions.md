@@ -24,17 +24,17 @@ Bachelorarbeit interpretiert werden.
 | Punkt | Status | Festlegung |
 |---|---|---|
 | Brightway-Projekt | DECIDED | `optimex_remind` |
-| Prozessdaten | DECIDED | Foreground-Activities und Exchanges werden im Case-Study-Notebook manuell nach dem Muster von `methanol_and_iron.ipynb` angelegt; die Zahlenbasis stammt aus den ausgewählten disco2very-Inventaren und dokumentierten Proxys. Die DAC-Hilfsaktivitäten PEI, Amine-on-Alumina und 4-kt-DAC-Konstruktion werden reproduzierbar in jeder premise-Stützjahresdatenbank angelegt. |
+| Prozessdaten | DECIDED | Foreground-Activities und Exchanges werden im Case-Study-Notebook manuell nach dem Muster von `methanol_and_iron.ipynb` angelegt; die Zahlenbasis stammt aus den ausgewählten disco2very-Inventaren und dokumentierten Proxys. Fallstudienspezifische Activities werden reproduzierbar in vier eigenen Stützjahresdatenbanken angelegt und verweisen intern auf premise. |
 | Workflow-Blueprints | DECIDED | `notebooks/basic_example_econ.ipynb` und `notebooks/methanol_and_iron.ipynb` |
-| Routen | DECIDED | Steam Cracking; DAC + PEM + CO2-Hydrierung + MTO; DAC + eCO2R + Aufbereitung |
+| Routen | DECIDED | Steam Cracking; DAC + PEM + CO2-Hydrierung + MTO; DAC + aggregierte eCO2R-Reaktion und Aufbereitung |
 | MTO-Koppelproduktbehandlung | DECIDED | Massenallokation: `allocation="weight"`, kein Avoided Burden |
-| Anlagenmodellierung | DECIDED | DAC, PEM, CO2-Hydrierung, MTO und eCO2R-Reaktor als eigenständige Foreground-Anlagen |
+| Anlagenmodellierung | DECIDED | DAC, PEM, CO2-Hydrierung, MTO und der aggregierte eCO2R-Prozess als eigenständige Foreground-Anlagen; Steam, MTO und eCO2R verwenden eindeutig benannte Installations-Wrapper. |
 | Gemeinsame DAC-Versorgung | DECIDED | CO2-Hydrierung und eCO2R greifen auf denselben manuell angelegten DAC-Produktknoten und damit auf einen gemeinsamen Pool installierter DAC-Kapazität zu |
-| eCO2R-Aufbereitung | DECIDED | Die Betriebsinputs der fünf Trennschritte werden im Notebook sichtbar zu einer Aufbereitungsanlage aggregiert |
+| eCO2R-Aufbereitung | DECIDED | Reaktion und die Betriebsinputs der fünf Trennschritte werden in einem gemeinsamen Foreground-Prozess sichtbar aggregiert, weil der verfügbare CAPEX-Proxy das Gesamtsystem abbildet. |
 | Kapazitätsbasis | DECIDED | Effektiv verfügbare Jahresproduktion in `kg Referenzprodukt/a` je Anlage |
 | Zeithorizont | DECIDED | 2025 bis 2050 einschließlich, jährliche Auflösung |
 | Geografische Systemgrenze | DECIDED | Europa; RER/REMIND-EU als Zielregion, deutsche Datensätze nur als dokumentierte Proxys |
-| Hintergrundszenario | DECIDED | Ausschließlich `REMIND-EU_SSP2-NDC`; vorhandene premise-Stützjahre mit jährlicher Interpolation |
+| Hintergrundszenario | DECIDED | Ausschließlich `REMIND-EU_SSP2-NDC`; vier Case-Study-Interface-Datenbanken für 2020, 2030, 2040 und 2050 verweisen intern auf die jeweiligen premise-Stützjahre und bilden die einzige an optimex übergebene zeitliche Datenbankfamilie. |
 | Zweck der Case Study | DECIDED | Demonstration der ökonomischen optimex-Erweiterung, keine Prognose oder Suche nach besonders interessanten Ethylen-Ergebnissen |
 | Modellierungstiefe | DECIDED | Fit-for-purpose-Demonstration des Frameworks; belastbar dokumentierte Proxys und vereinfachte Annahmen sind zulässig, eine vollständige Markt- oder Technologieprognose ist nicht erforderlich |
 | Umweltziel | DECIDED | Ausschließlich Minimierung der Wirkungskategorie Climate Change; keine Mehrkriteriengewichtung |
@@ -64,13 +64,13 @@ Bachelorarbeit interpretiert werden.
 | Kostenbasis | DECIDED | Sämtliche Kostendaten werden auf reale Euro des Jahres 2025 (`EUR_2025`) vereinheitlicht; ursprüngliche Währung, Preisjahr und Umrechnung bleiben dokumentiert |
 | Zeitpunkt der Investitionskosten | DECIDED | Installationsbezogene Kosten fallen vollständig im Installationsjahr an; keine Verteilung als Annuität über die Anlagenlebensdauer |
 | Restwert am Zeithorizont | OUT_OF_SCOPE | Kein Salvage Value für nach 2050 verbleibende Anlagenlebensdauer; Investitionen tragen ihre vollständigen Kosten im Installationsjahr |
-| Ökonomische Systemgrenze | DECIDED | Bepreisung ausschließlich der direkten Hintergrundkäufe aus `LCADataProcessor.cost_relevant_op_flows` und `cost_relevant_cap_flows` |
+| Ökonomische Systemgrenze | DECIDED | Bepreisung ausschließlich der direkten Käufe aus den Case-Study-Hintergrunddatenbanken, wie sie in `LCADataProcessor.cost_relevant_op_flows` und `cost_relevant_cap_flows` erscheinen; interne premise-Inputs werden nicht zusätzlich bepreist. |
 | Wärme aus Erdgas | PROXY | `0.011231884 EUR_2025/MJ Wärme`: THE-Day-Ahead-Gaspreis 2025 von `37.2 EUR/MWh` nach FfE/EEX, geteilt durch `3600 MJ/MWh` und den Gasboiler-Wirkungsgrad `0.920` aus Tiggeloven (2026), Tabelle C.2, gedruckte Seite 169/PDF 184; nur Brennstoffkosten, ohne Kessel-CAPEX und O&M; bis zur Preisprojektion real konstant |
 | Absorptionskühlung | PROXY | `0.020543646 EUR_2025/MJ Kühlenergie`: `1.67 MJ` Wärme aus Erdgas zu `0.011231884 EUR/MJ` plus `0.0200 kWh` Strom zu `0.08932 EUR/kWh`; Wasser bleibt unbepreist; bis zu den Gas- und Strompreisprojektionen real konstant |
 | Nicht inventarisierte Kosten | OUT_OF_SCOPE | Personal, Versicherung, Verwaltung, fixe Wartung und weitere Kosten werden nur berücksichtigt, wenn sie als explizite bepreisbare Flows im Inventar vorkommen; kein separates Zusatzkostenmodell |
 | Prüfung der Preisvollständigkeit | DECIDED | Keine zusätzliche Strict-Implementierung; fehlende `market_price`-Werte erzeugen die bestehende Warnung des `LCADataProcessor`, und die Prüfung vor finalen Läufen bleibt User Responsibility |
 | Zeitliche Preisentwicklung | DECIDED | Für jeden kostenrelevanten Flow wird eine zeitliche Entwicklung recherchiert oder mindestens eine quellenbasierte Entwicklungshypothese begründet; real konstante Preise sind kein automatischer Default |
-| Preisinterpolation | DECIDED | Literaturwerte werden nach der Umrechnung auf `EUR_2025` zunächst auf die tatsächlich verwendeten premise-Stützjahre übertragen; `LCADataProcessor` interpoliert diese Preise mit der Hintergrund-Mapping-Matrix jährlich auf 2025 bis 2050 |
+| Preisinterpolation | DECIDED | Literaturwerte werden nach der Umrechnung auf `EUR_2025` auf die vier Case-Study-Stützjahre übertragen; `LCADataProcessor` interpoliert diese Preise mit der Hintergrund-Mapping-Matrix jährlich auf 2025 bis 2050. |
 | Preisextrapolation und Proxys | DECIDED | Keine unbemerkte automatische Extrapolation; fehlende Randjahre dürfen mit einer expliziten einfachen Fortschreibung oder einem dokumentierten Proxy abgedeckt werden |
 | Anzahl der Preispfade | DECIDED | Je kostenrelevantem Flow zunächst genau ein zentraler Baseline-Preispfad; alternative Preisannahmen können bei Bedarf nachträglich als separates Szenario gerechnet werden |
 | Kosten-CSV | DECIDED | Eine gemeinsame CSV für installierungs- und betriebsbezogene Preise; `cost_class` unterscheidet `cap`, `op` und `cap_and_op` |
@@ -78,7 +78,7 @@ Bachelorarbeit interpretiert werden.
 | Öffentliche Notebook-Fassung | DECIDED | Das Notebook bleibt leserorientiert und enthält nur einen kompakten Abschnitt für Kostenflussliste, CSV und Preisstatus; Research Mode, Blocker-Gates und Entwicklerworkflow werden nicht gezeigt |
 | Veröffentlichung der Kosten-CSV | DECIDED | Die fertig recherchierte CSV wird als reproduzierbarer Modellinput im öffentlichen Repository versioniert; Weitergaberechte der Preisquellen und enthaltenen Daten vor Veröffentlichung prüfen |
 | Aktivitätsidentität in der CSV | DECIDED | Öffentliche Preiszeilen verwenden `name`, `product`, `location`, `unit` und `year`; keine datenbankspezifischen Brightway-Activity-Codes |
-| Voraussetzungen des öffentlichen Notebooks | DECIDED | `optimex_remind`, die benötigten premise-Datenbanken und die Biosphere-Datenbank werden vorausgesetzt; die `disco2very`-Datenbank und der lokale Pfad zum disco2very-Repository sind keine Laufzeitabhängigkeiten, weil die drei benötigten DAC-Hilfsinventare sichtbar im Case-Study-Notebook reproduziert werden. |
+| Voraussetzungen des öffentlichen Notebooks | DECIDED | `optimex_remind`, die benötigten premise-Datenbanken und die Biosphere-Datenbank werden vorausgesetzt. Die vier Case-Study-Hintergrunddatenbanken werden vom Notebook erstellt; `disco2very` bleibt keine Laufzeitabhängigkeit. premise wird dabei nicht verändert. |
 
 Die Kapazitätsbasis bezieht sich jeweils auf das Referenzprodukt der Anlage:
 
@@ -86,7 +86,7 @@ Die Kapazitätsbasis bezieht sich jeweils auf das Referenzprodukt der Anlage:
 - PEM: `kg H2/a`
 - CO2-Hydrierung: `kg Methanol/a`
 - MTO: `kg Ethylen/a`
-- eCO2R-Reaktor und Aufbereitung: `kg des jeweiligen Zwischen- oder Endprodukts/a`
+- aggregierter eCO2R-Prozess: `kg Ethylen/a`
 
 Die Kapazität ist als effektive Jahresproduktion definiert. Eine zusätzliche
 Multiplikation mit einem Auslastungsgrad erfolgt nicht, sofern die recherchierten
@@ -118,8 +118,10 @@ erneut gegen die korrigierte Variablensemantik zu pruefen.
 
 ### Einheiten der ecoinvent-Infrastruktur
 
-- `chemical factory construction, organics`: Preis und Exchange bezogen auf `unit`
-- `chemical factory construction`: Preis und Exchange bezogen auf `kg factory`
+- `chemical factory construction, organics`: internes Umweltinventar bezogen auf
+  `unit`; direkte Preise liegen auf den getrennten Steam- und MTO-Wrappern.
+- `chemical factory construction`: internes Umweltinventar bezogen auf
+  `kg factory`; der direkte Preis liegt auf `eCO2R system installation`.
 
 Fuer die in `my_activities.py` dokumentierten Mengen bleibt lediglich zu
 pruefen, welcher konkrete Datensatz und welche Einheit verwendet wurden. Eine
@@ -129,17 +131,15 @@ Quellenlebensdauer ist fuer ihre Uebernahme nicht erforderlich.
 
 | Anlage | Installations- oder EoL-Kandidaten | Status |
 |---|---|---|
-| MTO | `chemical factory construction, organics` | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
-| CO2-Hydrierung | `chemical factory construction, organics` | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
+| MTO | `methanol-to-olefins installation` | Eindeutiger Kosten-Wrapper mit `1 unit chemical factory construction, organics`; äußerer Koeffizient `3.584e-12 unit/kg Ethylen` bleibt unverändert. |
+| CO2-Hydrierung | `methanol production facility, construction` | Bereits eindeutig benannter direkter Installationsfluss; kein zusätzlicher Wrapper erforderlich. |
 | PEM | Stahl, Aluminium, Kupfer, Kunststoff, Elektronik, Beton, Titan, Edelstahl, Nafion, Aktivkohle, Iridium, Platin | Inventory-Mengen unveraendert uebernommen; separate Komponentenwechsel sind eine optionale Modellerweiterung |
 | PEM EoL | zugehörige Recycling- und Entsorgungsprozesse | OPEN: Zeitpunkt und Skalierung prüfen |
 | DAC | `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Material- und Landnutzungsinventar der disco2very-Activity `construction of direct air capture, 2016` übernommen; Name, Code und Kommentar spezifizieren die Nennkapazität von 4 kt CO2/a und Deutz und Bardow (2021) als Quelle. Der Koeffizient `1.25e-8 unit/kg CO2` bleibt unverändert. |
 | DAC EoL | `treatment of direct air capture, 2016` | In der disco2very-Konstruktionsactivity enthalten, für die Baseline aber bewusst nicht übernommen, da Anlagen-EoL außerhalb der Systemgrenze liegt. |
-| eCO2R-Reaktor | `chemical factory construction` | Inventory-Menge unveraendert uebernommen; Einheit `kg factory` pruefen |
-| eCO2R-Reaktor | Kupferelektrode | Inventory-Menge unveraendert uebernommen; Infrastruktur oder Verbrauchsmaterial klaeren |
-| eCO2R-Aufbereitung | Stahl des Vapor-Liquid-Separators | Inventory-Menge unveraendert uebernommen; Activity-Identitaet pruefen |
+| eCO2R-Gesamtsystem | `eCO2R system installation` | Eindeutiger Kosten-Wrapper auf Fabrikmassenbasis; enthält je kg Wrapper `1 kg chemical factory`, `0.000101092896 kg Kupfer` und `4.122512295082 kg Stahl`. Der äußere Koeffizient bleibt `7.32e-7 kg/kg Ethylen`. |
 | eCO2R-Aufbereitung | Anlagen für DeOx, Amine Wash, TSA und Kryotrennung | OPEN: explizite Infrastruktur fehlt weitgehend |
-| Steam Cracking | `chemical factory construction, organics` | Dokumentierter ecoinvent-Koeffizient `1.1516356618335166e-10 unit/kg Ethylen` unveraendert als Installation modelliert |
+| Steam Cracking | `steam cracker installation` | Eindeutiger Kosten-Wrapper mit `1 unit chemical factory construction, organics`; dokumentierter ecoinvent-Koeffizient `1.1516356618335166e-10 unit/kg Ethylen` bleibt außen unverändert. |
 
 ### Abgleich der disco2very-Background-Inputs
 
@@ -148,13 +148,12 @@ bewusste Abweichungen im Case-Study-Modell:
 
 | Prozess | Ergebnis |
 |---|---|
-| Steam Cracking | Keine Proxy-Ersetzung; das ecoinvent-Inventar wird lediglich eine Ebene tiefer aufgeschlüsselt. |
+| Steam Cracking | Das ecoinvent-Inventar wird eine Ebene tiefer aufgeschlüsselt. Die sieben Feedstocks werden ökologisch unverändert in `steam cracking feedstock mix` gebündelt; Diesel bleibt der dokumentierte Proxy für atmospheric gas oil. |
 | DAC | Korrigiert: Amine-on-Alumina ersetzt den früheren Aktivkohleproxy; die 4-kt-Solid-Sorbent-Konstruktion ersetzt die frühere premise-Activity für ein solvent-basiertes System. |
 | PEM | Die disco2very-Material- und Entsorgungsinputs sind bewusst durch die Stack- und Balance-of-Plant-Inventare aus `methanol_and_iron` ersetzt; Betriebsstrom, Wasser und Abwasser entsprechen disco2very. |
 | CO2-Hydrierung | Betriebsinputs entsprechen disco2very; als Installation wird bewusst `methanol production facility, construction` statt `chemical factory construction, organics` verwendet. |
 | MTO | Mengen entsprechen `allocation="weight"`; die disco2very-Kühlaktivitäten bei -30 °C und -75 °C werden durch verfügbare premise-Proxys bei -25 °C beziehungsweise -100 °C ersetzt. |
-| eCO2R-Reaktion | Direkte Background-Inputs und Mengen entsprechen disco2very. |
-| eCO2R-Aufbereitung | Die Aggregation erhält die ursprünglichen Mengen; lediglich die disco2very-Kühlaktivität bei -75 °C wird durch den premise-Proxy bei -100 °C ersetzt. |
+| eCO2R-Reaktion und Aufbereitung | Beide bisherigen Foreground-Prozesse sind zu `eCO2R ethylene production` aggregiert. Alle Betriebs- und Biosphere-Mengen bleiben erhalten; die disco2very-Kühlaktivität bei -75 °C wird weiterhin durch den premise-Proxy bei -100 °C ersetzt. |
 
 Die DAC-Konstruktionsactivity beschreibt ein System mit `4 kt CO2/a`
 Nennkapazität. Diese Kapazitätsbasis stimmt mit den betrachteten Kostendaten aus
@@ -243,7 +242,7 @@ Die geplante Kosten-CSV soll mindestens enthalten:
 | `location` | Brightway-Standort |
 | `unit` | Einheit des Market Price |
 | `cost_class` | `op`, `cap` oder `cap_and_op` |
-| `year` | Repräsentatives Jahr der premise-Hintergrunddatenbank, an deren Knoten der Preis geschrieben wird |
+| `year` | Repräsentatives Jahr der Case-Study-Hintergrunddatenbank, an deren direktem Kostenknoten der Preis geschrieben wird |
 | `scenario` | Zunächst `REMIND-EU_SSP2-NDC`; ermöglicht bei Bedarf einen späteren alternativen Preispfad |
 | `price` | Auf `EUR_2025` umgerechneter Market Price je Einheit |
 | `currency` | Einheitlich `EUR_2025` |
@@ -280,31 +279,22 @@ Euroraums für 2023, 2024 und 2025 umgerechnet:
 = 0.806635610112 EUR_2025/kg
 ```
 
-Dieser Wert steht vorläufig für alle vier Stützjahre auf der bestehenden
-CSV-Identität `market for naphtha`. Der Status ist `PROXY`, weil der Preis nicht
-nur Naphtha, sondern vereinfachend den gesamten allokierten Feedstock-Slate
-bewertet. Die übrigen direkten Kohlenwasserstoffinputs behalten bis zur
-Modelländerung ihre bisherigen CSV-Zeilen; damit sind zwischenzeitliche
-Kostenläufe weiterhin nur vorläufig interpretierbar. Insbesondere bewertet der
-aktuelle Modellstand numerisch nur die vorhandene Naphtha-Exchange-Menge mit
-diesem Preis. Die beabsichtigte Bewertung der gesamten Feedstock-Mix-Menge wird
-erst durch die neue Activity hergestellt und ist noch nicht implementiert.
+Der Wert wird für alle vier Stützjahre auf die Case-Study-Activity
+`steam cracking feedstock mix` geschrieben. Der Status bleibt `PROXY`, weil ein
+Naphtha-Preis vereinfachend den gesamten Feedstock-Slate bewertet.
 
-Geplante, noch nicht implementierte Modelländerung:
+Die Activity produziert `1 kg` Mix aus den sieben in der ecoinvent-Dokumentation
+genannten Massenanteilen: Butan `16.2 %`, Ethan `4.5 %`, Naphtha `64.0 %`, Natural
+Gas Liquids `2.2 %`, Propan `7.6 %`, Refinery Gas `1.5 %` und Atmospheric Gas Oil
+`4.0 %`, letzteres wie im Quellinventar durch Diesel approximiert. Steam Cracking
+bezieht insgesamt `1.21675954200327 kg Mix/kg Ethylen`.
 
-1. Die anhand der ecoinvent-Dokumentation bestätigten Feedstock-Inputs werden in
-   einer eigenen Background-Activity `steam cracking feedstock mix` gebündelt.
-2. Der Steam-Cracking-Prozess konsumiert anschließend nur diesen Mix als direkten
-   Betriebsinput. Energie-, Hilfsstoff- und Abfallflüsse bleiben außerhalb der
-   Bündelung.
-3. Die internen Exchanges der Mix-Activity erhalten die bisherige ökologische
-   Zusammensetzung. Nur der direkte Mix-Flow wird in Optimex bepreist, damit die
-   Bestandteile nicht zusätzlich als einzelne Kostenpositionen erscheinen.
-4. Erst nach dieser Brightway-Anpassung wird die temporäre Naphtha-Identität in
-   `cost_inputs.csv` durch die tatsächliche Identität der Mix-Activity ersetzt.
-   Vorher wird keine vorweggenommene CSV-Zeile für diese Activity angelegt.
-5. Nach der Umsetzung werden LCIA-Gleichheit zum bisherigen Inventar und die
-   Ausgabe von `cost_relevant_op_flows` geprüft.
+Nur der direkte Mix-Flow wird in optimex bepreist. Seine sieben internen
+premise-Exchanges erhalten keinen zusätzlichen Market Price; Energie,
+Hilfsstoffe und Abfallbehandlungen bleiben separate direkte Betriebsflüsse.
+Die früheren sieben einzelnen Feedstock-Identitäten wurden entsprechend aus
+`cost_inputs.csv` entfernt. Die vollständige Laufzeitprüfung von LCIA-Gleichheit
+und `cost_relevant_op_flows` steht weiterhin aus.
 
 ## Implementierungsstand Meilenstein 1
 
@@ -323,20 +313,25 @@ Stand 2026-07-18:
 - Die beiden Vintages 2005 und 2015 stellen mit jeweils `0.5e9 kg/a` die
   vollständige Steam-Cracker-Kapazität im Startjahr bereit.
 - Der Steam Cracker wird eine Ebene unterhalb der gebündelten ecoinvent-Activity
-  modelliert: 17 direkte Technosphere-Inputs und 44 direkte Biosphere-Exchanges
-  bilden den Betrieb ab. Kumulierte Biosphere-Flows der Lieferketten werden nicht
-  übernommen, sondern weiterhin durch Brightway berechnet.
-- `chemical factory construction, organics` wird ausschliesslich als
-  Installation verwendet. Der statische ecoinvent-Koeffizient
-  `1.1516356618335166e-10 unit/kg Ethylen` wird unveraendert uebernommen. Eine
+  modelliert. Sieben der 17 direkten Technosphere-Inputs bilden intern den
+  Feedstock-Mix; dadurch verbleiben elf direkte Optimex-Betriebsflüsse. Die 44
+  direkten Biosphere-Exchanges bleiben unverändert. Kumulierte Biosphere-Flows
+  der Lieferketten werden weiterhin durch Brightway berechnet.
+- `steam cracker installation` verweist intern auf genau `1 unit chemical
+  factory construction, organics`. Der statische Außenkoeffizient
+  `1.1516356618335166e-10 unit/kg Ethylen` bleibt unverändert; eine
   Multiplikation mit der Modell- oder Quellenlebensdauer findet nicht statt.
 - Bei 25 Jahren Modelllebensdauer ist das Bestandsvintage von 2005 bis
   einschließlich 2029 und das Vintage von 2015 bis einschließlich 2039
   verfügbar. Sie sind weiterhin nicht must-run und können früher durch andere
   Routen ersetzt werden.
 - DAC wird von CO2-Hydrierung und eCO2R über denselben Produktknoten genutzt.
-  Die eCO2R-Aufbereitung bleibt aggregiert und enthält `6.091081 kg CO2/kg
-  Ethylen` aus der Oxidation der Nebenprodukte, nicht aus Produkt-EoL.
+  eCO2R-Reaktion und Aufbereitung sind ein gemeinsamer Foreground-Prozess und
+  enthalten `6.091081 kg CO2/kg Ethylen` aus der Oxidation der Nebenprodukte,
+  nicht aus Produkt-EoL.
+- Die vier Case-Study-Hintergrunddatenbanken enthalten die Kosten-Interfaces und
+  verweisen intern auf die jeweils gleichjährige premise-Datenbank. Weder eigene
+  Activities noch `representative_time` werden in premise geschrieben.
 - Das Notebook liest die versionierte Kosten-CSV unter
   `notebooks/data/ethylene_case_study/cost_inputs.csv`, zeigt ihre Abdeckung für
   die direkten Kostenflüsse und gibt anschließend die tatsächlichen
@@ -364,7 +359,7 @@ Stand 2026-07-18:
 | Alternative premise-Szenarien | OUT_OF_SCOPE | Als mögliche Stellschraube dokumentiert, aber kein Szenariovergleich in der Bachelorarbeit |
 | Sensitivitätsanalyse | OUT_OF_SCOPE | Keine systematische Unsicherheits- oder Parametersensitivität; der Emissionsbudget-Sweep bleibt eine eigene Capability-Demonstration |
 | Alternative Preispfade | DEFERRED | Nur bei späterem Bedarf als gezieltes alternatives Szenario; keine vorab aufgebaute Low-/High-Sensitivität |
-| Steam-Cracker-Feedstock-Bündelung | PENDING | Bestätigte Feedstock-Inputs in einer Background-Activity bündeln und danach die temporäre Naphtha-Identität in der Kosten-CSV ersetzen |
+| Steam-Cracker-Feedstock-Bündelung | IMPLEMENTED_STATIC | Sieben bestätigte Feedstocks in `steam cracking feedstock mix` gebündelt und temporäre Einzelidentitäten in der Kosten-CSV ersetzt; Brightway-/LCIA-Laufzeitprüfung steht aus. |
 | Technologiespezifische Ausbaugrenzen | OUT_OF_SCOPE | Bereits bestehendes optimex-Feature und kein Beitrag der ökonomischen Erweiterung; ein theoretisch sofortiger Großausbau wird als Modellvereinfachung akzeptiert |
 | Restwertmodellierung | OUT_OF_SCOPE | Keine Gutschrift für verbleibende technische Lebensdauer nach 2050; mögliche Benachteiligung später Investitionen wird als Endhorizont-Limitation ausgewiesen |
 | Steigender Ethylen-Demand | DEFERRED | Optionale spätere Stellschraube; kann Kapazitätsaufbau beeinflussen, erzeugt aber ohne weitere Randbedingungen nicht automatisch Frühinvestitionen |
