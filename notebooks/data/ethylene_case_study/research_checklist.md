@@ -162,11 +162,13 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 ### CAPEX
 
 - [x] REPO Installationskoeffizient `3.5842e-12 unit/kg Methanol`
-  unveraendert uebernommen.
+  unveraendert uebernommen. Ein route-spezifischer Installations-Wrapper
+  konsumiert intern genau `1 unit chemical factory construction, organics`.
 - [x] REPO Tiggeloven liefert eine technisch passende CAPEX-Funktion fuer
   direkte Methanolsynthese aus CO2.
-- [ ] DECISION Route-spezifischen Anlagen-CAPEX in einen passenden
-  Installations-Flow ueberfuehren.
+- [x] REPO Route-spezifischen Installations-Flow `CO2 hydrogenation
+  installation` umgesetzt; die Umrechnung des Anlagen-CAPEX auf seine
+  Wrapper-Einheit bleibt offen.
 - [ ] DECISION Fixe Instandhaltung von 2.5 Prozent TPC/a behandeln, ohne CAPEX
   oder OPEX doppelt zu zaehlen.
 

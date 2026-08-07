@@ -89,7 +89,7 @@ muessen ebenfalls geklaert sein.
 | DAC-System | `1.25e-8` | `unit/kg CO2` |
 | PEM-Stack | `1.34989e-6` | `unit/kg H2` |
 | PEM Balance of Plant | `3.37373e-7` | `unit/kg H2` |
-| Methanolanlage | `3.5842e-12` | `unit/kg methanol` |
+| CO2-Hydrierungsinstallation | `3.5842e-12` | `unit CO2 hydrogenation installation/kg methanol`; Wrapper enthält `1 unit chemical factory construction, organics` |
 | MTO-Installation | `3.584e-12` | `unit methanol-to-olefins installation/kg ethylene`; Wrapper enthält `1 unit chemical factory construction, organics` |
 | eCO2R-Systeminstallation | `4e-10` | `unit installation/kg ethylene`; intern `1 unit chemical factory construction, organics`, `0.185 kg copper` und `7544.1975 kg steel` je Wrapper-Einheit. Korrektur nach Rücksprache mit dem disco2very-Ersteller; die absoluten Kupfer- und Stahlmengen bleiben unverändert. |
 
@@ -503,7 +503,7 @@ inhaltlich verbessern.
 | `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Deutz-und-Bardow-Inventar und kapazitaetsgleiche Kostendaten aus Sievert et al. | Der fruehere solvent-basierte 1-Mt-Proxy wurde entfernt. Den TPC aus Sievert et al. auf `EUR_2025` umrechnen und direkt je 4-kt-Einheit eintragen; bis dahin bleibt `1 EUR/Einheit` ein technischer `PLACEHOLDER`. |
 | `electrolyzer production, 1MWe, PEM, Balance of Plant` | AEC-Lebensdauertrennung, kein PEM-CAPEX | Vorhandene IRENA-Proxys behalten; AEC-CAPEX nicht uebertragen. |
 | `electrolyzer production, 1MWe, PEM, Stack` | AEC-Stack 9 a, Kostenanteil 23.8 %, kein PEM-CAPEX | Lebensdauerhinweis dokumentieren; vorhandene IRENA-Proxys behalten. |
-| `methanol production facility, construction` | direkte CO2-Methanolsynthese-CAPEX-Funktion | Technisch gut passend und bereits eindeutig benannt; recherchierten TPC auf die vorhandene unit-Basis umrechnen und direkt eintragen. |
+| `CO2 hydrogenation installation` | direkte CO2-Methanolsynthese-CAPEX-Funktion | Eindeutiger unit-Wrapper ist umgesetzt; den recherchierten TPC auf die Wrapper-Einheit umrechnen. Der frühere premise-Flow `methanol production facility, construction` wurde entfernt, weil sein abstrahierter Einheitenmaßstab nicht zum disco2very-Koeffizienten passt. |
 
 ### Betriebsflows
 
