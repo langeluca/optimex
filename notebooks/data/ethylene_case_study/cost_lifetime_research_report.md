@@ -83,7 +83,7 @@ muessen ebenfalls geklaert sein.
 
 ### Installationskoeffizienten aus den Inventories
 
-| Installation | Unveraendert uebernommener Koeffizient | Inventory-Basis |
+| Installation | Verwendeter Koeffizient | Inventory-Basis |
 |---|---:|---|
 | Steam-Cracker-Installation | `1.1516356618335166e-10` | `unit steam cracker installation/kg ethylene`; Wrapper enthält `1 unit chemical factory construction, organics` |
 | DAC-System | `1.25e-8` | `unit/kg CO2` |
@@ -91,11 +91,12 @@ muessen ebenfalls geklaert sein.
 | PEM Balance of Plant | `3.37373e-7` | `unit/kg H2` |
 | Methanolanlage | `3.5842e-12` | `unit/kg methanol` |
 | MTO-Installation | `3.584e-12` | `unit methanol-to-olefins installation/kg ethylene`; Wrapper enthält `1 unit chemical factory construction, organics` |
-| eCO2R-Systeminstallation | `7.32e-7` | `kg installation proxy/kg ethylene`; intern `1 kg factory`, `0.000101092896 kg copper` und `4.122512295082 kg steel` je kg Wrapper |
+| eCO2R-Systeminstallation | `4e-10` | `unit installation/kg ethylene`; intern `1 unit chemical factory construction, organics`, `0.185 kg copper` und `7544.1975 kg steel` je Wrapper-Einheit. Korrektur nach Rücksprache mit dem disco2very-Ersteller; die absoluten Kupfer- und Stahlmengen bleiben unverändert. |
 
-Die Betrags- und Referenzproduktbasis bleibt damit identisch zum
-Quellinventory. `operation=False` kennzeichnet die zeitliche Skalierung als
-Installation, fuehrt aber nicht zu einer Umrechnung auf Jahreskapazitaet.
+Die Betrags- und Referenzproduktbasis bleibt mit Ausnahme der bestätigten
+eCO2R-Korrektur identisch zum Quellinventory. `operation=False` kennzeichnet die
+zeitliche Skalierung als Installation, fuehrt aber nicht zu einer Umrechnung
+auf Jahreskapazitaet.
 
 ## Rohwerte aus den Quellen
 
@@ -496,7 +497,7 @@ inhaltlich verbessern.
 
 | CSV-Flow | Neue Evidenz | Bewertung und naechster Schritt |
 |---|---|---|
-| `eCO2R system installation` | eCO2R-CAPEX aus Tiggeloven | Eindeutiger kg-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/kg` als `PLACEHOLDER`, bis der aggregierte TPC auf die Fabrikmassenbasis umgerechnet ist. |
+| `eCO2R system installation` | eCO2R-CAPEX aus Tiggeloven | Eindeutiger unit-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/unit` als `PLACEHOLDER`, bis der aggregierte TPC auf die Fabrikeinheitenbasis umgerechnet ist. |
 | `steam cracker installation` | Steam-Cracker-CAPEX aus Tiggeloven | Eindeutiger unit-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/unit` als `PLACEHOLDER`, bis der TPC auf die Wrapper-Einheit umgerechnet ist. |
 | `methanol-to-olefins installation` | MTO-CAPEX aus Tiggeloven | Eindeutiger unit-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/unit` als `PLACEHOLDER`, bis der TPC auf die Wrapper-Einheit umgerechnet ist. |
 | `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Deutz-und-Bardow-Inventar und kapazitaetsgleiche Kostendaten aus Sievert et al. | Der fruehere solvent-basierte 1-Mt-Proxy wurde entfernt. Den TPC aus Sievert et al. auf `EUR_2025` umrechnen und direkt je 4-kt-Einheit eintragen; bis dahin bleibt `1 EUR/Einheit` ein technischer `PLACEHOLDER`. |
@@ -543,9 +544,9 @@ installation` und `methanol-to-olefins installation`. Beide verweisen intern
 auf `chemical factory construction, organics`, dessen Umweltinventar dadurch
 erhalten bleibt, ohne ihm einen gemeinsamen route-unspezifischen Preis zu geben.
 
-Analog fasst `eCO2R system installation` Fabrik, Kupfer und Stahl hinter einer
-einzigen direkten CAPEX-Identitaet zusammen. Die drei generischen Inputs werden
-nicht mehr einzeln durch optimex bepreist.
+Analog fasst `eCO2R system installation` die organisch-chemische Fabrik, Kupfer
+und Stahl hinter einer einzigen direkten CAPEX-Identitaet zusammen. Die drei
+generischen Inputs werden nicht mehr einzeln durch optimex bepreist.
 
 Die LCA-Infrastruktur bleibt durch die internen Wrapper-Exchanges unveraendert.
 Offen ist nicht mehr die Architektur, sondern die nachvollziehbare Umrechnung

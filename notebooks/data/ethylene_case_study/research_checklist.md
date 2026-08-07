@@ -227,10 +227,13 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 ### CAPEX
 
 - [x] REPO Reaktion und Separation zu einem Foreground-Prozess aggregiert;
-  Betriebswerte und `6.091081 kg CO2/kg Ethylen` bleiben sichtbar erhalten.
-- [x] REPO `eCO2R system installation` auf Fabrikmassenbasis umgesetzt. Der
-  äußere Koeffizient bleibt `7.32e-7 kg/kg Ethylen`; Fabrik, Kupfer und Stahl
-  liegen intern im vereinbarten Verhältnis.
+  Betriebswerte und `6.091081 kg CO2/kg Ethylen` aus der Nebenproduktoxidation
+  bleiben sichtbar erhalten. Dies entspricht `eol="no"`; das Ethylenprodukt-EoL
+  ist ausgeschlossen.
+- [x] REPO `eCO2R system installation` auf Fabrikeinheitenbasis umgesetzt. Nach
+  Rücksprache mit dem disco2very-Ersteller ersetzt `4e-10 unit/kg Ethylen` den
+  fehlerhaften Fabrikmasseninput. Fabrik, Kupfer und Stahl liegen intern im
+  unveränderten absoluten Verhältnis.
 - [x] REPO Tiggeloven liefert eine CO2-Elektrolyse-CAPEX-Funktion als Proxy.
 - [ ] DECISION Systemgrenze und Kapazitaetsbasis mit dem modellierten
   eCO2R-Reaktor vergleichen.

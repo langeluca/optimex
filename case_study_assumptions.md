@@ -42,7 +42,7 @@ Bachelorarbeit interpretiert werden.
 | Zeitliche Aggregation des Umweltziels | DECIDED | Minimierung der kumulierten Klimawirkung über alle Jahre 2025 bis 2050; keine jährliche Klimagrenze und kein isoliertes Zieljahr |
 | Weitere Wirkungskategorien | OUT_OF_SCOPE | Feinstaub, Landnutzung, Wassernutzung und weitere Kategorien werden nicht systematisch optimiert oder ausgewertet |
 | Use Phase | OUT_OF_SCOPE | Die Nutzungsphase der aus Ethylen hergestellten Produkte bleibt in jedem Fall ausgeschlossen |
-| Produkt-End-of-Life | DEFERRED | In der Baseline ausgeschlossen; bei einer späteren EoL-Erweiterung gemeinsam mit Anlagenstilllegung und Anlagen-EoL aufnehmen |
+| Produkt-End-of-Life | DEFERRED | In der Baseline ausgeschlossen; die eCO2R-Route entspricht `create_eCO2R_cryo_sep(eol="no")`. Bei einer späteren EoL-Erweiterung gemeinsam mit Anlagenstilllegung und Anlagen-EoL aufnehmen. |
 | Anlagenstilllegung und Anlagen-EoL | DEFERRED | In der Baseline ausgeschlossen; bei einer späteren EoL-Erweiterung gemeinsam mit dem Produkt-EoL aufnehmen |
 | Optimierungstyp | DECIDED | Brownfield-Optimierung: Zu Beginn des Modellzeitraums ist fossile Steam-Cracking-Kapazität vorhanden; zusätzliche Kapazitäten können endogen gebaut werden |
 | Ethylennachfrage | DECIDED | Konstant `1 Mt/a = 1e9 kg/a` von 2025 bis 2050; keine recherchierte sektorale Nachfrageprojektion erforderlich |
@@ -119,9 +119,13 @@ erneut gegen die korrigierte Variablensemantik zu pruefen.
 ### Einheiten der ecoinvent-Infrastruktur
 
 - `chemical factory construction, organics`: internes Umweltinventar bezogen auf
-  `unit`; direkte Preise liegen auf den getrennten Steam- und MTO-Wrappern.
-- `chemical factory construction`: internes Umweltinventar bezogen auf
-  `kg factory`; der direkte Preis liegt auf `eCO2R system installation`.
+  `unit`; direkte Preise liegen auf den getrennten Steam-, MTO- und
+  eCO2R-Wrappern.
+
+Der disco2very-Ersteller hat bestätigt, dass der bisher für eCO2R verwendete
+Input `chemical factory construction` mit der Einheit `kg factory` fehlerhaft
+war. Korrekt sind `4e-10 unit chemical factory construction, organics` pro kg
+Ethylen.
 
 Fuer die in `my_activities.py` dokumentierten Mengen bleibt lediglich zu
 pruefen, welcher konkrete Datensatz und welche Einheit verwendet wurden. Eine
@@ -137,7 +141,7 @@ Quellenlebensdauer ist fuer ihre Uebernahme nicht erforderlich.
 | PEM EoL | zugehörige Recycling- und Entsorgungsprozesse | OPEN: Zeitpunkt und Skalierung prüfen |
 | DAC | `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Material- und Landnutzungsinventar der disco2very-Activity `construction of direct air capture, 2016` übernommen; Name, Code und Kommentar spezifizieren die Nennkapazität von 4 kt CO2/a und Deutz und Bardow (2021) als Quelle. Der Koeffizient `1.25e-8 unit/kg CO2` bleibt unverändert. |
 | DAC EoL | `treatment of direct air capture, 2016` | In der disco2very-Konstruktionsactivity enthalten, für die Baseline aber bewusst nicht übernommen, da Anlagen-EoL außerhalb der Systemgrenze liegt. |
-| eCO2R-Gesamtsystem | `eCO2R system installation` | Eindeutiger Kosten-Wrapper auf Fabrikmassenbasis; enthält je kg Wrapper `1 kg chemical factory`, `0.000101092896 kg Kupfer` und `4.122512295082 kg Stahl`. Der äußere Koeffizient bleibt `7.32e-7 kg/kg Ethylen`. |
+| eCO2R-Gesamtsystem | `eCO2R system installation` | Eindeutiger Kosten-Wrapper auf Fabrikeinheitenbasis; enthält je Wrapper-Einheit `1 unit chemical factory construction, organics`, `0.185 kg Kupfer` und `7544.1975 kg Stahl`. Der äußere Koeffizient ist `4e-10 unit/kg Ethylen`; dadurch bleiben die absoluten Kupfer- und Stahlmengen unverändert. |
 | eCO2R-Aufbereitung | Anlagen für DeOx, Amine Wash, TSA und Kryotrennung | OPEN: explizite Infrastruktur fehlt weitgehend |
 | Steam Cracking | `steam cracker installation` | Eindeutiger Kosten-Wrapper mit `1 unit chemical factory construction, organics`; dokumentierter ecoinvent-Koeffizient `1.1516356618335166e-10 unit/kg Ethylen` bleibt außen unverändert. |
 
@@ -153,7 +157,7 @@ bewusste Abweichungen im Case-Study-Modell:
 | PEM | Die disco2very-Material- und Entsorgungsinputs sind bewusst durch die Stack- und Balance-of-Plant-Inventare aus `methanol_and_iron` ersetzt; Betriebsstrom, Wasser und Abwasser entsprechen disco2very. |
 | CO2-Hydrierung | Betriebsinputs entsprechen disco2very; als Installation wird bewusst `methanol production facility, construction` statt `chemical factory construction, organics` verwendet. |
 | MTO | Mengen entsprechen `allocation="weight"`; die disco2very-Kühlaktivitäten bei -30 °C und -75 °C werden durch verfügbare premise-Proxys bei -25 °C beziehungsweise -100 °C ersetzt. |
-| eCO2R-Reaktion und Aufbereitung | Beide bisherigen Foreground-Prozesse sind zu `eCO2R ethylene production` aggregiert. Alle Betriebs- und Biosphere-Mengen bleiben erhalten; die disco2very-Kühlaktivität bei -75 °C wird weiterhin durch den premise-Proxy bei -100 °C ersetzt. |
+| eCO2R-Reaktion und Aufbereitung | Beide bisherigen Foreground-Prozesse sind zu `eCO2R ethylene production` aggregiert. Alle Betriebs- und Biosphere-Mengen bleiben erhalten; die disco2very-Kühlaktivität bei -75 °C wird weiterhin durch den premise-Proxy bei -100 °C ersetzt. Der fehlerhafte Fabrikmasseninput wurde nach Rücksprache mit dem disco2very-Ersteller durch `4e-10 unit chemical factory construction, organics/kg Ethylen` ersetzt. |
 
 Die DAC-Konstruktionsactivity beschreibt ein System mit `4 kt CO2/a`
 Nennkapazität. Diese Kapazitätsbasis stimmt mit den betrachteten Kostendaten aus
@@ -328,7 +332,8 @@ Stand 2026-07-18:
 - DAC wird von CO2-Hydrierung und eCO2R über denselben Produktknoten genutzt.
   eCO2R-Reaktion und Aufbereitung sind ein gemeinsamer Foreground-Prozess und
   enthalten `6.091081 kg CO2/kg Ethylen` aus der Oxidation der Nebenprodukte,
-  nicht aus Produkt-EoL.
+  nicht aus Produkt-EoL. Dies entspricht `create_eCO2R_cryo_sep(eol="no")` in
+  der aktuellen disco2very-Implementierung.
 - Die vier Case-Study-Hintergrunddatenbanken enthalten die Kosten-Interfaces und
   verweisen intern auf die jeweils gleichjährige premise-Datenbank. Weder eigene
   Activities noch `representative_time` werden in premise geschrieben.
