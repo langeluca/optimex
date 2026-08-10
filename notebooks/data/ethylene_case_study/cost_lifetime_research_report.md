@@ -20,10 +20,12 @@ Inventory-Mengen angepasst. `cost_inputs.csv` bleibt unveraendert.
 
 Die Quellenwerte werden grundsaetzlich zunaechst in Originalwaehrung und
 Originalpreisjahr dokumentiert. Eine Umrechnung auf `EUR_2025` erfolgt nur mit
-einem expliziten Faktor und einer separaten Indexquelle. Fuer Naphtha wurde
-dies inzwischen mit den HICP-Jahresraten des Euroraums fuer 2023-2025
-umgesetzt; die uebrigen neu extrahierten Werte bleiben vorerst in ihrer
-Originalbasis. Es wird keine stillschweigende Umrechnung vorgenommen.
+einem expliziten Faktor und einer separaten Indexquelle. Verbindlich ist die in
+`case_study_assumptions.md` dokumentierte Methode mit dem Eurostat-HVPI-
+Jahresdurchschnitt fuer EA20 und den ECB-Jahresmittelkursen. Fuer Naphtha wurde
+diese Methode bereits umgesetzt; die uebrigen neu extrahierten Werte bleiben
+vorerst in ihrer Originalbasis. Es wird keine stillschweigende Umrechnung
+vorgenommen.
 
 ## Kurzfazit
 
@@ -87,8 +89,7 @@ muessen ebenfalls geklaert sein.
 |---|---:|---|
 | Steam-Cracker-Installation | `1.1516356618335166e-10` | `unit steam cracker installation/kg ethylene`; Wrapper enthält `1 unit chemical factory construction, organics` |
 | DAC-System | `1.25e-8` | `unit/kg CO2` |
-| PEM-Stack | `1.34989e-6` | `unit/kg H2` |
-| PEM Balance of Plant | `3.37373e-7` | `unit/kg H2` |
+| PEM-Systemwrapper | `2.55731016392694e-7` | `wrapper/kg H2`; Referenz `1 MWe`, `156414.347 kg H2/a`, 25 Jahre; intern `5.2785540801` Stack- und `1.3192494393` Balance-of-Plant-Einheiten, sodass die bisherigen Nettokoeffizienten erhalten bleiben |
 | CO2-Hydrierungsinstallation | `3.5842e-12` | `unit CO2 hydrogenation installation/kg methanol`; Wrapper enthält `1 unit chemical factory construction, organics` |
 | MTO-Installation | `3.584e-12` | `unit methanol-to-olefins installation/kg ethylene`; Wrapper enthält `1 unit chemical factory construction, organics` |
 | eCO2R-Systeminstallation | `4e-10` | `unit installation/kg ethylene`; intern `1 unit chemical factory construction, organics`, `0.185 kg copper` und `7544.1975 kg steel` je Wrapper-Einheit. Korrektur nach Rücksprache mit dem disco2very-Ersteller; die absoluten Kupfer- und Stahlmengen bleiben unverändert. |
@@ -145,9 +146,15 @@ Tabelle C.2, gedruckte Seite 169, PDF-Seite 184:
 |---|---|
 | Conventional cracker | Input Naphtha 1; Output Ethylen 0.303, jeweils auf Massenbasis |
 | Direkte Methanolsynthese | Input CO2 1; Output Methanol 0.685 |
-| MTO | Input Methanol 1; Output Ethylen 0.592 |
+| MTO | Input Methanol 1; Output Ethylen 0.163 und Propylen 0.165; `0.592` gehoert zur Ethanol-Dehydratisierung |
 | CO2-Elektrolyse | Input CO2 1; Output Ethylen 0.602 |
 | Gas boiler | 0.920 MJ Dampf je MJ Erdgas |
+
+Die vollstaendige Herleitung der vier auf `1 Mt Ethylen/a` bezogenen
+Tiggeloven-CAPEX steht in
+[`tiggeloven_capex_calculations.md`](tiggeloven_capex_calculations.md). Die dort
+berechneten Preise und die kapazitaetsbasierten Wrapper sind statisch umgesetzt;
+die Laufzeitpruefung steht noch aus.
 
 #### Energie- und Feedstockpreise
 
@@ -424,7 +431,7 @@ sind nicht enthalten. Der Wert ist daher `PROXY`.
 
 | Flow | Rohwert | Mechanische Umrechnung | Eignung |
 |---|---:|---:|---|
-| Naphtha | 732 EUR_2022/t | 0.732 EUR_2022/kg; 0.806635610112 EUR_2025/kg nach HICP-Umrechnung | `DIRECT` als Rohwert, `PROXY` fuer den gebuendelten Feedstock-Slate |
+| Naphtha | 732 EUR_2022/t | 0.732 EUR_2022/kg; 0.806789375069 EUR_2025/kg nach HVPI-Indexmethode | `DIRECT` als Rohwert, `PROXY` fuer den gebuendelten Feedstock-Slate |
 | Ethane | 330 USD_2023/t | 0.330 USD_2023/kg | `PROXY`, USA |
 | Strom NL 2019 | 41.2 EUR/MWh | 0.0412 EUR/kWh | `PROXY` |
 | Strom Chemelot 2030/2040/2050 | 108.2 / 272.9 / 20.5 EUR/MWh | 0.1082 / 0.2729 / 0.0205 EUR/kWh | `PROXY`, stark szenarioabhaengig |
@@ -438,12 +445,13 @@ Naphtha. Der Quellenwert stammt damit nicht aus einer eigenen Preisschaetzung
 von Tiggeloven. Die unveraenderte Fortschreibung in Tabelle 4.2 ist dagegen
 eine Modellannahme.
 
-Fuer `EUR_2025` wird der Quellenwert mit den HICP-Jahresraten des Euroraums fuer
-2023 bis 2025 umgerechnet:
+Fuer `EUR_2025` wird der Quellenwert mit dem Eurostat-HVPI-Jahresdurchschnitt
+fuer EA20 umgerechnet. Die Reihe `prc_hicp_ainr` (`TOTAL`, `INX_A_AVG`) weist
+`90.73` fuer 2022 und `100.00` fuer 2025 aus:
 
 ```text
-0.732 * 1.054 * 1.024 * 1.021
-= 0.806635610112 EUR_2025/kg
+0.732 * (100 / 90.73)
+= 0.806789375069 EUR_2025/kg
 ```
 
 Der Wert wird real konstant fuer alle Stutzjahre auf `steam cracking feedstock
@@ -478,7 +486,8 @@ Alle Empfehlungen bleiben Annahmen fuer eine Framework-Demonstration.
 ## Inventory-Uebernahmeregel
 
 - Normale ecoinvent-, disco2very- und andere Brightway-Inventory-Mengen werden
-  unveraendert uebernommen, auch fuer PEM Stack und Balance of Plant.
+  unveraendert uebernommen. Beim PEM-System geschieht dies ueber interne Stack-
+  und Balance-of-Plant-Mengen im kapazitaetsbezogenen Wrapper.
 - Fuer die Installationsskalierung muss keine Quellenlebensdauer recherchiert
   werden.
 - Weiterhin fachlich zu entscheiden ist, ob ein Exchange Betrieb
@@ -497,13 +506,12 @@ inhaltlich verbessern.
 
 | CSV-Flow | Neue Evidenz | Bewertung und naechster Schritt |
 |---|---|---|
-| `eCO2R system installation` | eCO2R-CAPEX aus Tiggeloven | Eindeutiger unit-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/unit` als `PLACEHOLDER`, bis der aggregierte TPC auf die Fabrikeinheitenbasis umgerechnet ist. |
-| `steam cracker installation` | Steam-Cracker-CAPEX aus Tiggeloven | Eindeutiger unit-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/unit` als `PLACEHOLDER`, bis der TPC auf die Wrapper-Einheit umgerechnet ist. |
-| `methanol-to-olefins installation` | MTO-CAPEX aus Tiggeloven | Eindeutiger unit-Wrapper ist umgesetzt; vorläufig `1 EUR_2025/unit` als `PLACEHOLDER`, bis der TPC auf die Wrapper-Einheit umgerechnet ist. |
-| `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Deutz-und-Bardow-Inventar und kapazitaetsgleiche Kostendaten aus Sievert et al. | Der fruehere solvent-basierte 1-Mt-Proxy wurde entfernt. Den TPC aus Sievert et al. auf `EUR_2025` umrechnen und direkt je 4-kt-Einheit eintragen; bis dahin bleibt `1 EUR/Einheit` ein technischer `PLACEHOLDER`. |
-| `electrolyzer production, 1MWe, PEM, Balance of Plant` | AEC-Lebensdauertrennung, kein PEM-CAPEX | Vorhandene IRENA-Proxys behalten; AEC-CAPEX nicht uebertragen. |
-| `electrolyzer production, 1MWe, PEM, Stack` | AEC-Stack 9 a, Kostenanteil 23.8 %, kein PEM-CAPEX | Lebensdauerhinweis dokumentieren; vorhandene IRENA-Proxys behalten. |
-| `CO2 hydrogenation installation` | direkte CO2-Methanolsynthese-CAPEX-Funktion | Eindeutiger unit-Wrapper ist umgesetzt; den recherchierten TPC auf die Wrapper-Einheit umrechnen. Der frühere premise-Flow `methanol production facility, construction` wurde entfernt, weil sein abstrahierter Einheitenmaßstab nicht zum disco2very-Koeffizienten passt. |
+| `eCO2R system installation` | eCO2R-CAPEX aus Tiggeloven | `1977.359042 MEUR_2025` je `1 Mt Ethylen/a`-Wrapper eingetragen; `PROXY`, weil Tiggelovens CO2-Elektrolyse die aggregierte Trennung nicht separat abbildet. |
+| `steam cracker installation` | Steam-Cracker-CAPEX aus Tiggeloven und PlasticsEurope-Allokationssystematik | `764.252608 MEUR_2025` je `1 Mt Ethylen/a`-Wrapper eingetragen. Mit den Zimmermann-und-Walzl-Ausbeuten aus Tiggeloven Tabelle A.6 gilt `alpha = 0.5222337125`; wegen des nicht separat ausgewiesenen Wasserstoff-Yields bleibt der Faktor `PROXY`. |
+| `methanol-to-olefins installation` | MTO-CAPEX aus Tiggeloven | `353.601345 MEUR_2025` je `1 Mt Ethylen/a`-Wrapper eingetragen; der Preis enthaelt die vom LCI geerbte Massenallokation `alpha = 0.4`. |
+| `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Deutz-und-Bardow-Inventar und kapazitaetsgleiche Kostendaten aus Sievert et al., SI Tabellen S12 und S15-S16 | Der TPC-Mittelwert von `22.8625 Mio. USD_2022` wurde mit EZB-Jahresmittelkurs und Eurostat-HVPI auf `23.928990 Mio. EUR_2025` je 4-kt-Einheit umgerechnet, als `PROXY` eingetragen und vorlaeufig real konstant fortgeschrieben. |
+| `PEM electrolyzer system installation, 1 MWe` | IRENA-Kosten fuer vollstaendige PEM-Systeme mit mindestens `10 MW` | `0.920 Mio. EUR_2025` je Wrapper fuer alle Stuetzjahre real konstant. Der spezifische Preis wird linear auf `1 MWe` uebertragen; Skaleneffekte werden nicht modelliert. Der Wrapper verwendet 25 Jahre; separate Stackwechsel werden wirtschaftlich nicht modelliert. Status `PROXY`, da Groessenuebertragung und Waehrungsumrechnung abzusichern sind. |
+| `CO2 hydrogenation installation` | direkte CO2-Methanolsynthese-CAPEX-Funktion | `1932.237784 MEUR_2025` je Wrapper mit `6.134969325 Mt Methanol/a` eingetragen. Der fruehere premise-Flow `methanol production facility, construction` bleibt durch den eindeutigen routenspezifischen Wrapper ersetzt. |
 
 ### Betriebsflows
 
@@ -511,8 +519,8 @@ inhaltlich verbessern.
 |---|---|---|
 | `cooling energy production, at -25 °C, propylene compression refrigeration system 1 MW` | keine | Vorhandenen Proxy behalten. |
 | `heat production, at heat pump 30kW, allocation exergy` | keine | Vorhandenen Proxy behalten. |
-| `adsorbent, amine on alumina` | disco2very-Inventar aus PEI und Aluminiumoxid; Kostendaten aus Sievert et al. | Der unpassende Aktivkohleproxy wurde entfernt. Sorbenspreis auf `EUR_2025/kg` uebertragen; bis dahin technischer `PLACEHOLDER`. |
-| `steam cracking feedstock mix` | 0.732 EUR_2022/kg Naphtha; 0.806635610112 EUR_2025/kg nach HICP-Umrechnung | `PROXY` fuer den gesamten siebenkomponentigen Feedstock-Mix; interne Feedstocks werden nicht separat bepreist. |
+| `adsorbent, amine on alumina` | disco2very-Inventar aus PEI und Aluminiumoxid; `8.821 USD_2022/kg` fuer Lewatit VP OC 1065 aus Sievert et al., SI Tabelle S21 | Mit EZB-Jahresmittelkurs und Eurostat-HVPI auf `9.232482229249 EUR_2025/kg` umgerechnet und als real konstanter `PROXY` eingetragen. Der laufende Flow bildet Sorbensersatz ab; die initiale Befuellung bleibt im DAC-TPC. |
+| `steam cracking feedstock mix` | 0.732 EUR_2022/kg Naphtha; 0.806789375069 EUR_2025/kg nach HVPI-Indexmethode | `PROXY` fuer den gesamten siebenkomponentigen Feedstock-Mix; interne Feedstocks werden nicht separat bepreist. |
 | `market for compressed air, 700 kPa gauge` | keine | `PLACEHOLDER`; weitere Recherche. |
 | `market for cooling energy` | keine | Vorhandenen Proxy behalten. |
 | `market for cooling energy, at -100 °C` | keine | Vorhandenen Proxy behalten. |
@@ -590,7 +598,7 @@ eingetragen werden.
 Aktuell dokumentiert beziehungsweise noch umzusetzen:
 
 1. Steam-Cracker-Feedstock: `steam cracking feedstock mix` ist mit
-   `0.806635610112 EUR_2025/kg` fuer alle Stutzjahre umgesetzt. Nur der Mix ist
+   `0.806789375069 EUR_2025/kg` fuer alle Stutzjahre umgesetzt. Nur der Mix ist
    direkte Kostenposition; die sieben internen Feedstocks wurden aus der CSV
    entfernt. Laufzeitpruefung steht aus.
 2. Steam-, MTO- und eCO2R-CAPEX: Die route-spezifischen Wrapper sind umgesetzt,
@@ -617,8 +625,8 @@ Aktuell dokumentiert beziehungsweise noch umzusetzen:
 - Korrigierten `var_installation`-Pfad mit einem mehrjaehrigen
   Static-LCA-Aequivalenztest validieren.
 - Entscheidung ueber route-spezifische CAPEX-Abbildung.
-- DAC-Anlagen-CAPEX.
-- PEM-Stack- und PEM-BOP-CAPEX mit passender MW-Basis und Zukunftstrajektorie.
+- Recherchierte Zukunftstrajektorie fuer den vorlaeufig real konstanten DAC-Anlagen-CAPEX.
+- Exakte Umrechnung des real konstanten PEM-Gesamtsystem-CAPEX.
 - EUR_2022- und USD_2023-Umrechnung auf `EUR_2025`.
 - Konsistente europaeische Strompreisentwicklung 2020-2050.
 
@@ -671,6 +679,14 @@ Aktuell dokumentiert beziehungsweise noch umzusetzen:
 7. INSEE (2022): *International prices of imported raw materials - Naphtha
    (European Northwest)*. Spotpreisreihe:
    https://www.insee.fr/fr/statistiques/serie/001641575.
-8. European Central Bank: *Past macroeconomic projections*, HICP-Jahresraten
-   des Euroraums 2023-2025:
-   https://www.ecb.europa.eu/mopo/devel/ecana/html/table.en.html.
+8. Eurostat: *Harmonised index of consumer prices (HICP) - ECOICOP ver.2 -
+   indices and rates of change, annual data*, `prc_hicp_ainr`, EA20, TOTAL,
+   INX_A_AVG. DOI: https://doi.org/10.2908/PRC_HICP_AINR.
+9. European Central Bank: annual average USD/EUR reference exchange rate,
+   series `EXR.A.USD.EUR.SP00.A`:
+   https://data.ecb.europa.eu/data/datasets/EXR/EXR.A.USD.EUR.SP00.A.
+10. Sievert, Katrin; Schmidt, Tobias S.; Steffen, Bjarne (2024):
+    *Considering technology characteristics to project future costs of direct
+    air capture*. Joule 8(4). DOI:
+    https://doi.org/10.1016/j.joule.2024.02.005. Verwendete Fundstelle:
+    Supporting Information, Tabelle S21, Sorbenspreis fuer Lewatit VP OC 1065.

@@ -28,7 +28,7 @@ Bachelorarbeit interpretiert werden.
 | Workflow-Blueprints | DECIDED | `notebooks/basic_example_econ.ipynb` und `notebooks/methanol_and_iron.ipynb` |
 | Routen | DECIDED | Steam Cracking; DAC + PEM + CO2-Hydrierung + MTO; DAC + aggregierte eCO2R-Reaktion und Aufbereitung |
 | MTO-Koppelproduktbehandlung | DECIDED | Massenallokation: `allocation="weight"`, kein Avoided Burden |
-| Anlagenmodellierung | DECIDED | DAC, PEM, CO2-Hydrierung, MTO und der aggregierte eCO2R-Prozess als eigenständige Foreground-Anlagen; Steam, MTO und eCO2R verwenden eindeutig benannte Installations-Wrapper. |
+| Anlagenmodellierung | DECIDED | DAC, PEM, CO2-Hydrierung, MTO und der aggregierte eCO2R-Prozess als eigenständige Foreground-Anlagen; Steam, PEM, CO2-Hydrierung, MTO und eCO2R verwenden eindeutig benannte Installations-Wrapper. |
 | Gemeinsame DAC-Versorgung | DECIDED | CO2-Hydrierung und eCO2R greifen auf denselben manuell angelegten DAC-Produktknoten und damit auf einen gemeinsamen Pool installierter DAC-Kapazität zu |
 | eCO2R-Aufbereitung | DECIDED | Reaktion und die Betriebsinputs der fünf Trennschritte werden in einem gemeinsamen Foreground-Prozess sichtbar aggregiert, weil der verfügbare CAPEX-Proxy das Gesamtsystem abbildet. |
 | Kapazitätsbasis | DECIDED | Effektiv verfügbare Jahresproduktion in `kg Referenzprodukt/a` je Anlage |
@@ -57,7 +57,7 @@ Bachelorarbeit interpretiert werden.
 | Bauzeit und Betriebsbeginn | DECIDED | Keine Inbetriebnahmeverzögerung: Konstruktion und erster möglicher Betrieb liegen im Installationsjahr; `operation_time_limits` beginnen bei `0` |
 | DAC-Modelllebensdauer | DECIDED | `20 Jahre` nach Deutz und Bardow (2021), DOI `10.1038/s41560-020-00771-9`; `operation_time_limits=(0, 19)` bildet damit genau 20 Betriebsjahre ab |
 | Übrige Modelllebensdauern | DECIDED | Jeweils `25 Jahre` nach Tiggeloven (2026), Tabelle C.1: Steam Cracking, PEM-Anlage als AEC-Proxy, CO2-Hydrierung, MTO, eCO2R-Reaktor als CO2-Elektrolyse-Proxy und eCO2R-Aufbereitung als ASU-Proxy; jeweils `operation_time_limits=(0, 24)` |
-| PEM-Stackersatz | OUT_OF_SCOPE | Tiggeloven nennt `9 Jahre` für AEC-Stacks und `25 Jahre` für die übrige Anlage. Das aktuelle Ein-Prozess-Modell verwendet `25 Jahre` für die PEM-Anlage und bildet keinen separaten Stacktausch ab. |
+| PEM-Stackersatz | OUT_OF_SCOPE | Tiggeloven nennt `9 Jahre` für AEC-Stacks und `25 Jahre` für die übrige Anlage. Das aktuelle Ein-Prozess-Modell verwendet einen vollständigen PEM-Systemwrapper mit `25 Jahren`; Stacktausch und separate Ersatzkosten werden nicht modelliert. |
 | Aktuelle Kostenstufe | DECIDED | Zunächst Kostenoptimierung ohne CO2-Preis |
 | Ökonomische Perspektive | DECIDED | Zentraler Systemplaner mit einem einheitlichen realen Diskontsatz; keine technologiespezifischen Investoren-WACC |
 | Diskontierung | PLACEHOLDER | Einheitlicher realer Diskontsatz von `3 %`, Referenzjahr 2025, entsprechend `basic_example_econ.ipynb`; Wert und Quelle vor finalen Kostenläufen prüfen |
@@ -65,8 +65,12 @@ Bachelorarbeit interpretiert werden.
 | Zeitpunkt der Investitionskosten | DECIDED | Installationsbezogene Kosten fallen vollständig im Installationsjahr an; keine Verteilung als Annuität über die Anlagenlebensdauer |
 | Restwert am Zeithorizont | OUT_OF_SCOPE | Kein Salvage Value für nach 2050 verbleibende Anlagenlebensdauer; Investitionen tragen ihre vollständigen Kosten im Installationsjahr |
 | Ökonomische Systemgrenze | DECIDED | Bepreisung ausschließlich der direkten Käufe aus den Case-Study-Hintergrunddatenbanken, wie sie in `LCADataProcessor.cost_relevant_op_flows` und `cost_relevant_cap_flows` erscheinen; interne premise-Inputs werden nicht zusätzlich bepreist. |
-| Wärme aus Erdgas | PROXY | `0.011231884 EUR_2025/MJ Wärme`: THE-Day-Ahead-Gaspreis 2025 von `37.2 EUR/MWh` nach FfE/EEX, geteilt durch `3600 MJ/MWh` und den Gasboiler-Wirkungsgrad `0.920` aus Tiggeloven (2026), Tabelle C.2, gedruckte Seite 169/PDF 184; nur Brennstoffkosten, ohne Kessel-CAPEX und O&M; bis zur Preisprojektion real konstant |
-| Absorptionskühlung | PROXY | `0.020543646 EUR_2025/MJ Kühlenergie`: `1.67 MJ` Wärme aus Erdgas zu `0.011231884 EUR/MJ` plus `0.0200 kWh` Strom zu `0.08932 EUR/kWh`; Wasser bleibt unbepreist; bis zu den Gas- und Strompreisprojektionen real konstant |
+| Kostenallokation | DECIDED | Kosten folgen den im verwendeten LCI enthaltenen oekologischen Allokationsregeln. OPEX erben die allokierten Exchange-Mengen; route-spezifische CAPEX-Wrapper verwenden denselben Allokationsfaktor auf den vollstaendigen TPC. Ohne Allokation gilt `alpha_LCA = 1`. |
+| Wärme aus Erdgas | PROXY | `0.011231884058 EUR_2025/MJ Wärme`: THE-Day-Ahead-Gaspreis 2025 von `37.2 EUR/MWh` nach FfE/EEX, geteilt durch `3600 MJ/MWh` und den Gasboiler-Wirkungsgrad `0.920` aus Tiggeloven (2026), Tabelle C.2, gedruckte Seite 169/PDF 184; nur Brennstoffkosten, ohne Kessel-CAPEX und O&M; bis zur Preisprojektion real konstant |
+| Absorptionskühlung | PROXY | `0.020543646377 EUR_2025/MJ Kühlenergie`: `1.67 MJ` Wärme aus Erdgas zu `0.011231884058 EUR/MJ` plus `0.0200 kWh` Strom zu `0.08932 EUR/kWh`; Wasser bleibt unbepreist; bis zu den Gas- und Strompreisprojektionen real konstant |
+| DAC-Sorbens | PROXY | `9.232482229249 EUR_2025/kg`: `8.821 USD_2022/kg` für Lewatit VP OC 1065 aus Sievert, Schmidt und Steffen (2024), SI Tabelle S21, mit dem dokumentierten EZB-/HVPI-Faktor `1.04664802508205` umgerechnet; Übertragung auf PEI auf Aluminiumoxid und reale konstante Fortschreibung; laufender Flow als Sorbensersatz, initiale Befüllung weiterhin im DAC-TPC |
+| DAC-Anlage | PROXY | `23928990.4734383 EUR_2025` je Solid-Sorbent-TVSA-Anlage mit `4 kt CO2/a`: TPC-Mittelwert `22.8625 Mio. USD_2022` aus Sievert, Schmidt und Steffen (2024), SI Tabellen S12 und S15-S16, mit EZB-Jahresmittelkurs und Eurostat-HVPI umgerechnet; nicht annualisiert und bis zu einer gesonderten Projektion real konstant |
+| PEM-System | PROXY | `920000 EUR_2025` je `1 MWe`-Wrapper, fuer alle Stuetzjahre real konstant. IRENA (2020), Tabelle ES1 und Tabelle 6, nennt `700-1400 USD_2020/kW` fuer vollstaendige PEM-Systeme mit mindestens `10 MW`; der spezifische Preis wird linear auf `1 MWe` uebertragen. Skaleneffekte werden nicht modelliert, die exakte EUR_2025-Umrechnung bleibt abzusichern. |
 | Nicht inventarisierte Kosten | OUT_OF_SCOPE | Personal, Versicherung, Verwaltung, fixe Wartung und weitere Kosten werden nur berücksichtigt, wenn sie als explizite bepreisbare Flows im Inventar vorkommen; kein separates Zusatzkostenmodell |
 | Prüfung der Preisvollständigkeit | DECIDED | Keine zusätzliche Strict-Implementierung; fehlende `market_price`-Werte erzeugen die bestehende Warnung des `LCADataProcessor`, und die Prüfung vor finalen Läufen bleibt User Responsibility |
 | Zeitliche Preisentwicklung | DECIDED | Für jeden kostenrelevanten Flow wird eine zeitliche Entwicklung recherchiert oder mindestens eine quellenbasierte Entwicklungshypothese begründet; real konstante Preise sind kein automatischer Default |
@@ -94,27 +98,171 @@ Kapazitätsdaten bereits auf diese effektive Basis umgerechnet wurden.
 
 ## Infrastruktur und Installationsskalierung
 
-### Inventory-Uebernahmeregel
+### Kapazitaetsbasierter Installations-Wrapper
 
-Normale Brightway-LCI-Inventory-Mengen werden fuer die Case Study unveraendert
-uebernommen. Das gilt auch fuer Infrastrukturkoeffizienten wie:
+**Status:** Im Case-Study-Notebook und in `cost_inputs.csv` statisch umgesetzt;
+Brightway-, LCA- und Solver-Laufzeitpruefung stehen noch aus.
+
+Umweltinventar, physische Anlagenkapazitaet und Anlagenkosten werden als drei
+getrennte Groessen behandelt:
+
+- `s_env`: urspruenglicher LCI-Infrastrukturkoeffizient in
+  `Umwelt-Infrastruktureinheiten/kg Produkt`;
+- `Q`: gewaehlte effektive Nennkapazitaet eines routenspezifischen Wrappers in
+  `kg Produkt/a`;
+- `L`: Modelllebensdauer des Foreground-Prozesses in Jahren;
+- `TPC(Q)`: nicht annualisierte Gesamtinvestition einer Anlage der Groesse `Q`.
+
+Der aeussere Installations-Exchange vom Foreground-Prozess zum Wrapper lautet:
 
 ```text
-unit factory / kg product
+a_wrapper = 1 / (Q * L)   [Wrapper/kg Produkt]
 ```
 
-`operation=False` klassifiziert den Exchange als Installation und steuert seine
-zeitliche Skalierung. Es aendert weder den Betrag noch die Bezugsbasis des
-Quellinventars. Daher gibt es keine Umrechnung von `unit/kg` auf
-`unit/(kg/a)` und keine Multiplikation mit einer Quellen- oder
-Modelllebensdauer.
+Der interne Exchange vom Wrapper zum urspruenglichen Umweltinventar lautet:
 
-Die Optimex-Modelllebensdauer bleibt davon getrennt. Sie steuert
-Verfuegbarkeit und Ersatz der Foreground-Kapazitaetsvintages, nicht die
-Inventory-Menge. Die Regel setzt den korrigierten `var_installation`-Pfad
-voraus; vor finalen Szenariolaeufen muss dessen mehrjaehrige Aequivalenz zu
-einer statischen LCA getestet werden. Dabei sind auch die Brownfield-Kapazitaeten
-erneut gegen die korrigierte Variablensemantik zu pruefen.
+```text
+a_internal = s_env / a_wrapper = s_env * Q * L
+```
+
+Damit bleibt das Umweltinventar exakt erhalten:
+
+```text
+a_wrapper * a_internal = s_env
+```
+
+Gleichzeitig ist die physische Kapazitaet konsistent. Da eine Optimex-
+Prozesseinheit ueber `L` Jahre insgesamt eine Produkteinheit liefert, werden
+bei einem konstanten Jahresbedarf `D` insgesamt `D * L` Prozesseinheiten
+installiert. Daraus folgen `D / Q` Wrapper und damit genau `D` Einheiten
+Jahreskapazitaet.
+
+Der Ausgangswert des Wrappers ist `TPC(Q)` in `EUR_2025/Wrapper`. Fuer die
+Baseline folgt die wirtschaftliche Zuordnung der im verwendeten LCI
+enthaltenen oekologischen Allokation:
+
+```text
+CAPEX_wrapper = alpha_LCA * TPC(Q)
+```
+
+Bei MTO gilt `alpha_LCA = 0.4`; Prozesse ohne Produktallokation verwenden
+`alpha_LCA = 1`. Beim Steam Cracking existiert dagegen kein einzelnes
+flussuebergreifendes `alpha_LCA`: Nach PlasticsEurope (2017), Abschnitte 3.2
+und 3.3, werden Feedstocks auf alle allokierbaren Produkte, Energie und
+Emissionen aber nur auf die definierten Hauptprodukte verteilt. ecoinvent 3.12
+uebernimmt diese flussspezifische Regel. Fuer die Baseline wird die
+Steam-Cracker-CAPEX analog
+zu Energie, Utilities und Emissionen nach dem Ethylen-Massenanteil an allen
+definierten Hauptprodukten alloziert:
+
+```text
+alpha_Steam_CAPEX = m_Ethylen / sum(m_Hauptprodukte)
+```
+
+Dies ist eine explizite Modellannahme, keine von PlasticsEurope vorgeschriebene
+CAPEX-Regel. Mangels offengelegter Hauptproduktmassen des ecoinvent-
+Industriemixes werden die Produktausbeuten aus Tiggeloven (2026), Tabelle A.6,
+gedruckte Seite 155/PDF-Seite 170, verwendet. Tiggeloven uebernimmt sie aus
+Zimmermann und Walzl [52] fuer High-Severity-Naphthacracking. Als eindeutig
+zuordenbare Hauptproduktgruppen werden Ethylen (`0.303 t/t Naphtha`), Propylen
+(`0.1481`), BTX (`0.0766`) und C4-Produkte (`0.0525`) beruecksichtigt:
+
+```text
+alpha_Steam_CAPEX = 0.303 / (0.303 + 0.1481 + 0.0766 + 0.0525)
+                  = 0.5222337125
+```
+
+Der separate Wasserstoff-Yield ist in Tabelle A.6 nicht ausgewiesen; der Faktor
+ist deshalb ein dokumentierter `PROXY` und tendenziell leicht zu hoch. Er wird
+nicht aus dem ecoinvent-Infrastrukturkoeffizienten zurueckgerechnet. Die von
+Tiggeloven in Gleichung A.3 verwendete preisbasierte Koppelproduktallokation wird
+nicht uebernommen.
+
+Die Kapazitaet `Q` wird weiterhin aus einer physischen Anlagen- oder
+Kostenquelle gewaehlt und nicht durch Invertieren von `s_env` abgeleitet. Eine
+Quellenlebensdauer erklaert nur die Herkunft von `s_env`; fuer die physische
+Wrapper-Skalierung ist die Optimex-Modelllebensdauer `L` massgeblich.
+
+Da Optimex Bruchteile eines Wrappers installieren kann, wird `TPC(Q)/Q` nach
+der Wahl von `Q` effektiv linear fortgeschrieben. Diskrete Anlagengroessen und
+endogene Skaleneffekte sind damit nicht abgebildet.
+
+### Kapazitaetsangaben in Tiggeloven
+
+Tiggeloven stellt fuer die in Tabelle C.1 betrachteten Technologien keine
+einheitlichen fertigen Anlagen-TPC bei jeweils einer ausgewiesenen
+Referenzkapazitaet bereit. Stattdessen wird die affine Kostenfunktion
+`TPC(S) = lambda * S + zeta` in der jeweils nativen Kapazitaetseinheit
+parametrisiert. Wartung `psi` und Annuitaetenfaktor `omega` liegen in den
+Zielfunktionen ausserhalb von `TPC` und duerfen daher nicht in den einmaligen
+Wrapperpreis eingehen.
+
+- Fuer Steam Cracking beschreibt Kapitel 2 ausdruecklich eine typische
+  Weltanlage mit `1000 kt Ethylen/a`, entsprechend rund `115 t Ethylen/h`.
+  Tabelle 2.3 gibt dafuer die Kostenparameter in `EUR_2019`; Gleichung 2.3 und
+  Abbildung 2.7 implizieren bei dieser Kapazitaet einen TPC von rund
+  `0.994 Mrd. EUR_2019`. Dies ist eine geeignete, quellennahe Wrappergroesse.
+- Tabelle C.1 gibt fuer Conventional Cracking, Direct Methanol Synthesis from
+  CO2, MTO, CO2 Electrolysis, AEC und ASU nur `lambda`, `zeta`, Einheit und
+  Lebensdauer in `EUR_2022` an. Die jeweilige Wrapperkapazitaet muss deshalb
+  transparent gewaehlt und `TPC(Q)` mit der Kostenfunktion berechnet werden.
+- Tabelle 4.1 nennt `1314 kt/a` Ethylen fuer Chemelot und `1822 kt/a` fuer
+  Zeeland. Dies sind Nameplate-Kapazitaeten ganzer bestehender Cluster und
+  keine Referenzgroessen der einzelnen alternativen Anlagen.
+- In Tabellen mit `Smax` aufgefuehrte Werte sind modellierte Ausbaugrenzen der
+  Cluster. Sie sind ebenfalls keine dokumentierten Nennkapazitaeten einer
+  Kostenreferenzanlage.
+
+Die fuer die Case Study relevanten Zeilen aus Tabelle C.1 lauten:
+
+| Technologie | Native Groesse `S` | `lambda` [`kEUR_2022/Einheit`] | `zeta` [`MEUR_2022`] |
+|---|---|---:|---:|
+| Conventional cracker | `t Naphtha/h` | 2083 | 543 |
+| AEC (Proxy fuer PEM) | `MW Stromaufnahme` | 753 | 0 |
+| Direct methanol synthesis from CO2 | `t CO2/h` | 1613 | 104 |
+| MTO | `t Methanol/h` | 1051 | 66 |
+| CO2 electrolysis (Proxy fuer eCO2R) | `t CO2/h` | 9461 | 0 |
+| ASU (Proxy fuer eCO2R-Aufbereitung) | `MW Stromaufnahme` | 4224 | 25 |
+
+Der einmalige TPC in Millionen Euro des Jahres 2022 wird daraus berechnet als:
+
+```text
+TPC_MEUR_2022(S) = lambda * S / 1000 + zeta
+```
+
+Diese Tabelle definiert also die Kostenbasis, aber noch nicht die jeweilige
+Wrappergroesse `Q`. Die zuvor fuer einen gemeinsamen Output von `1 Mt
+Ethylen/a` berechneten Stoffstroeme sind eigene Systemskalierungen der Case
+Study und keine von Tiggeloven ausgewiesenen Nennkapazitaeten der einzelnen
+Anlagen.
+
+Die vier Referenzrechnungen sind vollstaendig in
+[`notebooks/data/ethylene_case_study/tiggeloven_capex_calculations.md`](notebooks/data/ethylene_case_study/tiggeloven_capex_calculations.md)
+dokumentiert. Aus Tabelle C.1 und C.2 ergeben sich fuer die auf `1 Mt
+Ethylen/a` dimensionierten Anlagen folgende vollstaendige, nicht annualisierte
+TPC:
+
+| Anlage | `MEUR_2022` | `MEUR_2025` |
+|---|---:|---:|
+| Steam Cracking | `1327.770258` | `1463.430241` |
+| CO2-Hydrierung | `1753.119342` | `1932.237784` |
+| MTO | `802.056251` | `884.003363` |
+| eCO2R, CO2-Elektrolyse-Proxy | `1794.057859` | `1977.359042` |
+
+Die Tabelle zeigt zunaechst die vollstaendigen Roh-TPC bei `alpha_LCA = 1`.
+Fuer den aktiven MTO-Wrapper gilt in der Baseline
+`0.4 * 884.003363 = 353.601345 MEUR_2025`. Fuer den Steam-Wrapper gilt
+`0.5222337125 * 1463.430241 = 764.252608 MEUR_2025`. Der verwendete
+Allokationsfaktor folgt der PlasticsEurope-Hauptproduktregel mit den
+Zimmermann-und-Walzl-Ausbeuten aus Tiggeloven Tabelle A.6.
+CO2-Hydrierung und eCO2R verwenden nach dem aktuell eingesetzten LCI
+`alpha_LCA = 1`.
+
+Die physische MTO-Relation von `6.134969 kg Methanol/kg Ethylen` weicht vom
+allokierten Notebook-Exchange von `2.3920583664 kg Methanol/kg Ethylen` ab.
+Diese Weitergabe der Allokation an CO2-Hydrierung, PEM und DAC ist fuer die
+Baseline beabsichtigt: Auch die vorgelagerten OPEX und CAPEX folgen dadurch
+den allokierten LCI-Mengen.
 
 ### Einheiten der ecoinvent-Infrastruktur
 
@@ -131,19 +279,24 @@ Fuer die in `my_activities.py` dokumentierten Mengen bleibt lediglich zu
 pruefen, welcher konkrete Datensatz und welche Einheit verwendet wurden. Eine
 Quellenlebensdauer ist fuer ihre Uebernahme nicht erforderlich.
 
-### Wahrscheinliche `operation=False`-Exchanges
+### `operation=False`-Exchanges und Wrapper-Stand
+
+Die folgende Tabelle beschreibt den aktuellen technischen Zwischenstand. Bei
+den routenspezifischen Wrappern sind die bisherigen aeusseren LCI-Koeffizienten
+durch `1 / (Q * L)` ersetzt. Das interne Umweltinventar ist gleichzeitig so
+skaliert, dass der jeweilige urspruengliche Nettokoeffizient erhalten bleibt.
 
 | Anlage | Installations- oder EoL-Kandidaten | Status |
 |---|---|---|
-| MTO | `methanol-to-olefins installation` | Eindeutiger Kosten-Wrapper mit `1 unit chemical factory construction, organics`; äußerer Koeffizient `3.584e-12 unit/kg Ethylen` bleibt unverändert. |
-| CO2-Hydrierung | `methanol production facility, construction` | Bereits eindeutig benannter direkter Installationsfluss; kein zusätzlicher Wrapper erforderlich. |
-| PEM | Stahl, Aluminium, Kupfer, Kunststoff, Elektronik, Beton, Titan, Edelstahl, Nafion, Aktivkohle, Iridium, Platin | Inventory-Mengen unveraendert uebernommen; separate Komponentenwechsel sind eine optionale Modellerweiterung |
+| MTO | `methanol-to-olefins installation` | `Q = 1e9 kg Ethylen/a`, aeusserer Koeffizient `4e-11 Wrapper/kg Ethylen`, intern `0.0896 unit chemical factory construction, organics`; Nettokoeffizient `3.584e-12` bleibt erhalten. |
+| CO2-Hydrierung | `CO2 hydrogenation installation` | `Q = 6.134969325e9 kg Methanol/a`, aeusserer Koeffizient `6.52e-12 Wrapper/kg Methanol`, intern `0.5497239264 unit chemical factory construction, organics`; Nettokoeffizient `3.5842e-12` bleibt erhalten. |
+| PEM | `PEM electrolyzer system installation, 1 MWe` | `Q = 156414.347247488 kg H2/a` aus `1 MWe * 8760 h/a / 56.00509259 kWh/kg H2`, `L = 25 Jahre`, aeusserer Koeffizient `2.55731016392694e-7 Wrapper/kg H2`; intern `5.2785540801` Stack- und `1.3192494393` Balance-of-Plant-Einheiten. Die Nettokoeffizienten `1.34989e-6` beziehungsweise `3.37373e-7 unit/kg H2` bleiben erhalten. |
 | PEM EoL | zugehörige Recycling- und Entsorgungsprozesse | OPEN: Zeitpunkt und Skalierung prüfen |
-| DAC | `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Material- und Landnutzungsinventar der disco2very-Activity `construction of direct air capture, 2016` übernommen; Name, Code und Kommentar spezifizieren die Nennkapazität von 4 kt CO2/a und Deutz und Bardow (2021) als Quelle. Der Koeffizient `1.25e-8 unit/kg CO2` bleibt unverändert. |
+| DAC | `direct air capture system construction, solid sorbent, 4 ktCO2/a` | Bereits kapazitaetsbezogen: `Q = 4 kt CO2/a`, `L = 20 Jahre` und `1/(Q*L) = 1.25e-8 unit/kg CO2`; die Activity enthaelt das Umweltinventar einer ganzen Anlage. |
 | DAC EoL | `treatment of direct air capture, 2016` | In der disco2very-Konstruktionsactivity enthalten, für die Baseline aber bewusst nicht übernommen, da Anlagen-EoL außerhalb der Systemgrenze liegt. |
-| eCO2R-Gesamtsystem | `eCO2R system installation` | Eindeutiger Kosten-Wrapper auf Fabrikeinheitenbasis; enthält je Wrapper-Einheit `1 unit chemical factory construction, organics`, `0.185 kg Kupfer` und `7544.1975 kg Stahl`. Der äußere Koeffizient ist `4e-10 unit/kg Ethylen`; dadurch bleiben die absoluten Kupfer- und Stahlmengen unverändert. |
+| eCO2R-Gesamtsystem | `eCO2R system installation` | `Q = 1e9 kg Ethylen/a`, aeusserer Koeffizient `4e-11 Wrapper/kg Ethylen`; intern `10 unit` Fabrik, `1.85 kg` Kupfer und `75441.975 kg` Stahl. Die drei urspruenglichen Nettokoeffizienten bleiben erhalten. |
 | eCO2R-Aufbereitung | Anlagen für DeOx, Amine Wash, TSA und Kryotrennung | OPEN: explizite Infrastruktur fehlt weitgehend |
-| Steam Cracking | `steam cracker installation` | Eindeutiger Kosten-Wrapper mit `1 unit chemical factory construction, organics`; dokumentierter ecoinvent-Koeffizient `1.1516356618335166e-10 unit/kg Ethylen` bleibt außen unverändert. |
+| Steam Cracking | `steam cracker installation` | `Q = 1000 kt Ethylen/a`, aeusserer Koeffizient `4e-11 Wrapper/kg Ethylen`, intern `2.8790891546 unit chemical factory construction, organics`; der ecoinvent-Nettokoeffizient bleibt erhalten. |
 
 ### Abgleich der disco2very-Background-Inputs
 
@@ -154,19 +307,18 @@ bewusste Abweichungen im Case-Study-Modell:
 |---|---|
 | Steam Cracking | Das ecoinvent-Inventar wird eine Ebene tiefer aufgeschlüsselt. Die sieben Feedstocks werden ökologisch unverändert in `steam cracking feedstock mix` gebündelt; Diesel bleibt der dokumentierte Proxy für atmospheric gas oil. |
 | DAC | Korrigiert: Amine-on-Alumina ersetzt den früheren Aktivkohleproxy; die 4-kt-Solid-Sorbent-Konstruktion ersetzt die frühere premise-Activity für ein solvent-basiertes System. |
-| PEM | Die disco2very-Material- und Entsorgungsinputs sind bewusst durch die Stack- und Balance-of-Plant-Inventare aus `methanol_and_iron` ersetzt; Betriebsstrom, Wasser und Abwasser entsprechen disco2very. |
-| CO2-Hydrierung | Betriebsinputs entsprechen disco2very; als Installation wird bewusst `methanol production facility, construction` statt `chemical factory construction, organics` verwendet. |
+| PEM | Die disco2very-Material- und Entsorgungsinputs sind bewusst durch die Stack- und Balance-of-Plant-Inventare aus `methanol_and_iron` ersetzt; beide liegen intern in einem gemeinsam bepreisten 1-MWe-Systemwrapper. Betriebsstrom, Wasser und Abwasser entsprechen disco2very. |
+| CO2-Hydrierung | Betriebsinputs entsprechen disco2very; die Installation wird ueber den routenspezifischen Wrapper `CO2 hydrogenation installation` eindeutig bepreist. |
 | MTO | Mengen entsprechen `allocation="weight"`; die disco2very-Kühlaktivitäten bei -30 °C und -75 °C werden durch verfügbare premise-Proxys bei -25 °C beziehungsweise -100 °C ersetzt. |
 | eCO2R-Reaktion und Aufbereitung | Beide bisherigen Foreground-Prozesse sind zu `eCO2R ethylene production` aggregiert. Alle Betriebs- und Biosphere-Mengen bleiben erhalten; die disco2very-Kühlaktivität bei -75 °C wird weiterhin durch den premise-Proxy bei -100 °C ersetzt. Der fehlerhafte Fabrikmasseninput wurde nach Rücksprache mit dem disco2very-Ersteller durch `4e-10 unit chemical factory construction, organics/kg Ethylen` ersetzt. |
 
 Die DAC-Konstruktionsactivity beschreibt ein System mit `4 kt CO2/a`
 Nennkapazität. Diese Kapazitätsbasis stimmt mit den betrachteten Kostendaten aus
-Sievert et al. überein und ermöglicht später eine direkte Zuordnung des dort
+Sievert et al. überein und ermöglicht eine direkte Zuordnung des dort
 abgeleiteten TPC. Die im Deutz-und-Bardow-Quellinventar genannten `20 Jahre`
-werden auch als Optimex-Modelllebensdauer der DAC-Anlage verwendet. Sie steuern
-die zeitliche Verfügbarkeit und Ersetzung der DAC-Kapazitätsvintages, bleiben
-aber weiterhin ohne Einfluss auf den unverändert übernommenen
-Installationskoeffizienten.
+werden auch als Optimex-Modelllebensdauer der DAC-Anlage verwendet. Mit beiden
+Groessen wird der aeussere Wrapperkoeffizient berechnet; der urspruengliche
+LCI-Koeffizient bleibt ueber den internen Exchange erhalten.
 
 Strom, Wärme, Kühlenergie, Wasser, Abwasser, CO2, H2, Methanol und andere
 produktionsabhängige Zwischenprodukte werden grundsätzlich als
@@ -185,7 +337,7 @@ werden, ob sie Betriebs- oder Installationsflüsse sind.
 | Altersstruktur bestehender Kapazität | Steam Cracking | BLOCKER | Installationsjahre der zwei Kohorten und resultierende Restlebensdauern in Abstimmung mit der recherchierten Anlagenlebensdauer festlegen |
 | Früheste Verfügbarkeit | neue Routen | OPEN | Jahr und Quelle |
 | Infrastruktur der eCO2R-Aufbereitung | Aufbereitungsanlage | OPEN | Umfang und Kapazitätsnormalisierung |
-| Modellierung Steam Cracking | fossile Route | BLOCKER | Direkte Betriebs- und Biosphere-Exchanges, der unveraenderte ecoinvent-Infrastrukturkoeffizient und die 25-jaehrige Modelllebensdauer nach Tiggeloven sind umgesetzt; Neubau-CAPEX bleibt zu pruefen |
+| Modellierung Steam Cracking | fossile Route | BLOCKER | Direkte Betriebs- und Biosphere-Exchanges, kapazitaetsbezogener Wrapper, erhaltener ecoinvent-Infrastrukturkoeffizient und 25-jaehrige Modelllebensdauer sind statisch umgesetzt; Neubau-CAPEX verwendet `alpha = 0.5222337125`; Brightway-/LCA-/Solver-Laufzeitpruefung bleibt offen |
 | Realer Diskontsatz | Gesamtsystem | PLACEHOLDER | Vorläufig `3 %` mit Referenzjahr 2025; endgültigen Wert und zitierfähige methodische Begründung recherchieren |
 | Preisbasis | alle Kostendaten | DECIDED | `EUR_2025`; ursprünglichen Wert, ursprüngliche Währung und ursprüngliches Preisjahr sowie Inflations- und Währungsumrechnung dokumentieren |
 | Preisentwicklung 2025-2050 | alle kostenrelevanten `op`- und `cap`-Flows | BLOCKER | Für jeden Flow Zeitreihe, dokumentierten Proxy oder begründete Entwicklungshypothese sowie Quellen, Stützjahre und Umgang mit Datenlücken festhalten |
@@ -266,6 +418,63 @@ werden. Es wird dafür keine zusätzliche automatische Strict-Prüfung implement
 die vom `LCADataProcessor` ausgegebenen Warnungen müssen vor einem finalen Lauf
 vom Nutzer geprüft und aufgelöst werden.
 
+### Einheitliche Umrechnung auf EUR_2025
+
+Alle historischen Kosten werden als reale Euro des Jahres 2025 ausgewiesen. Als
+einheitlicher Inflationsindex wird der jährliche Durchschnitt des All-items-HVPI
+für den Euroraum mit 20 Ländern verwendet (`prc_hicp_ainr`, `EA20`, `TOTAL`,
+`INX_A_AVG`). Eurostat weist auf der Basis `2025 = 100` folgende Indizes aus:
+
+| Preisjahr | HVPI-Jahresdurchschnitt | Faktor auf `EUR_2025` |
+|---:|---:|---:|
+| 2020 | `81.59` | `100 / 81.59 = 1.22564039710749` |
+| 2022 | `90.73` | `100 / 90.73 = 1.10217127741651` |
+| 2025 | `100.00` | `1` |
+
+Quelle: Eurostat, *Harmonised index of consumer prices (HICP) - ECOICOP
+ver.2 - indices and rates of change, annual data*, DOI
+[`10.2908/PRC_HICP_AINR`](https://doi.org/10.2908/PRC_HICP_AINR),
+[API-Abfrage für EA20 und All-items](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_ainr?lang=en&geo=EA20&coicop18=TOTAL&unit=INX_A_AVG).
+
+Für Euro-Werte gilt:
+
+```text
+Preis_EUR_2025 = Preis_EUR_y * HVPI_2025 / HVPI_y
+```
+
+USD-Werte werden zuerst mit dem jahresdurchschnittlichen ECB-Referenzkurs ihres
+Preisjahres in Euro desselben Jahres umgerechnet. Die ECB-Reihe
+`EXR.A.USD.EUR.SP00.A` ist in `USD je EUR` notiert; deshalb wird der USD-Wert
+durch den Wechselkurs dividiert. Anschließend wird der Euro-Wert mit demselben
+HVPI-Verfahren auf 2025 gebracht.
+
+| Preisjahr | ECB-Jahresmittel `USD/EUR` | Gesamtfaktor `USD_y` auf `EUR_2025` |
+|---:|---:|---:|
+| 2020 | `1.1421961089494` | `(1 / 1.1421961089494) * (100 / 81.59) = 1.07305600807452` |
+| 2022 | `1.0530486381323` | `(1 / 1.0530486381323) * (100 / 90.73) = 1.04664802508205` |
+
+Quelle: Europäische Zentralbank,
+[`EXR.A.USD.EUR.SP00.A`](https://data.ecb.europa.eu/data/datasets/EXR/EXR.A.USD.EUR.SP00.A),
+Annual average of observations through period.
+
+Für USD-Werte gilt damit:
+
+```text
+Preis_EUR_2025 = Preis_USD_y / ECB_USD_je_EUR_y * HVPI_2025 / HVPI_y
+```
+
+Das Preisjahr und nicht das Technologie- oder Szenariojahr bestimmt den Faktor.
+Ein beispielsweise als `USD_2020` ausgewiesenes 2050-Technologieziel verwendet
+daher weiterhin den Faktor für `USD_2020`. Bandbreiten werden an beiden Grenzen
+mit demselben Faktor umgerechnet. Es wird nicht zwischengerundet; in der CSV
+werden mindestens zwölf signifikante Stellen des Ergebnisses gespeichert.
+
+Der All-items-HVPI ist kein spezifischer Chemieanlagen-Kostenindex. Seine
+Verwendung ist eine transparente, einheitliche Modellannahme für diese
+Framework-Demonstration. Währungsumrechnung und Inflation verändern nur die
+Preisbasis; Technologieentwicklung und zukünftige Preiszeitreihen werden davon
+getrennt modelliert.
+
 ### Steam-Cracker-Feedstock-Proxy
 
 Entscheidung vom 2026-08-01: Der von Tiggeloven (2026) angegebene
@@ -275,12 +484,12 @@ Tiggeloven bezeichnet den Wert als Durchschnittspreis für 2022 und verweist auf
 die INSEE-Spotpreisreihe für nordwesteuropäisches Naphtha. Die konstante
 Fortschreibung ist eine Modellannahme und keine Marktpreisprognose.
 
-Für die einheitliche CSV-Preisbasis wird der Wert mit den HICP-Jahresraten des
-Euroraums für 2023, 2024 und 2025 umgerechnet:
+Für die einheitliche CSV-Preisbasis wird der Wert nach der oben festgelegten
+HVPI-Indexmethode umgerechnet:
 
 ```text
-0.732 EUR_2022/kg * 1.054 * 1.024 * 1.021
-= 0.806635610112 EUR_2025/kg
+0.732 EUR_2022/kg * (100 / 90.73)
+= 0.806789375069 EUR_2025/kg
 ```
 
 Der Wert wird für alle vier Stützjahre auf die Case-Study-Activity
@@ -321,10 +530,11 @@ Stand 2026-07-18:
   Feedstock-Mix; dadurch verbleiben elf direkte Optimex-Betriebsflüsse. Die 44
   direkten Biosphere-Exchanges bleiben unverändert. Kumulierte Biosphere-Flows
   der Lieferketten werden weiterhin durch Brightway berechnet.
-- `steam cracker installation` verweist intern auf genau `1 unit chemical
-  factory construction, organics`. Der statische Außenkoeffizient
-  `1.1516356618335166e-10 unit/kg Ethylen` bleibt unverändert; eine
-  Multiplikation mit der Modell- oder Quellenlebensdauer findet nicht statt.
+- `steam cracker installation` verwendet `Q = 1000 kt Ethylen/a` und
+  `L = 25 Jahre` fuer den aeusseren Koeffizienten
+  `1 / (Q * L)`. Der ecoinvent-Koeffizient
+  `1.1516356618335166e-10 unit/kg Ethylen` wird durch entsprechende Skalierung
+  des internen Exchanges als Netto-Umweltinventar erhalten.
 - Bei 25 Jahren Modelllebensdauer ist das Bestandsvintage von 2005 bis
   einschließlich 2029 und das Vintage von 2015 bis einschließlich 2039
   verfügbar. Sie sind weiterhin nicht must-run und können früher durch andere

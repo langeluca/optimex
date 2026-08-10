@@ -45,7 +45,7 @@ BA-Interpretation belastbar ist. Viele vorhandene Werte sind weiterhin
 
 ### Erdgaswaerme
 
-- [x] REPO Brennstoffbasierter Proxy von `0.011231884 EUR_2025/MJ Waerme`
+- [x] REPO Brennstoffbasierter Proxy von `0.011231884058 EUR_2025/MJ Waerme`
   aus THE-Gaspreis und einem Wirkungsgrad von 0.920 vorhanden.
 - [ ] RESEARCH Reale Gaspreisentwicklung fuer 2020, 2030, 2040 und 2050
   recherchieren oder begruendet festlegen.
@@ -66,22 +66,23 @@ BA-Interpretation belastbar ist. Viele vorhandene Werte sind weiterhin
 
 ### CAPEX
 
-- [x] REPO `steam cracker installation` kapselt `1 unit chemical factory
-  construction, organics`; der äußere Koeffizient bleibt unverändert
-  `1.1516356618335166e-10 unit/kg Ethylen`.
+- [x] REPO `steam cracker installation` bildet eine Referenzkapazitaet von
+  `1e9 kg Ethylen/a` bei 25 Jahren ab: außen `4e-11 Wrapper/kg Ethylen`,
+  intern `2.8790891546 unit chemical factory construction, organics/Wrapper`.
 - [x] REPO Tiggeloven liefert eine route-spezifische CAPEX-Funktion fuer einen
   konventionellen Naphtha-Cracker.
-- [x] REPO Route-spezifischen Steam-Cracker-CAPEX auf den eigenen
-  Installations-Flow abgebildet; bis zur TPC-Umrechnung bleibt dessen Preis ein
-  technischer `PLACEHOLDER`.
-- [ ] DECISION Kapazitaetsbasis, Auslastung, Kostenumfang und fixe
-  Instandhaltung von 4 Prozent TPC/a dokumentieren.
+- [x] REPO TPC mit Hauptprodukt-Massenallokation `0.5222337125` auf
+  `764252607.86956 EUR_2025/Wrapper` umgerechnet und in die CSV eingetragen.
+- [x] REPO Kapazitaetsbasis, Kostenumfang und Allokation dokumentiert. Die fixe
+  Instandhaltung von 4 Prozent TPC/a ist nicht im einmaligen CAPEX enthalten und
+  wird ohne eigenen direkten OPEX-Flow vorlaeufig nicht zusaetzlich berechnet.
 
 ### Prioritaere OPEX-Preise
 
 - [x] REPO Naphtha-Rohwert von `0.732 EUR_2022/kg` aus Tiggeloven gefunden.
-- [x] RESEARCH Naphtha mit den HICP-Jahresraten 2023-2025 auf
-  `0.806635610112 EUR_2025/kg` umgerechnet.
+- [x] RESEARCH Naphtha mit dem Eurostat-HVPI-Jahresdurchschnitt fuer EA20
+  (`2022 = 90.73`, `2025 = 100.00`) auf `0.806789375069 EUR_2025/kg`
+  umgerechnet.
 - [x] DECISION Den Naphtha-Wert vorlaeufig real konstant als
   Naphtha-aequivalenten Preisproxy fuer den gesamten allokierten
   Steam-Cracker-Feedstock-Slate verwenden.
@@ -90,7 +91,7 @@ BA-Interpretation belastbar ist. Viele vorhandene Werte sind weiterhin
   Naphtha, NGL, Propan, Refinery Gas und Diesel als Proxy fuer Atmospheric Gas
   Oil. Energie-, Hilfsstoff- und Behandlungsinputs bleiben außerhalb.
 - [x] REPO Die sieben einzelnen Feedstock-Zeilen in `cost_inputs.csv` durch die
-  echte Mix-Identitaet mit `0.806635610112 EUR_2025/kg` ersetzt.
+  echte Mix-Identitaet mit `0.806789375069 EUR_2025/kg` ersetzt.
 - [ ] VERIFY LCIA-Gleichheit zum bisherigen direkten Inventar pruefen und
   sicherstellen, dass `cost_relevant_op_flows` nur den Mix statt seiner
   Feedstock-Bestandteile als direkte Kostenposition ausweist.
@@ -109,7 +110,7 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 ### Abgeleitete Utility-Kosten
 
 - [x] REPO Druckluftpreis aus dem ecoinvent-Strombedarf abgeleitet:
-  `0.01403896 EUR_2025/m3`.
+  `0.01403896032 EUR_2025/m3`.
 - [ ] DECISION Nach Einfuehrung der Stromtrajektorie den Druckluftpreis fuer
   jedes Stuetzjahr neu berechnen.
 
@@ -136,11 +137,12 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
   Anlagen-EoL-Kante bleibt entsprechend der Baseline ausgeschlossen.
 - [x] REPO Die Nennkapazitaet des Deutz-und-Bardow-Inventars stimmt mit der
   Kapazitaetsbasis der Kostendaten aus Sievert et al. ueberein.
-- [ ] RESEARCH Den TPC aus Sievert et al. auf `EUR_2025` umrechnen und direkt
-  als Preis einer 4-kt-Einheit eintragen; der technische CSV-Fallback von
-  `1 EUR/Einheit` darf nicht interpretiert werden.
-- [ ] RESEARCH Zukunftstrajektorie des DAC-TPC festlegen oder eine reale
-  konstante Fortschreibung transparent begruenden.
+- [x] RESEARCH TPC-Mittelwert von `22.8625 Mio. USD_2022` aus Sievert et al. mit
+  EZB-Jahresmittelkurs und Eurostat-HVPI auf
+  `23928990.4734383 EUR_2025/4-kt-Einheit` umgerechnet und als `PROXY` in die
+  CSV eingetragen.
+- [x] REPO DAC-TPC bis zu einer gesonderten Projektion transparent real konstant
+  fortgeschrieben; eine recherchierte Zukunftstrajektorie bleibt optional.
 
 ### OPEX
 
@@ -152,8 +154,10 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 - [x] REPO Der unpassende Aktivkohleproxy wurde durch die originale
   disco2very-Activity `adsorbent, amine on alumina` ersetzt; ihr Inventar
   besteht aus PEI und Aluminiumoxid.
-- [ ] RESEARCH Sorbenspreis aus Sievert et al. auf die Einheit
-  `EUR_2025/kg adsorbent` uebertragen und den technischen CSV-Fallback ersetzen.
+- [x] RESEARCH Sorbenspreis aus Sievert et al., SI Tabelle S21, mit der
+  einheitlichen Wechselkurs- und HVPI-Methode von `8.821 USD_2022/kg` auf
+  `9.232482229249 EUR_2025/kg adsorbent` uebertragen; als `PROXY` real konstant
+  fortgeschrieben.
 - [ ] SCREEN Sorbens und Behandlung wegen `0.0075 kg/kg CO2` auf
   Kostenrelevanz pruefen und Quellenqualitaet bewerten.
 
@@ -161,14 +165,13 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 
 ### CAPEX
 
-- [x] REPO Installationskoeffizient `3.5842e-12 unit/kg Methanol`
-  unveraendert uebernommen. Ein route-spezifischer Installations-Wrapper
-  konsumiert intern genau `1 unit chemical factory construction, organics`.
+- [x] REPO Der Installations-Wrapper bildet `6.134969325e9 kg Methanol/a` bei
+  25 Jahren ab: außen `6.52e-12 Wrapper/kg Methanol`, intern
+  `0.5497239264 unit chemical factory construction, organics/Wrapper`.
 - [x] REPO Tiggeloven liefert eine technisch passende CAPEX-Funktion fuer
   direkte Methanolsynthese aus CO2.
-- [x] REPO Route-spezifischen Installations-Flow `CO2 hydrogenation
-  installation` umgesetzt; die Umrechnung des Anlagen-CAPEX auf seine
-  Wrapper-Einheit bleibt offen.
+- [x] REPO Route-spezifischen Installations-Flow umgesetzt und den TPC mit
+  `1932237784.243985 EUR_2025/Wrapper` in die CSV eingetragen.
 - [ ] DECISION Fixe Instandhaltung von 2.5 Prozent TPC/a behandeln, ohne CAPEX
   oder OPEX doppelt zu zaehlen.
 
@@ -183,19 +186,21 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 
 ### CAPEX
 
-- [x] REPO Installationskoeffizient `3.584e-12 unit/kg Ethylen` unveraendert
-  uebernommen.
+- [x] REPO Der Installations-Wrapper bildet `1e9 kg Ethylen/a` bei 25 Jahren
+  ab: außen `4e-11 Wrapper/kg Ethylen`, intern
+  `0.0896 unit chemical factory construction, organics/Wrapper`.
 - [x] REPO Tiggeloven liefert eine route-spezifische MTO-CAPEX-Funktion.
-- [x] REPO `methanol-to-olefins installation` als eigenen Installations-Flow
-  umgesetzt; der äußere Koeffizient bleibt `3.584e-12 unit/kg Ethylen`.
-- [ ] DECISION Kapazitaetsbasis auf Methanoldurchsatz und fixe
-  Instandhaltung von 2.5 Prozent TPC/a dokumentieren.
+- [x] REPO TPC mit der disco2very-Massenallokation `0.4` auf
+  `353601345.18928 EUR_2025/Wrapper` umgerechnet und in die CSV eingetragen.
+- [x] REPO Kapazitaetsbasis und Allokation dokumentiert. Die fixe
+  Instandhaltung von 2.5 Prozent TPC/a wird ohne eigenen direkten OPEX-Flow
+  vorlaeufig nicht zusaetzlich berechnet.
 
 ### OPEX
 
 - [x] REPO Strom wird aus der gemeinsamen Stromtrajektorie uebernommen.
 - [x] REPO Allgemeine Kuehlung als Absorptionskuehlung aus Erdgaswaerme und
-  Strom abgeleitet: `0.020543646 EUR_2025/MJ`.
+  Strom abgeleitet: `0.020543646377 EUR_2025/MJ`.
 - [x] REPO Kuehlung bei -25 Grad C und -100 Grad C aus dem jeweiligen
   ecoinvent-Strombedarf abgeleitet.
 - [ ] DECISION Alle Kuehlpreise mit den neuen Strom- und Gastrajektorien je
@@ -207,14 +212,21 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 
 ### CAPEX
 
-- [x] REPO PEM-Stack und Balance of Plant sind als getrennte
-  Installations-Flows modelliert.
-- [x] REPO Vorlaeufige IRENA-basierte Preisproxies und Trajektorien sind in der
-  CSV vorhanden.
-- [ ] RESEARCH PEM-spezifische Stack- und BOP-CAPEX mit eindeutiger MW-Basis,
-  Preisjahr, Systemgrenze und Zukunftstrajektorie absichern.
-- [ ] DECISION Stack-Ersatz und laengere BOP-Lebensdauer als optionale
-  Modellerweiterung behandeln oder explizit ausschliessen.
+- [x] REPO PEM-Stack und Balance of Plant sind intern in einem gemeinsamen
+  `PEM electrolyzer system installation, 1 MWe`-Wrapper zusammengefuehrt; ihre
+  Umweltkoeffizienten bleiben unveraendert.
+- [x] REPO Wrapperbasis auf `1 MWe`, `156414.347 kg H2/a` bei Volllast und
+  `25 Jahre` gesetzt; aeusserer Koeffizient `2.5573101639e-7 Wrapper/kg H2`.
+- [x] REPO Die bisherigen IRENA-basierten Komponentenpreise zu einem vollstaendigen
+  Systempreis von `920000 EUR_2025/Wrapper` zusammengefuehrt, fuer alle
+  Stuetzjahre real konstant; separate Stack- und BOP-Preiszeilen entfernt.
+- [x] REPO Dokumentiert, dass IRENA vollstaendige PEM-Systeme ab `10 MW`
+  betrachtet und der spezifische Preis linear auf den `1 MWe`-Wrapper uebertragen
+  wird; Skaleneffekte bleiben unberuecksichtigt.
+- [x] DECISION Separaten Stack-Ersatz und unterschiedliche Komponentenlebensdauern
+  fuer die Baseline explizit ausgeschlossen.
+- [ ] RESEARCH Exakte Waehrungs- und Inflationsumrechnung des IRENA-Rohwerts
+  absichern; eine Zukunftstrajektorie bleibt außerhalb der aktuellen Fassung.
 
 ### OPEX
 
@@ -232,16 +244,14 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
   Betriebswerte und `6.091081 kg CO2/kg Ethylen` aus der Nebenproduktoxidation
   bleiben sichtbar erhalten. Dies entspricht `eol="no"`; das Ethylenprodukt-EoL
   ist ausgeschlossen.
-- [x] REPO `eCO2R system installation` auf Fabrikeinheitenbasis umgesetzt. Nach
-  Rücksprache mit dem disco2very-Ersteller ersetzt `4e-10 unit/kg Ethylen` den
-  fehlerhaften Fabrikmasseninput. Fabrik, Kupfer und Stahl liegen intern im
-  unveränderten absoluten Verhältnis.
+- [x] REPO Der Installations-Wrapper bildet `1e9 kg Ethylen/a` bei 25 Jahren
+  ab: außen `4e-11 Wrapper/kg Ethylen`; intern bleiben `10` Fabrikeinheiten,
+  `1.85 kg` Kupfer und `75441.975 kg` Stahl pro Wrapper erhalten.
 - [x] REPO Tiggeloven liefert eine CO2-Elektrolyse-CAPEX-Funktion als Proxy.
-- [ ] DECISION Systemgrenze und Kapazitaetsbasis mit dem modellierten
-  eCO2R-Reaktor vergleichen.
-- [x] REPO Route-spezifischen aggregierten eCO2R-CAPEX auf den eindeutigen
-  Wrapper abgebildet; bis zur TPC-Umrechnung bleibt dessen Preis ein technischer
-  `PLACEHOLDER`.
+- [x] REPO Kapazitaetsbasis auf `1e9 kg Ethylen/a` gesetzt und Systemgrenze als
+  Proxy fuer den aggregierten eCO2R-Reaktions- und Trennprozess dokumentiert.
+- [x] REPO Route-spezifischen aggregierten eCO2R-CAPEX mit
+  `1977359042.08908 EUR_2025/Wrapper` in die CSV eingetragen; Status `PROXY`.
 - [ ] DECISION Klaeren, ob Kupfer dauerhafte Infrastruktur oder regelmaessig
   ersetztes Elektrodenmaterial ist.
 
@@ -255,8 +265,9 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 
 ### CAPEX
 
-- [x] REPO Stahlkoeffizient `3.017679e-6 kg/kg Ethylen` unveraendert als
-  interner Bestandteil des eCO2R-Installations-Wrappers uebernommen.
+- [x] REPO Stahlkoeffizient `3.017679e-6 kg/kg Ethylen` als
+  `75441.975 kg/Wrapper` in den eCO2R-Installations-Wrapper ueberfuehrt; das
+  Produkt aus äußerer und innerer Menge bleibt unveraendert.
 - [x] REPO Air-Separation-Unit-CAPEX aus Tiggeloven als Teilproxy vorhanden.
 - [ ] RESEARCH beziehungsweise DECISION Infrastruktur fuer Deoxygenierung,
   Aminwaesche, TSA und kryogene Trennung vollstaendig abgrenzen.
@@ -280,15 +291,18 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 
 ## 7. Route-spezifische CAPEX-Abbildung
 
-Ein Brightway-Node traegt genau einen Marktpreis. Steam Cracking, MTO und eCO2R
-verwenden deshalb eindeutige Installations-Wrapper, die intern weiterhin die
-generischen Umweltinventare beziehen.
+Ein Brightway-Node traegt genau einen Marktpreis. Steam Cracking,
+CO2-Hydrierung, MTO und eCO2R verwenden deshalb eindeutige
+Installations-Wrapper, die intern weiterhin die generischen Umweltinventare
+beziehen. Die äußere Menge bildet die gewaehlte Referenzkapazitaet und
+Modelllebensdauer ab; die innere Menge bewahrt den originalen Umweltkoeffizienten.
 
-- [x] REPO Route-spezifische Installations-Proxy-Nodes fuer Steam, MTO und das
-  aggregierte eCO2R-System umgesetzt.
+- [x] REPO Route-spezifische Installations-Nodes fuer Steam, CO2-Hydrierung,
+  MTO und das aggregierte eCO2R-System umgesetzt und bepreist.
 - [x] REPO Generische Fabrik-, Kupfer- und Stahlidentitaeten aus den direkten
   CAPEX-Zeilen der CSV entfernt.
-- [ ] DECISION Fixe Kostenanteile der CAPEX-Funktionen korrekt skalieren.
+- [x] REPO Groessenabhaengige und fixe Kostenanteile der Tiggeloven-Funktionen
+  fuer die gewaehlten Referenzkapazitaeten berechnet.
 - [ ] DECISION Instandhaltung aus Tiggeloven nur ergaenzen, wenn sie nicht
   bereits in anderen OPEX-Positionen enthalten ist.
 - [ ] DECISION Aggregierte Produktionskosten aus Cattry nicht gemeinsam mit
@@ -335,9 +349,9 @@ In sinnvoller Arbeitsreihenfolge bleiben damit:
 2. Statische Steam-Cracker-Feedstock-Buendelung durch einen Brightway-/LCIA-Lauf
    pruefen und bestaetigen, dass nur der Mix als direkter Kostenfluss erscheint.
 3. Gaspreisentwicklung und Aktualisierung aller Waerme- und Kuehlproxies.
-4. Recherchierte Steam-, MTO- und aggregierte eCO2R-TPC-Werte auf die bereits
-   umgesetzten Wrapper-Einheiten umrechnen; CO2-Hydrierungs-CAPEX absichern.
-5. DAC- und PEM-CAPEX absichern.
+4. Steam-, MTO- und eCO2R-CAPEX-Proxys fachlich absichern; insbesondere
+   Steam-Wasserstoff-Yield und eCO2R-Systemgrenze pruefen.
+5. PEM-System-CAPEX-Umrechnung absichern.
 6. Brownfield-Installationsjahre der Steam-Cracker final begruenden.
 7. Wasser, Abwasser, Amine-on-Alumina-Sorbens und Abfallbehandlungen screenen.
 8. Cut-off-Entscheidungen dokumentieren und alle PLACEHOLDER ersetzen.
