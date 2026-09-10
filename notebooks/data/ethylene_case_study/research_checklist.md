@@ -240,10 +240,11 @@ Screening-Scope, kein nachgewiesener Kostenanteil.
 
 ### CAPEX
 
-- [x] REPO Reaktion und Separation zu einem Foreground-Prozess aggregiert;
-  Betriebswerte und `6.091081 kg CO2/kg Ethylen` aus der Nebenproduktoxidation
-  bleiben sichtbar erhalten. Dies entspricht `eol="no"`; das Ethylenprodukt-EoL
-  ist ausgeschlossen.
+- [x] DECIDED Reaktion und Separation zu einem Foreground-Prozess aggregiert.
+  Die abgetrennten Nebenprodukte und ihre weitere Behandlung werden für die
+  illustrative Case Study ausgeschlossen. Daher werden weder die pauschalen
+  Oxidationsemissionen von `6.091081 kg CO2/kg Ethylen` noch zusätzliche
+  Aufreinigungsaufwände oder mögliche Produktgutschriften berücksichtigt.
 - [x] REPO Der Installations-Wrapper bildet `1e9 kg Ethylen/a` bei 25 Jahren
   ab: außen `4e-11 Wrapper/kg Ethylen`; intern bleiben `10` Fabrikeinheiten,
   `1.85 kg` Kupfer und `75441.975 kg` Stahl pro Wrapper erhalten.

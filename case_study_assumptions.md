@@ -42,7 +42,7 @@ Bachelorarbeit interpretiert werden.
 | Zeitliche Aggregation des Umweltziels | DECIDED | Minimierung der kumulierten Klimawirkung über alle Jahre 2025 bis 2050; keine jährliche Klimagrenze und kein isoliertes Zieljahr |
 | Weitere Wirkungskategorien | OUT_OF_SCOPE | Feinstaub, Landnutzung, Wassernutzung und weitere Kategorien werden nicht systematisch optimiert oder ausgewertet |
 | Use Phase | OUT_OF_SCOPE | Die Nutzungsphase der aus Ethylen hergestellten Produkte bleibt in jedem Fall ausgeschlossen |
-| Produkt-End-of-Life | DEFERRED | In der Baseline ausgeschlossen; die eCO2R-Route entspricht `create_eCO2R_cryo_sep(eol="no")`. Bei einer späteren EoL-Erweiterung gemeinsam mit Anlagenstilllegung und Anlagen-EoL aufnehmen. |
+| Produkt-End-of-Life | DEFERRED | In der Baseline ausgeschlossen. Auch die abgetrennten eCO2R-Nebenprodukte und ihre weitere Behandlung liegen außerhalb der Systemgrenze; weder Aufreinigungsaufwände noch mögliche Produktgutschriften werden berücksichtigt. Bei einer späteren EoL-Erweiterung gemeinsam mit Anlagenstilllegung und Anlagen-EoL aufnehmen. |
 | Anlagenstilllegung und Anlagen-EoL | DEFERRED | In der Baseline ausgeschlossen; bei einer späteren EoL-Erweiterung gemeinsam mit dem Produkt-EoL aufnehmen |
 | Optimierungstyp | DECIDED | Brownfield-Optimierung: Zu Beginn des Modellzeitraums ist fossile Steam-Cracking-Kapazität vorhanden; zusätzliche Kapazitäten können endogen gebaut werden |
 | Ethylennachfrage | DECIDED | Konstant `1 Mt/a = 1e9 kg/a` von 2025 bis 2050; keine recherchierte sektorale Nachfrageprojektion erforderlich |
@@ -540,10 +540,11 @@ Stand 2026-07-18:
   verfügbar. Sie sind weiterhin nicht must-run und können früher durch andere
   Routen ersetzt werden.
 - DAC wird von CO2-Hydrierung und eCO2R über denselben Produktknoten genutzt.
-  eCO2R-Reaktion und Aufbereitung sind ein gemeinsamer Foreground-Prozess und
-  enthalten `6.091081 kg CO2/kg Ethylen` aus der Oxidation der Nebenprodukte,
-  nicht aus Produkt-EoL. Dies entspricht `create_eCO2R_cryo_sep(eol="no")` in
-  der aktuellen disco2very-Implementierung.
+  eCO2R-Reaktion und Aufbereitung sind ein gemeinsamer Foreground-Prozess. Die
+  abgetrennten Nebenprodukte und ihre weitere Behandlung werden in der
+  illustrativen Case Study vernachlässigt. Daher werden weder die pauschalen
+  Oxidationsemissionen der disco2very-Implementierung noch Aufreinigungsaufwände
+  oder mögliche Produktgutschriften übernommen.
 - Die vier Case-Study-Hintergrunddatenbanken enthalten die Kosten-Interfaces und
   verweisen intern auf die jeweils gleichjährige premise-Datenbank. Weder eigene
   Activities noch `representative_time` werden in premise geschrieben.
